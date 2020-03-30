@@ -1,26 +1,33 @@
 <template>
-  <div class="grid">
-    <router-link
-      v-for="item in library"
-      :key="item.id"
-      :to="{ name: 'watch', params: { id: item.id } }"
-      class="grid__item"
-    >
-      <img
-        v-if="item.poster"
-        :src="item.poster"
-      >
-
+  <div>
+    <div class="grid">
       <div
-        v-else
+        v-for="item in library"
+        :key="item.id"
+        class="grid__item"
+        @click="castMovie(item)"
       >
-        {{ item.title }}
+        <img
+          v-if="item.poster"
+          :src="item.poster"
+        >
+
+        <div
+          v-else
+        >
+          {{ item.title }}
+        </div>
       </div>
-    </router-link>
+    </div>
+
+    <div class="fixed bottom-0 right-0 w-12 h-12 p-2 m-4 bg-black shadow-lg rounded-full cursor-pointer">
+      <google-cast-launcher />
+    </div>
   </div>
 </template>
 
 <script>
+/* global chrome, cast */
 import axios from 'axios'
 
 export default {
@@ -28,10 +35,41 @@ export default {
   data: () => ({
     library: []
   }),
+  created () {
+    window.__onGCastApiAvailable = (isAvailable) => {
+      if (isAvailable && !!chrome && !!cast) {
+        cast.framework.CastContext.getInstance().setOptions({
+          receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+          autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+        })
+        console.log('Cast initialized')
+      } else {
+        console.warn('Cast not available on this browser')
+      }
+    }
+  },
   async mounted () {
     const response = await axios.get('http://localhost:3000/api/library')
 
     this.library = response.data
+  },
+  methods: {
+    async castMovie (movie) {
+      const castSession = cast.framework.CastContext.getInstance().getCurrentSession()
+
+      const url = `http://192.168.1.2:3000/api/watch/${movie.id}`
+      const mimeType = `video/${movie.container}`
+
+      const mediaInfo = new chrome.cast.media.MediaInfo(url, mimeType)
+      const request = new chrome.cast.media.LoadRequest(mediaInfo)
+      console.log('Casting', url, mimeType, mediaInfo, request)
+
+      try {
+        await castSession.loadMedia(request)
+      } catch (e) {
+        console.error(e)
+      }
+    }
   }
 }
 </script>
