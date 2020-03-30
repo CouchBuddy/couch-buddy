@@ -4,9 +4,9 @@ const glob = require('glob')
 const ptt = require('parse-torrent-title')
 const path = require('path')
 
-const OMDB_KEY = process.env.OMDB_KEY;
+const OMDB_KEY = process.env.OMDB_KEY
 
-(async function () {
+async function refreshLibrary (ctx) {
   const videos = await searchVideos()
 
   const library = []
@@ -48,7 +48,26 @@ const OMDB_KEY = process.env.OMDB_KEY;
   }
 
   fs.writeFileSync('data/library.json', JSON.stringify(library))
-})()
+
+  ctx.status = 204
+}
+
+function listLibrary (ctx) {
+  const library = require('../data/library.json')
+
+  ctx.body = library
+}
+
+function getLibrary (ctx) {
+  const library = require('../data/library.json')
+
+  const movieId = parseInt(ctx.params.id)
+  const movie = library.find(item => item.id === movieId)
+
+  ctx.assert(movie, 404)
+
+  ctx.body = movie
+}
 
 function searchVideos () {
   return new Promise((resolve, reject) => {
@@ -67,4 +86,10 @@ function searchVideos () {
       resolve(files)
     })
   })
+}
+
+module.exports = {
+  getLibrary,
+  listLibrary,
+  refreshLibrary
 }

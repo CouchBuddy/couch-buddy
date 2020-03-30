@@ -29,7 +29,7 @@ export default {
     library: []
   }),
   async mounted () {
-    const response = await axios.get('http://localhost:3000/library.json')
+    const response = await axios.get('http://localhost:3000/api/library')
 
     this.library = response.data
   }

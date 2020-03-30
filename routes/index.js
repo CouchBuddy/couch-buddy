@@ -2,6 +2,11 @@ const fs = require('fs')
 const router = require('@koa/router')()
 const mime = require('mime-types')
 
+const library = require('./library')
+
+router.get('/library', library.listLibrary)
+router.get('/library/:id', library.getLibrary)
+
 router.get('/watch/:id', async ctx => {
   const library = require('../data/library.json')
 

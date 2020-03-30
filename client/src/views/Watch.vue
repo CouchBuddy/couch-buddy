@@ -35,8 +35,8 @@ export default {
   async mounted () {
     this.movieId = parseInt(this.$route.params.id)
 
-    const response = await axios.get('http://localhost:3000/library.json')
-    this.movie = response.data.find(m => m.id === this.movieId)
+    const response = await axios.get(`http://localhost:3000/api/library/${this.movieId}`)
+    this.movie = response.data
 
     this.source = `http://localhost:3000/api/watch/${this.movieId}.mp4`
   },
