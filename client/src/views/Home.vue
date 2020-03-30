@@ -5,7 +5,7 @@
         v-for="item in library"
         :key="item.id"
         class="grid__item"
-        @click="castMovie(item)"
+        @click="playMovie(item)"
       >
         <img
           v-if="item.poster"
@@ -20,7 +20,10 @@
       </div>
     </div>
 
-    <div class="fixed bottom-0 right-0 w-12 h-12 p-2 m-4 bg-black shadow-lg rounded-full cursor-pointer">
+    <div
+      v-if="isCastLoaded"
+      class="fixed bottom-0 right-0 w-12 h-12 p-2 m-4 bg-black shadow-lg rounded-full cursor-pointer"
+    >
       <google-cast-launcher />
     </div>
   </div>
@@ -34,16 +37,25 @@ import config from '@/config'
 export default {
   name: 'Home',
   data: () => ({
-    library: []
+    library: [],
+    isCastConnected: false,
+    isCastLoaded: false
   }),
   created () {
     window.__onGCastApiAvailable = (isAvailable) => {
       if (isAvailable && !!chrome && !!cast) {
+        this.isCastLoaded = true
+
         cast.framework.CastContext.getInstance().setOptions({
           receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-          autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+          autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+          resumeSavedSession: true
         })
-        console.log('Cast initialized')
+
+        cast.framework.CastContext.getInstance().addEventListener(
+          cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+          this.castConnectionListener
+        )
       } else {
         console.warn('Cast not available on this browser')
       }
@@ -55,6 +67,13 @@ export default {
     this.library = response.data
   },
   methods: {
+    playMovie (movie) {
+      if (this.isCastConnected) {
+        this.castMovie(movie)
+      } else {
+        this.$router.push({ name: 'watch', params: { id: movie.id } })
+      }
+    },
     async castMovie (movie) {
       const castSession = cast.framework.CastContext.getInstance().getCurrentSession()
 
@@ -68,6 +87,18 @@ export default {
         await castSession.loadMedia(request)
       } catch (e) {
         console.error(e)
+      }
+    },
+    castConnectionListener (event) {
+      switch (event.sessionState) {
+        case cast.framework.SessionState.SESSION_STARTED:
+        case cast.framework.SessionState.SESSION_RESUMED:
+          this.isCastConnected = true
+          break
+
+        case cast.framework.SessionState.SESSION_ENDED:
+          this.isCastConnected = false
+          break
       }
     }
   }
