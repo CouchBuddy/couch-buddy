@@ -6,7 +6,7 @@ const path = require('path')
 
 const OMDB_KEY = process.env.OMDB_KEY
 
-async function refreshLibrary (ctx) {
+async function scanLibrary (ctx) {
   const videos = await searchVideos()
 
   const library = []
@@ -91,5 +91,5 @@ function searchVideos () {
 module.exports = {
   getLibrary,
   listLibrary,
-  refreshLibrary
+  scanLibrary
 }
