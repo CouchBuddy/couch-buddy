@@ -4,7 +4,7 @@
       <div
         v-for="item in library"
         :key="item.id"
-        class="flex justify-center items-center"
+        class="flex justify-center items-center cursor-pointer"
         @click="playMovie(item)"
       >
         <img
