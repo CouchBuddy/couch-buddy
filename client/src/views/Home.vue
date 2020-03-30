@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div class="grid">
+    <div class="grid grid-cols-5 gap-4 p-4">
       <div
         v-for="item in library"
         :key="item.id"
-        class="grid__item"
+        class="flex justify-center items-center"
         @click="playMovie(item)"
       >
         <img
@@ -77,24 +77,7 @@ export default {
 
 <style lang="scss">
 body {
-  margin: 0;
   background: #141414;
   color: white;
-}
-
-img {
-  max-width: 100%;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-.grid__item {
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 </style>
