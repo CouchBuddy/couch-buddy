@@ -28,7 +28,8 @@
 
 <script>
 /* global chrome, cast */
-import axios from 'axios'
+import client from '@/client'
+import config from '@/config'
 
 export default {
   name: 'Home',
@@ -49,7 +50,7 @@ export default {
     }
   },
   async mounted () {
-    const response = await axios.get('http://localhost:3000/api/library')
+    const response = await client.get('/api/library')
 
     this.library = response.data
   },
@@ -57,12 +58,11 @@ export default {
     async castMovie (movie) {
       const castSession = cast.framework.CastContext.getInstance().getCurrentSession()
 
-      const url = `http://192.168.1.2:3000/api/watch/${movie.id}`
+      const url = `${config.serverUrl}/api/watch/${movie.id}`
       const mimeType = `video/${movie.container}`
 
       const mediaInfo = new chrome.cast.media.MediaInfo(url, mimeType)
       const request = new chrome.cast.media.LoadRequest(mediaInfo)
-      console.log('Casting', url, mimeType, mediaInfo, request)
 
       try {
         await castSession.loadMedia(request)
