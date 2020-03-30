@@ -20,46 +20,28 @@
       </div>
     </div>
 
-    <div
-      v-if="isCastLoaded"
-      class="fixed bottom-0 right-0 w-12 h-12 p-2 m-4 bg-black shadow-lg rounded-full cursor-pointer"
-    >
-      <google-cast-launcher />
-    </div>
+    <cast-control />
   </div>
 </template>
 
 <script>
 /* global chrome, cast */
+import { mapState } from 'vuex'
+
 import client from '@/client'
 import config from '@/config'
+import CastControl from '@/components/CastControl'
 
 export default {
   name: 'Home',
+  components: {
+    CastControl
+  },
   data: () => ({
-    library: [],
-    isCastConnected: false,
-    isCastLoaded: false
+    library: []
   }),
-  created () {
-    window.__onGCastApiAvailable = (isAvailable) => {
-      if (isAvailable && !!chrome && !!cast) {
-        this.isCastLoaded = true
-
-        cast.framework.CastContext.getInstance().setOptions({
-          receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-          autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
-          resumeSavedSession: true
-        })
-
-        cast.framework.CastContext.getInstance().addEventListener(
-          cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
-          this.castConnectionListener
-        )
-      } else {
-        console.warn('Cast not available on this browser')
-      }
-    }
+  computed: {
+    ...mapState(['isCastConnected'])
   },
   async mounted () {
     const response = await client.get('/api/library')
@@ -87,18 +69,6 @@ export default {
         await castSession.loadMedia(request)
       } catch (e) {
         console.error(e)
-      }
-    },
-    castConnectionListener (event) {
-      switch (event.sessionState) {
-        case cast.framework.SessionState.SESSION_STARTED:
-        case cast.framework.SessionState.SESSION_RESUMED:
-          this.isCastConnected = true
-          break
-
-        case cast.framework.SessionState.SESSION_ENDED:
-          this.isCastConnected = false
-          break
       }
     }
   }

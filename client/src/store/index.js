@@ -5,8 +5,12 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    isCastConnected: false
   },
   mutations: {
+    setCastConnected (state, payload) {
+      state.isCastConnected = payload
+    }
   },
   actions: {
   },
