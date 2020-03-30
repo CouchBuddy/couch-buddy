@@ -5,7 +5,7 @@
         v-for="item in library"
         :key="item.id"
         class="flex justify-center items-center cursor-pointer"
-        @click="playMovie(item)"
+        @click="showItemDetails(item)"
       >
         <img
           v-if="item.poster"
@@ -16,6 +16,55 @@
           v-else
         >
           {{ item.title }}
+        </div>
+      </div>
+    </div>
+
+    <div
+      v-if="showDetailsModal"
+      class="fixed top-0 left-0 flex w-2/3 h-screen details-modal"
+    >
+      <div class="w-1/2">
+        <img
+          class="w-full"
+          :src="selectedItem.poster"
+        >
+
+        <div class="mt-4 text-center">
+          <button
+            class="px-4 py-2 bg-purple-700 rounded"
+            @click="playMovie(selectedItem)"
+          >
+            Play
+          </button>
+        </div>
+      </div>
+
+      <div class="mx-4 w-1/2">
+        <div
+          class="text-3xl text-right mr-4 cursor-pointer"
+          @click="showDetailsModal = false"
+        >
+          &times;
+        </div>
+
+        <h2 class="text-4xl">
+          {{ selectedItem.title }}
+        </h2>
+
+        <div class="text-gray-600">
+          <small>{{ selectedItem.year }}</small>
+        </div>
+
+        <div>{{ selectedItem.plot }}</div>
+
+        <div class="mt-4 text-gray-600">
+          Cast: {{ selectedItem.actors }}
+        </div>
+
+        <div class="mt-4 text-gray-600">
+          Directed by {{ selectedItem.director }} -
+          {{ selectedItem.writer }}
         </div>
       </div>
     </div>
@@ -38,7 +87,9 @@ export default {
     CastControl
   },
   data: () => ({
-    library: []
+    library: [],
+    selectedItem: null,
+    showDetailsModal: false
   }),
   computed: {
     ...mapState(['isCastConnected'])
@@ -49,6 +100,10 @@ export default {
     this.library = response.data
   },
   methods: {
+    showItemDetails (item) {
+      this.showDetailsModal = true
+      this.selectedItem = item
+    },
     playMovie (movie) {
       if (this.isCastConnected) {
         this.castMovie(movie)
@@ -68,7 +123,7 @@ export default {
       try {
         await castSession.loadMedia(request)
       } catch (e) {
-        console.error(e)
+        console.error(e, url, mimeType)
       }
     }
   }
@@ -79,5 +134,10 @@ export default {
 body {
   background: #141414;
   color: white;
+}
+
+.details-modal {
+  background: rgba(0,0,0,0.95);
+  box-shadow: 10px 0 10px rgba(0,0,0,0.40);
 }
 </style>
