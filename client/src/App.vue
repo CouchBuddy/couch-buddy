@@ -9,9 +9,16 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-#app {
+*:focus,
+button:focus {
+  outline: none;
+}
+
+body {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: #141414;
+  color: white;
 }
 </style>

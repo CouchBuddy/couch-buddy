@@ -29,15 +29,6 @@
           class="w-full"
           :src="selectedItem.poster"
         >
-
-        <div class="mt-4 text-center">
-          <button
-            class="px-4 py-2 bg-purple-700 rounded"
-            @click="playMovie(selectedItem)"
-          >
-            Play
-          </button>
-        </div>
       </div>
 
       <div class="mx-4 w-1/2">
@@ -52,7 +43,7 @@
           {{ selectedItem.title }}
         </h2>
 
-        <div class="text-gray-600">
+        <div class="mb-2 text-gray-600">
           <small>{{ selectedItem.year }}</small>
         </div>
 
@@ -63,8 +54,23 @@
         </div>
 
         <div class="mt-4 text-gray-600">
-          Directed by {{ selectedItem.director }} -
-          {{ selectedItem.writer }}
+          Directed by {{ selectedItem.director }}
+        </div>
+
+        <div class="flex justify-evenly mt-8 text-center">
+          <button
+            class="px-4 py-2 border-2 border-white"
+            @click="playMovie(selectedItem)"
+          >
+            {{ selectedItem.type === 'series' ? 'Play Next Episode' : 'Play' }}
+          </button>
+
+          <router-link
+            :to="{ name: 'movie', params: { id: selectedItem.id } }"
+            class="px-4 py-2 border-2 border-white"
+          >
+            More Info
+          </router-link>
         </div>
       </div>
     </div>
@@ -131,11 +137,6 @@ export default {
 </script>
 
 <style lang="scss">
-body {
-  background: #141414;
-  color: white;
-}
-
 .details-modal {
   background: rgba(0,0,0,0.95);
   box-shadow: 10px 0 10px rgba(0,0,0,0.40);
