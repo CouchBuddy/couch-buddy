@@ -7,8 +7,8 @@ const koaCors = require('@koa/cors')
 // load env vars from .env file
 require('dotenv').config()
 
-const router = require('./routes')
-// require('./src/db')
+// Initialize DB
+require('./models')
 
 const app = new Koa()
 
@@ -27,6 +27,7 @@ app.use(koaBody({
 app.use(koaStatic('public'))
 app.use(koaMount('/uploads', koaStatic('uploads')))
 
+const router = require('./routes')
 app.use(koaMount('/api', router.routes()))
 app.use(koaMount('/api', router.allowedMethods()))
 
