@@ -8,6 +8,8 @@ router.get('/library', library.listLibrary)
 router.get('/library/:id', library.getLibrary)
 router.post('/library/scan', library.scanLibrary)
 
+router.get('/episodes/:id', library.listEpisodes)
+
 router.get('/watch/:id', async ctx => {
   const library = require('../data/library.json')
 

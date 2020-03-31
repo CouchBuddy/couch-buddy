@@ -11,6 +11,9 @@ async function scanLibrary (ctx) {
 
   const library = []
   let id = 1
+  const episodes = []
+  let episodeId = 1
+
   for (const filename of videos) {
     const info = ptt.parse(path.basename(filename))
 
@@ -22,17 +25,33 @@ async function scanLibrary (ctx) {
         }
       })
 
-      const item = Object.assign(info, {
-        id,
-        filename
-      })
+      const item = Object.assign(info, { id })
 
       if (!response.data.Error) {
         for (const k in response.data) {
           item[k.toLowerCase()] = response.data[k]
         }
 
-        console.log('Found', response.data.Title)
+        if (!!item.season || !!item.episode || item.type === 'series') {
+          // It's a series, so add the episode with the filename and link it to the library
+
+          const existingItem = library.find(i => i.imdbid === item.imdbid || i.title === item.title)
+
+          item.type = 'series'
+          episodes.push({
+            id: episodeId,
+            libraryId: existingItem ? existingItem.id : id,
+            season: item.season,
+            episode: item.episode,
+            filename
+          })
+
+          episodeId++
+
+          if (existingItem) { continue }
+        } else {
+          item.filename = filename
+        }
       } else {
         // Not found on OMDb
         console.warn(response.data.Error, info.title)
@@ -48,6 +67,7 @@ async function scanLibrary (ctx) {
   }
 
   fs.writeFileSync('data/library.json', JSON.stringify(library))
+  fs.writeFileSync('data/episodes.json', JSON.stringify(episodes))
 
   ctx.status = 204
 }
@@ -67,6 +87,15 @@ function getLibrary (ctx) {
   ctx.assert(movie, 404)
 
   ctx.body = movie
+}
+
+function listEpisodes (ctx) {
+  const episodes = require('../data/episodes.json')
+
+  const seriesId = parseInt(ctx.params.id)
+  ctx.assert(seriesId, 404, 'Please provide an ID in the URL')
+
+  ctx.body = episodes.filter(e => e.libraryId === seriesId)
 }
 
 function searchVideos () {
@@ -91,5 +120,7 @@ function searchVideos () {
 module.exports = {
   getLibrary,
   listLibrary,
-  scanLibrary
+  scanLibrary,
+
+  listEpisodes
 }
