@@ -17,23 +17,6 @@ async function init () {
     console.error('Error while connecting and syncing database:', err)
   }
 
-  // Find all .js files in this folder, excluding this very file
-  const modelFiles = glob.sync('*.js', {
-    cwd: __dirname,
-    ignore: path.basename(__filename)
-  })
-
-  for (const file of modelFiles) {
-    const model = sequelize.import(path.join(__dirname, file))
-    models[model.name] = model
-  }
-
-  for (const modelName in models) {
-    if (models[modelName].associate) {
-      models[modelName].associate(models)
-    }
-  }
-
   try {
     await sequelize.sync()
     console.log('DB synced correctly')
@@ -42,6 +25,24 @@ async function init () {
   }
 }
 
-init()
+// Find all .js files in this folder, excluding this very file
+const modelFiles = glob.sync('*.js', {
+  cwd: __dirname,
+  ignore: path.basename(__filename)
+})
 
+for (const file of modelFiles) {
+  const model = sequelize.import(path.join(__dirname, file))
+  models[file.split('.')[0]] = model
+}
+
+// for (const modelName in models) {
+//   if (models[modelName].associate) {
+//     models[modelName].associate(models)
+//   }
+// }
+
+models.Episode.belongsTo(models.Movie)
+
+models.init = init
 module.exports = models

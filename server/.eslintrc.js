@@ -15,5 +15,9 @@ module.exports = {
     ecmaVersion: 2018
   },
   rules: {
+    'array-bracket-spacing': [ 2, 'always', {
+        objectsInArrays: false,
+        arraysInArrays: false
+    }]
   }
 }

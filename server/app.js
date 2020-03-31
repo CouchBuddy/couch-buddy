@@ -8,7 +8,7 @@ const koaCors = require('@koa/cors')
 require('dotenv').config()
 
 // Initialize DB
-require('./models')
+require('./models').init()
 
 const app = new Koa()
 

@@ -1,73 +1,90 @@
 const axios = require('axios')
-const fs = require('fs')
 const glob = require('glob')
+const mime = require('mime-types')
 const ptt = require('parse-torrent-title')
 const path = require('path')
 
+const { Episode, MediaFile, Movie } = require('../models')
+
 const OMDB_KEY = process.env.OMDB_KEY
 
-async function scanLibrary (ctx) {
-  const videos = await searchVideos()
+async function scanLibrary (ctx = {}) {
+  // Scan directory to search video files
+  const videos = await searchVideoFiles(process.env.MEDIA_BASE_DIR)
+  console.log(`Found ${videos.length} video files in ${process.env.MEDIA_BASE_DIR}`)
 
-  const library = []
-  let id = 1
-  const episodes = []
-  let episodeId = 1
+  for (const fileName of videos) {
+    // Parse filename to obtain basic info
+    const basicInfo = ptt.parse(path.basename(fileName))
 
-  for (const filename of videos) {
-    const info = ptt.parse(path.basename(filename))
+    // If the file has already been indexed, skip it
+    const existingFile = await MediaFile.findOne({ where: { fileName } })
+    if (existingFile) {
+      continue
+    }
 
+    const item = { ...basicInfo }
+
+    // Search movie info on OMDb through title
     try {
       const response = await axios.get('http://www.omdbapi.com/', {
         params: {
-          t: info.title,
+          t: basicInfo.title,
           apikey: OMDB_KEY
         }
       })
 
-      const item = Object.assign(info, { id })
-
       if (!response.data.Error) {
+        // Found info on OMDb, refactor object to match Movie/Episode model
         for (const k in response.data) {
           item[k.toLowerCase()] = response.data[k]
         }
 
-        if (!!item.season || !!item.episode || item.type === 'series') {
-          // It's a series, so add the episode with the filename and link it to the library
+        item.imdbId = item.imdbid
+        item.ratingImdb = parseFloat(item.imdbrating)
+        item.ratingMetacritic = parseInt(item.metascore)
 
-          const existingItem = library.find(i => i.imdbid === item.imdbid || i.title === item.title)
-
-          item.type = 'series'
-          episodes.push({
-            id: episodeId,
-            libraryId: existingItem ? existingItem.id : id,
-            season: item.season,
-            episode: item.episode,
-            filename
-          })
-
-          episodeId++
-
-          if (existingItem) { continue }
-        } else {
-          item.filename = filename
+        const rt = item.ratings.find(x => x.Source === 'Rotten Tomatoes')
+        if (rt) {
+          item.ratingRottenTomatoes = parseInt(rt.Value)
         }
       } else {
         // Not found on OMDb
-        console.warn(response.data.Error, info.title)
+        console.warn(response.data.Error, basicInfo.title)
       }
-
-      library.push(item)
     } catch (e) {
-      console.log('Failed request for', info.title)
+      console.log('OMDb request failed for:', basicInfo.title)
       console.error(e.message)
     }
 
-    id++
-  }
+    const where = {}
+    if (item.imdbid) {
+      where.imdbid = item.imdbid
+    } else {
+      where.title = item.title
+    }
 
-  fs.writeFileSync('data/library.json', JSON.stringify(library))
-  fs.writeFileSync('data/episodes.json', JSON.stringify(episodes))
+    const [ movie ] = await Movie.findOrCreate({ where, defaults: item })
+    let episode
+
+    const isSeries = !!item.season || !!item.episode || item.type === 'series'
+
+    if (isSeries) {
+      item.type = 'series'
+
+      episode = await Episode.create({
+        movieId: movie.id,
+        ...item
+      })
+    }
+
+    await MediaFile.create({
+      fileName,
+      mediaId: isSeries ? episode.id : movie.id,
+      mediaType: isSeries ? 'episode' : 'movie',
+      mimeType: mime.lookup(fileName)
+    })
+  }
 
   ctx.status = 204
 }
@@ -98,10 +115,10 @@ function listEpisodes (ctx) {
   ctx.body = episodes.filter(e => e.libraryId === seriesId)
 }
 
-function searchVideos () {
+function searchVideoFiles (dir) {
   return new Promise((resolve, reject) => {
     const options = {
-      cwd: process.env.MEDIA_BASE_DIR,
+      cwd: dir,
       matchBase: true,
       nocase: true,
       nodir: true
