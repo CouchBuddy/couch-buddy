@@ -10,7 +10,8 @@ router.get('/library/:id/episodes', library.listEpisodes)
 router.get('/episodes/:id', library.getEpisode)
 
 router.get('/watch/:id', streaming.watch)
-router.get('/watch/:id/subtitles', streaming.listSubtitles)
+router.get('/watch/:wid/subtitles', streaming.listSubtitles)
 router.get('/subtitles/:id', streaming.getSubtitles)
+router.post('/subtitles/:wid/download', streaming.downloadSubtitles)
 
 module.exports = router

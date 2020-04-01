@@ -1,14 +1,19 @@
+const axios = require('axios')
 const fs = require('fs')
 const mime = require('mime-types')
 const sendFile = require('koa-send')
+const OS = require('opensubtitles-api')
+var srt2vtt = require('srt-to-vtt')
 
-const { MediaFile, SubtitlesFile } = require('../models')
+const { Episode, MediaFile, Movie, SubtitlesFile } = require('../models')
+
+const OpenSubtitles = new OS(process.env.OPENSUBTITLES_UA)
 
 async function watch (ctx) {
+  ctx.assert(/^(e|m)\d+$/.test(ctx.params.id), 400, 'Invalid ID format')
+
   const mediaId = parseInt(ctx.params.id.slice(1))
   const mediaType = ctx.params.id[0] === 'm' ? 'movie' : 'episode'
-
-  ctx.assert(/^(e|m)\d+$/.test(ctx.params.id), 400, 'Bad ID format')
 
   const mediaFile = await MediaFile.findOne({
     where: {
@@ -61,10 +66,10 @@ async function watch (ctx) {
 }
 
 async function listSubtitles (ctx) {
-  const mediaId = parseInt(ctx.params.id.slice(1))
-  const mediaType = ctx.params.id[0] === 'm' ? 'movie' : 'episode'
+  ctx.assert(/^(e|m)\d+$/.test(ctx.params.wid), 400, 'Invalid ID format')
 
-  ctx.assert(/^(e|m)\d+$/.test(ctx.params.id), 400, 'Bad ID format')
+  const mediaId = parseInt(ctx.params.wid.slice(1))
+  const mediaType = ctx.params.wid[0] === 'm' ? 'movie' : 'episode'
 
   const subtitles = await SubtitlesFile.findAll({
     where: {
@@ -84,11 +89,83 @@ async function getSubtitles (ctx) {
 
   ctx.assert(subtitles, 404)
 
-  const path = process.env.MEDIA_BASE_DIR + subtitles.fileName
-  await sendFile(ctx, path)
+  await sendFile(ctx, subtitles.fileName, { root: process.env.MEDIA_BASE_DIR })
+}
+
+async function downloadSubtitles (ctx) {
+  const mediaId = parseInt(ctx.params.wid.slice(1))
+  const mediaType = ctx.params.wid[0] === 'm' ? 'movie' : 'episode'
+  const lang = ctx.request.body.lang
+
+  let media
+  if (mediaType === 'movie') {
+    media = await Movie.findByPk(mediaId)
+  } else {
+    media = await Episode.findByPk(mediaId)
+  }
+
+  const mediaFile = await MediaFile.findOne({
+    where: {
+      mediaId,
+      mediaType
+    }
+  })
+
+  ctx.assert(mediaFile, 404, 'Media not found')
+
+  const result = await OpenSubtitles.search({
+    sublanguageid: lang,
+    path: process.env.MEDIA_BASE_DIR + mediaFile.fileName,
+    imdbid: media.imdbid
+  })
+
+  const subtitles = result[lang]
+  ctx.assert(subtitles, 404, 'No subtitles found')
+
+  // Remember what format we are downloading, needed later for conversion
+  const isVtt = !!subtitles.vtt
+
+  const response = await axios.get(subtitles.vtt || subtitles.url, {
+    responseType: 'stream'
+  })
+
+  // Find subtitles filename with several strategies
+  // 1. name of the downloaded file as in HTTP headers
+  // 2. from the OS API
+  // 3. use name of the video file
+  let fileName
+
+  if (response.headers['Content-Disposition']) {
+    const m = response.headers['Content-Disposition'].match(/filename="(.*)"/)
+    if (m) {
+      fileName = m[1]
+    }
+  } else if (subtitles.filename) {
+    fileName = subtitles.filename
+  } else {
+    fileName = mediaFile.fileName
+  }
+
+  // Be sure to set .vtt extension
+  fileName = fileName.replace(/\.[^/.]+$/, '.vtt')
+
+  let stream = response.data
+  if (!isVtt) {
+    stream = stream.pipe(srt2vtt())
+  }
+  await stream.pipe(fs.createWriteStream(process.env.MEDIA_BASE_DIR + fileName))
+
+  await SubtitlesFile.create({
+    fileName,
+    mediaId,
+    mediaType
+  })
+
+  ctx.status = 204
 }
 
 module.exports = {
+  downloadSubtitles,
   getSubtitles,
   listSubtitles,
 

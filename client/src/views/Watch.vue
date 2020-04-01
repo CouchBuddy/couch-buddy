@@ -10,8 +10,8 @@
         @error="onVideoError"
       >
         <track
-          v-for="subs in subtitles"
-          :key="`subs-${subs.id}`"
+          v-for="sub in subtitles"
+          :key="`subs-${sub.id}`"
           :label="sub.lang"
           kind="subtitles"
           :srclang="sub.lang"
@@ -56,24 +56,30 @@ export default {
     showOverlay: false,
     source: null,
     sourceSubs: null,
-    subtitles: []
+    subtitles: [],
+    watchId: null
   }),
   async mounted () {
-    const watchId = this.$route.params.id
+    this.watchId = this.$route.params.id
 
-    const resourcePath = watchId[0] === 'e' ? 'episodes' : 'library'
-    const resourceId = watchId.slice(1)
+    const resourcePath = this.watchId[0] === 'e' ? 'episodes' : 'library'
+    const resourceId = this.watchId.slice(1)
 
     // get movie info
     this.movie = (await client.get(`/api/${resourcePath}/${resourceId}`)).data
 
     // get available subtitles
-    this.subtitles = (await client.get(`/api/watch/${watchId}/subtitles`)).data
+    this.subtitles = (await client.get(`/api/watch/${this.watchId}/subtitles`)).data
 
-    this.source = `${config.serverUrl}/api/watch/${watchId}`
+    this.source = `${config.serverUrl}/api/watch/${this.watchId}`
     this.sourceSubs = `${config.serverUrl}/api/subtitles`
   },
   methods: {
+    async downloadSubtitles (lang) {
+      await client.post(`/api/subtitles/${this.watchId}/download`, {
+        lang
+      })
+    },
     onMouseMove () {
       this.showOverlay = true
       clearTimeout(this.overlayTimeout)
