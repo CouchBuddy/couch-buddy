@@ -112,6 +112,15 @@ async function listEpisodes (ctx) {
   ctx.body = episodes
 }
 
+async function getEpisode (ctx) {
+  const episodeId = parseInt(ctx.params.id)
+  const episode = await Episode.findByPk(episodeId)
+
+  ctx.assert(episode, 404)
+
+  ctx.body = episode
+}
+
 function searchVideoFiles (dir) {
   return new Promise((resolve, reject) => {
     const options = {
@@ -136,5 +145,6 @@ module.exports = {
   listLibrary,
   scanLibrary,
 
-  listEpisodes
+  listEpisodes,
+  getEpisode
 }

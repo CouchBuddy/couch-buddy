@@ -24,13 +24,16 @@
       <div><small>NOW PLAYING</small></div>
       <h1>
         {{ movie.title }}
+        <span v-if="movie.season && movie.episode">
+          - S{{ movie.season }}E{{ movie.episode }}
+        </span>
       </h1>
     </div>
   </div>
 </template>
 
 <script>
-// import client from '@/client'
+import client from '@/client'
 import config from '@/config'
 
 export default {
@@ -45,11 +48,11 @@ export default {
   async mounted () {
     const watchId = this.$route.params.id
 
-    // const resourcePath = watchId[0] === 'e' ? 'episodes' : 'library'
-    // const resourceId = watchId.slice(1)
+    const resourcePath = watchId[0] === 'e' ? 'episodes' : 'library'
+    const resourceId = watchId.slice(1)
 
-    // const response = await client.get(`/api/${resourcePath}/${resourceId}`)
-    // this.movie = response.data
+    const response = await client.get(`/api/${resourcePath}/${resourceId}`)
+    this.movie = response.data
 
     this.source = `${config.serverUrl}/api/watch/${watchId}`
   },

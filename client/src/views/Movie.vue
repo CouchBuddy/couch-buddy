@@ -91,7 +91,7 @@ export default {
   },
   methods: {
     async fetchEpisodes (seriesId) {
-      const response = await client.get(`/api/episodes/${seriesId}`)
+      const response = await client.get(`/api/library/${this.movieId}/episodes`)
       this.episodesBySeason = response.data.reduce((r, v, i, a, k = v.season) => { (r[k] || (r[k] = [])).push(v); return r }, {})
     },
     playMovie (movie) {
