@@ -146,8 +146,8 @@ async function downloadSubtitles (ctx) {
     fileName = mediaFile.fileName
   }
 
-  // Be sure to set .vtt extension
-  fileName = fileName.replace(/\.[^/.]+$/, '.vtt')
+  // Append .lang to avoid filename clash and set .vtt extension
+  fileName = fileName.replace(/\.[^/.]+$/, `.${lang}.vtt`)
 
   let stream = response.data
   if (!isVtt) {
