@@ -64,14 +64,13 @@ async function scanLibrary (ctx = {}) {
       where.title = item.title
     }
 
+    const isSeries = !!item.season || !!item.episode || item.type === 'series'
+    item.type = isSeries ? 'series' : 'movie'
+
     const [ movie ] = await Movie.findOrCreate({ where, defaults: item })
     let episode
 
-    const isSeries = !!item.season || !!item.episode || item.type === 'series'
-
     if (isSeries) {
-      item.type = 'series'
-
       episode = await Episode.create({
         movieId: movie.id,
         ...item
