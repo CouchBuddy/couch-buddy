@@ -6,8 +6,19 @@
       <video
         controls
         :src="source"
+        crossorigin="anonymous"
         @error="onVideoError"
-      />
+      >
+        <track
+          v-for="subs in subtitles"
+          :key="`subs-${subs.id}`"
+          :label="sub.lang"
+          kind="subtitles"
+          :srclang="sub.lang"
+          :src="`${sourceSubs}/${sub.id}`"
+          default
+        >
+      </video>
 
       <div
         v-if="error"
@@ -43,7 +54,9 @@ export default {
     movie: {},
     overlayTimeout: null,
     showOverlay: false,
-    source: null
+    source: null,
+    sourceSubs: null,
+    subtitles: []
   }),
   async mounted () {
     const watchId = this.$route.params.id
@@ -51,10 +64,14 @@ export default {
     const resourcePath = watchId[0] === 'e' ? 'episodes' : 'library'
     const resourceId = watchId.slice(1)
 
-    const response = await client.get(`/api/${resourcePath}/${resourceId}`)
-    this.movie = response.data
+    // get movie info
+    this.movie = (await client.get(`/api/${resourcePath}/${resourceId}`)).data
+
+    // get available subtitles
+    this.subtitles = (await client.get(`/api/watch/${watchId}/subtitles`)).data
 
     this.source = `${config.serverUrl}/api/watch/${watchId}`
+    this.sourceSubs = `${config.serverUrl}/api/subtitles`
   },
   methods: {
     onMouseMove () {

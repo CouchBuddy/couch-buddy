@@ -1,7 +1,8 @@
 const fs = require('fs')
 const mime = require('mime-types')
+const sendFile = require('koa-send')
 
-const { MediaFile } = require('../models')
+const { MediaFile, SubtitlesFile } = require('../models')
 
 async function watch (ctx) {
   const mediaId = parseInt(ctx.params.id.slice(1))
@@ -59,6 +60,37 @@ async function watch (ctx) {
   }
 }
 
+async function listSubtitles (ctx) {
+  const mediaId = parseInt(ctx.params.id.slice(1))
+  const mediaType = ctx.params.id[0] === 'm' ? 'movie' : 'episode'
+
+  ctx.assert(/^(e|m)\d+$/.test(ctx.params.id), 400, 'Bad ID format')
+
+  const subtitles = await SubtitlesFile.findAll({
+    where: {
+      mediaId,
+      mediaType
+    }
+  })
+
+  ctx.body = subtitles
+}
+
+async function getSubtitles (ctx) {
+  const id = parseInt(ctx.params.id)
+  ctx.assert(id >= 1, 400, 'Invalid ID')
+
+  const subtitles = await SubtitlesFile.findByPk(id)
+
+  ctx.assert(subtitles, 404)
+
+  const path = process.env.MEDIA_BASE_DIR + subtitles.fileName
+  await sendFile(ctx, path)
+}
+
 module.exports = {
+  getSubtitles,
+  listSubtitles,
+
   watch
 }
