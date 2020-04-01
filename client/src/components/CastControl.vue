@@ -25,11 +25,15 @@ import { mapMutations } from 'vuex'
 
 export default {
   data: () => ({
-    isCastLoaded: !!cast.framework,
+    isCastLoaded: false,
     controller: null,
     player: null
   }),
   created () {
+    if (cast) {
+      this.isCastLoaded = !!cast.framework
+    }
+
     window.__onGCastApiAvailable = (isAvailable) => {
       if (isAvailable && !!chrome && !!cast) {
         this.isCastLoaded = true
