@@ -1,12 +1,16 @@
 <template>
   <div
+    class="relative w-screen h-screen overflow-hidden"
     @mousemove="onMouseMove"
   >
     <div class="video-container">
       <video
+        ref="video"
         controls
         :src="source"
         crossorigin="anonymous"
+        @pause="onPause"
+        @play="onPlay"
         @error="onVideoError"
       >
         <track
@@ -40,20 +44,31 @@
         </span>
       </h1>
     </div>
+
+    <video-controls
+      v-if="$refs.video"
+      :video="$refs.video"
+      class="absolute bottom-0 left-0 w-full p-8 video-controls"
+      :class="{ 'active': showOverlay }"
+    />
   </div>
 </template>
 
 <script>
 import client from '@/client'
 import config from '@/config'
+import VideoControls from '@/components/VideoControls'
 
 export default {
   name: 'Watch',
+  components: {
+    VideoControls
+  },
   data: () => ({
     error: false,
     movie: {},
     overlayTimeout: null,
-    showOverlay: false,
+    showOverlay: true,
     source: null,
     sourceSubs: null,
     subtitles: [],
@@ -81,8 +96,17 @@ export default {
       })
     },
     onMouseMove () {
+      if (this.$refs.video.paused) { return }
+
       this.showOverlay = true
       clearTimeout(this.overlayTimeout)
+      this.overlayTimeout = setTimeout(() => { this.showOverlay = false }, 5000)
+    },
+    onPause () {
+      this.showOverlay = true
+      clearTimeout(this.overlayTimeout)
+    },
+    onPlay () {
       this.overlayTimeout = setTimeout(() => { this.showOverlay = false }, 5000)
     },
     onVideoError () {
@@ -141,6 +165,16 @@ export default {
   h1 {
     margin: 0;
     text-align: left;
+  }
+}
+
+.video-controls {
+  transform: translate(0, 100%);
+  transition: all .5s;
+  background: linear-gradient(to top, black, transparent);
+
+  &.active {
+    transform: none;
   }
 }
 </style>
