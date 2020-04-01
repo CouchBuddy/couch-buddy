@@ -89,30 +89,28 @@ async function scanLibrary (ctx = {}) {
   ctx.status = 204
 }
 
-function listLibrary (ctx) {
-  const library = require('../data/library.json')
+async function listLibrary (ctx) {
+  const library = await Movie.findAll({ order: [[ 'title', 'ASC' ]] })
 
   ctx.body = library
 }
 
-function getLibrary (ctx) {
-  const library = require('../data/library.json')
-
+async function getLibrary (ctx) {
   const movieId = parseInt(ctx.params.id)
-  const movie = library.find(item => item.id === movieId)
+  const movie = await Movie.findByPk(movieId)
 
   ctx.assert(movie, 404)
 
   ctx.body = movie
 }
 
-function listEpisodes (ctx) {
-  const episodes = require('../data/episodes.json')
+async function listEpisodes (ctx) {
+  const movieId = parseInt(ctx.params.id)
+  ctx.assert(movieId, 404, 'Please provide an ID in the URL')
 
-  const seriesId = parseInt(ctx.params.id)
-  ctx.assert(seriesId, 404, 'Please provide an ID in the URL')
+  const episodes = await Episode.findAll({ where: { movieId } })
 
-  ctx.body = episodes.filter(e => e.libraryId === seriesId)
+  ctx.body = episodes
 }
 
 function searchVideoFiles (dir) {
