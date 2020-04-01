@@ -6,7 +6,15 @@
       <video
         controls
         :src="source"
+        @error="onVideoError"
       />
+
+      <div
+        v-if="error"
+        class="video-error"
+      >
+        Sorry, this video format is not supported
+      </div>
     </div>
 
     <div
@@ -28,6 +36,7 @@ import config from '@/config'
 export default {
   name: 'Watch',
   data: () => ({
+    error: false,
     movie: {},
     overlayTimeout: null,
     showOverlay: false,
@@ -49,6 +58,9 @@ export default {
       this.showOverlay = true
       clearTimeout(this.overlayTimeout)
       this.overlayTimeout = setTimeout(() => { this.showOverlay = false }, 5000)
+    },
+    onVideoError () {
+      this.error = true
     }
   }
 }
@@ -62,6 +74,13 @@ export default {
   width: 100%;
   height: 100%;
   overflow: hidden;
+
+  .video-error {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+  }
 }
 
 .video-container video {
