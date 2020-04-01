@@ -64,7 +64,7 @@ module.exports = (sequelize) => {
     },
     type: {
       type: Sequelize.TEXT,
-      validate: { isIn: [['series', 'movie']] }
+      validate: { isIn: [[ 'series', 'movie' ]] }
     },
     writer: {
       type: Sequelize.TEXT

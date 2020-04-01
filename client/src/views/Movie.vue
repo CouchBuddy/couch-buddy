@@ -53,6 +53,7 @@
           v-for="episode in episodes"
           :key="`episode-${episode.id}`"
           class="flex justify-center items-center text-4xl bg-gray-600 rounded-lg"
+          @click="playMovie(episode)"
         >
           {{ episode.episode }}
         </div>
@@ -62,7 +63,11 @@
 </template>
 
 <script>
+/* global chrome, cast */
+import { mapState } from 'vuex'
+
 import client from '@/client'
+import config from '@/config'
 
 export default {
   name: 'Movie',
@@ -71,6 +76,9 @@ export default {
     movie: {},
     movieId: null
   }),
+  computed: {
+    ...mapState(['isCastConnected'])
+  },
   async mounted () {
     this.movieId = parseInt(this.$route.params.id)
 
@@ -85,6 +93,31 @@ export default {
     async fetchEpisodes (seriesId) {
       const response = await client.get(`/api/episodes/${seriesId}`)
       this.episodesBySeason = response.data.reduce((r, v, i, a, k = v.season) => { (r[k] || (r[k] = [])).push(v); return r }, {})
+    },
+    playMovie (movie) {
+      if (this.isCastConnected) {
+        this.castMovie(movie)
+      } else {
+        this.$router.push({ name: 'watch', params: { id: this.getWatchId(movie) } })
+      }
+    },
+    async castMovie (movie) {
+      const castSession = cast.framework.CastContext.getInstance().getCurrentSession()
+
+      const url = `${config.serverUrl}/api/watch/${this.getWatchId(movie)}`
+      // const mimeType = `video/${movie.container}`
+
+      const mediaInfo = new chrome.cast.media.MediaInfo(url)
+      const request = new chrome.cast.media.LoadRequest(mediaInfo)
+
+      try {
+        await castSession.loadMedia(request)
+      } catch (e) {
+        console.error(e, url)
+      }
+    },
+    getWatchId (movie) {
+      return `${movie.type === 'movie' ? 'm' : 'e'}${movie.id}`
     }
   }
 }

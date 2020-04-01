@@ -22,25 +22,27 @@
 </template>
 
 <script>
-import client from '@/client'
+// import client from '@/client'
 import config from '@/config'
 
 export default {
   name: 'Watch',
   data: () => ({
     movie: {},
-    movieId: null,
     overlayTimeout: null,
     showOverlay: false,
     source: null
   }),
   async mounted () {
-    this.movieId = parseInt(this.$route.params.id)
+    const watchId = this.$route.params.id
 
-    const response = await client.get(`/api/library/${this.movieId}`)
-    this.movie = response.data
+    // const resourcePath = watchId[0] === 'e' ? 'episodes' : 'library'
+    // const resourceId = watchId.slice(1)
 
-    this.source = `${config.serverUrl}/api/watch/${this.movieId}`
+    // const response = await client.get(`/api/${resourcePath}/${resourceId}`)
+    // this.movie = response.data
+
+    this.source = `${config.serverUrl}/api/watch/${watchId}`
   },
   methods: {
     onMouseMove () {

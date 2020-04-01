@@ -114,13 +114,13 @@ export default {
       if (this.isCastConnected) {
         this.castMovie(movie)
       } else {
-        this.$router.push({ name: 'watch', params: { id: movie.id } })
+        this.$router.push({ name: 'watch', params: { id: this.getWatchId(movie) } })
       }
     },
     async castMovie (movie) {
       const castSession = cast.framework.CastContext.getInstance().getCurrentSession()
 
-      const url = `${config.serverUrl}/api/watch/${movie.id}`
+      const url = `${config.serverUrl}/api/watch/${this.getWatchId(movie)}`
       const mimeType = `video/${movie.container}`
 
       const mediaInfo = new chrome.cast.media.MediaInfo(url, mimeType)
@@ -131,6 +131,9 @@ export default {
       } catch (e) {
         console.error(e, url, mimeType)
       }
+    },
+    getWatchId (movie) {
+      return `${movie.type === 'movie' ? 'm' : 'e'}${movie.id}`
     }
   }
 }
