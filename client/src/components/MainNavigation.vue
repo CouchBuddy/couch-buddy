@@ -23,6 +23,7 @@ export default {
   data: () => ({
     menu: [
       { to: 'home', icon: 'mdi-sofa' },
+      { to: 'downloads', icon: 'mdi-download' },
       { to: 'settings', icon: 'mdi-cog' }
     ]
   })
