@@ -1,15 +1,19 @@
 <template>
   <div>
-    <div class="grid grid-cols-5 gap-4 p-4">
+    <div
+      class="grid gap-4 p-4"
+      style="grid-auto-rows: minmax(200px, 1fr); grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));"
+    >
       <div
         v-for="item in library"
         :key="item.id"
-        class="flex justify-center items-center cursor-pointer"
+        class="flex justify-center items-center cursor-pointer bg-red-700"
         @click="showItemDetails(item)"
       >
         <img
           v-if="item.poster"
           :src="item.poster"
+          class="w-full h-full object-cover"
         >
 
         <div
