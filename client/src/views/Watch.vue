@@ -48,6 +48,7 @@
     <video-controls
       v-if="$refs.video"
       :video="$refs.video"
+      :showing="showOverlay"
       class="absolute bottom-0 left-0 w-full p-8 video-controls"
       :class="{ 'active': showOverlay }"
     />
