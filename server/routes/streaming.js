@@ -157,6 +157,7 @@ async function downloadSubtitles (ctx) {
 
   await SubtitlesFile.create({
     fileName,
+    lang,
     mediaId,
     mediaType
   })

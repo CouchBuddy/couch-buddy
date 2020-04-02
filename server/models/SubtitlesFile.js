@@ -8,6 +8,10 @@ module.exports = (sequelize) => {
       type: Sequelize.TEXT,
       allowNull: false
     },
+    lang: {
+      type: Sequelize.TEXT,
+      allowNull: false
+    },
     mediaId: {
       type: Sequelize.INTEGER,
       validate: { min: 1 },
