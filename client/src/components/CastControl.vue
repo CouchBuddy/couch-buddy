@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="anyDeviceAvailable"
-    class="fixed bottom-0 right-0 flex items-center p-4 m-4 bg-black shadow-lg rounded-full"
+    class="fixed bottom-0 right-0 flex items-center p-4 mb-20 mr-4 md:m-4 bg-black shadow-lg rounded-full"
   >
     <div v-if="controller && player.canPause">
       <button

@@ -3,7 +3,7 @@
     <main-navigation />
 
     <router-view
-      class="ml-16"
+      class="mb-16 md:ml-16"
       style="padding: 5vh 5vw"
     />
   </div>
