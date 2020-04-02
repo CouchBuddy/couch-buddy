@@ -1,6 +1,7 @@
 <template>
   <div
-    class="fixed bottom-0 right-0 flex items-center h-12 p-2 m-4 bg-black shadow-lg rounded-full"
+    v-if="anyDeviceAvailable"
+    class="fixed bottom-0 right-0 flex items-center p-4 m-4 bg-black shadow-lg rounded-full"
   >
     <div v-if="controller && player.canPause">
       <button
@@ -12,10 +13,11 @@
       </button>
     </div>
 
-    <google-cast-launcher
-      v-if="isCastLoaded"
-      class="w-8 h-8 cursor-pointer"
-    />
+    <div class="w-6 h-6 cursor-pointer">
+      <google-cast-launcher
+        v-if="isCastLoaded"
+      />
+    </div>
   </div>
 </template>
 
@@ -25,40 +27,53 @@ import { mapMutations } from 'vuex'
 
 export default {
   data: () => ({
+    anyDeviceAvailable: false,
     isCastLoaded: false,
     controller: null,
     player: null
   }),
   created () {
-    if (cast) {
+    if (window.cast) {
       this.isCastLoaded = !!cast.framework
     }
 
-    window.__onGCastApiAvailable = (isAvailable) => {
-      if (isAvailable && !!chrome && !!cast) {
-        this.isCastLoaded = true
-
-        cast.framework.CastContext.getInstance().setOptions({
-          receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-          autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
-          resumeSavedSession: true
-        })
-
-        cast.framework.CastContext.getInstance().addEventListener(
-          cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
-          this.castConnectionListener
-        )
-      } else {
-        console.warn('Cast not available on this browser')
-      }
-    }
+    window.__onGCastApiAvailable = this.initCast
   },
   mounted () {
-    this.player = new cast.framework.RemotePlayer()
-    this.controller = new cast.framework.RemotePlayerController(this.player)
+    this.initCast(true)
   },
   methods: {
     ...mapMutations(['setCastConnected']),
+    initCast (isAvailable) {
+      if (!isAvailable || !chrome || !cast) {
+        console.warn('Cast is not supported on this browser')
+        return
+      }
+
+      this.isCastLoaded = true
+
+      const context = cast.framework.CastContext.getInstance()
+
+      this.anyDeviceAvailable = context.getCastState() !== cast.framework.CastState.NO_DEVICES_AVAILABLE
+
+      context.setOptions({
+        receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+        autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+        resumeSavedSession: true
+      })
+
+      context.addEventListener(
+        cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+        this.castConnectionListener
+      )
+      context.addEventListener(
+        cast.framework.CastContextEventType.CAST_STATE_CHANGED,
+        this.castStateListener
+      )
+
+      this.player = new cast.framework.RemotePlayer()
+      this.controller = new cast.framework.RemotePlayerController(this.player)
+    },
     castConnectionListener (event) {
       switch (event.sessionState) {
         case cast.framework.SessionState.SESSION_STARTED:
@@ -70,6 +85,9 @@ export default {
           this.setCastConnected(false)
           break
       }
+    },
+    castStateListener (event) {
+      this.anyDeviceAvailable = event.castState !== cast.framework.CastState.NO_DEVICES_AVAILABLE
     }
   }
 }
