@@ -40,7 +40,9 @@ export default {
     window.__onGCastApiAvailable = this.initCast
   },
   mounted () {
-    this.initCast(true)
+    if (this.isCastLoaded) {
+      this.initCast(true)
+    }
   },
   methods: {
     ...mapMutations(['setCastConnected']),
