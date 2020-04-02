@@ -1,9 +1,6 @@
 <template>
-  <div class="p-4">
-    <h1 class="text-4xl ml-16 mb-8">
-      <router-link :to="{ name: 'home' }">
-        &larr;
-      </router-link>
+  <div>
+    <h1 class="text-4xl mb-8">
       Settings
     </h1>
 
@@ -18,7 +15,7 @@
       </div>
       <div class="md:w-2/3">
         <button
-          class="rounded bg-purple-600 px-4 py-2"
+          class="bg-transparent border-2 px-4 py-2"
           :disabled="scanningLibrary"
           @click="scanLibrary()"
         >
