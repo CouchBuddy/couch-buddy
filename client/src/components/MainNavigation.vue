@@ -5,7 +5,7 @@
         v-for="item in menu"
         :key="`menu-${item.to}`"
         :to="{ name: item.to }"
-        active-class="border-t-4 md:border-r-4"
+        active-class="border-t-4 md:border-t-0 md:border-r-4"
         exact
         class="flex h-16 w-16 items-center justify-center text-4xl"
       >
