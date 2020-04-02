@@ -1,14 +1,14 @@
 <template>
   <div>
-    <div class="flex">
-      <div class="w-1/3">
+    <div class="flex flex-col md:flex-row">
+      <div class="w-full md:w-1/3">
         <img
           class="w-full"
           :src="movie.poster"
         >
       </div>
 
-      <div class="ml-8 w-2/3">
+      <div class="w-full md:ml-8 md:w-2/3">
         <h2 class="text-4xl">
           {{ movie.title }}
         </h2>
