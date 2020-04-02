@@ -6,7 +6,6 @@
     <div class="video-container">
       <video
         ref="video"
-        controls
         :src="source"
         crossorigin="anonymous"
         @pause="onPause"
