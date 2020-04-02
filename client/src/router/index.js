@@ -1,29 +1,36 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '@/views/Home.vue'
+import MainLayout from '@/components/MainLayout'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: Home
-  },
-  {
-    path: '/movie/:id',
-    name: 'movie',
-    component: () => import(/* webpackChunkName: "movie" */ '@/views/Movie.vue')
+    component: MainLayout,
+    children: [
+      {
+        path: '/',
+        name: 'home',
+        component: Home
+      },
+      {
+        path: '/movie/:id',
+        name: 'movie',
+        component: () => import(/* webpackChunkName: "movie" */ '@/views/Movie.vue')
+      },
+      {
+        path: '/settings',
+        name: 'settings',
+        component: () => import(/* webpackChunkName: "settings" */ '@/views/Settings.vue')
+      }
+    ]
   },
   {
     path: '/watch/:id',
     name: 'watch',
     component: () => import(/* webpackChunkName: "watch" */ '@/views/Watch.vue')
-  },
-  {
-    path: '/settings',
-    name: 'settings',
-    component: () => import(/* webpackChunkName: "settings" */ '@/views/Settings.vue')
   }
 ]
 

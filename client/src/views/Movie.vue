@@ -1,8 +1,6 @@
 <template>
   <div>
-    <div
-      class="flex mx-24 mt-16"
-    >
+    <div class="flex">
       <div class="w-1/3">
         <img
           class="w-full"
@@ -44,7 +42,7 @@
       v-for="(episodes, season) in episodesBySeason"
       :key="`season-${season}`"
     >
-      <div class="ml-24 mt-8 mb-4">
+      <div class="mt-8 mb-4">
         SEASON {{ season }}
       </div>
 
@@ -133,6 +131,7 @@ export default {
   grid-auto-columns: calc(30% - 40px * 2);
   overflow-x: scroll;
   scroll-snap-type: x proximity;
+  margin: 0px -5vw;
 
   &:before,
   &:after {
