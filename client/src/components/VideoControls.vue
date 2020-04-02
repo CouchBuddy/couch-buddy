@@ -45,9 +45,20 @@
 
     <subtitles-dialog
       :subtitles="subtitles"
+      class="mr-2"
       @set="onSubsSelect"
       @add="onSubsAdd"
     />
+
+    <button
+      class="flex-shrink-0 w-10 h-10 rounded-full"
+      @click="toggleFullscreen()"
+    >
+      <span
+        class="mdi text-2xl"
+        :class="{ 'mdi-fullscreen': !isFullscreen, 'mdi-fullscreen-exit': isFullscreen }"
+      />
+    </button>
   </div>
 </template>
 
@@ -77,6 +88,7 @@ export default {
   data: () => ({
     currentTime: 0,
     duration: 0,
+    isFullscreen: false,
     isMuted: false,
     isPaused: true,
     remainingTime: '0:00:00',
@@ -91,6 +103,7 @@ export default {
     this.video.addEventListener('volumechange', this.onVolumeChange)
     this.video.addEventListener('loadedmetadata', this.onLoadedMetadata)
     this.video.addEventListener('timeupdate', this.onTimeUpdate)
+    document.addEventListener('fullscreenchange', this.onFullscreenChange)
   },
   beforeDestroy () {
     this.video.removeEventListener('play', this.onPlayPause)
@@ -98,6 +111,7 @@ export default {
     this.video.removeEventListener('volumechange', this.onVolumeChange)
     this.video.removeEventListener('loadedmetadata', this.onLoadedMetadata)
     this.video.removeEventListener('timeupdate', this.onTimeUpdate)
+    document.removeEventListener('fullscreenchange', this.onFullscreenChange)
   },
   methods: {
     togglePlay () {
@@ -149,6 +163,31 @@ export default {
     },
     onSubsAdd (id) {
       this.$emit('subtitles:add', id)
+    },
+    async toggleFullscreen () {
+      if (this.checkFullscreen()) {
+        if (document.exitFullscreen) await document.exitFullscreen()
+        else if (document.mozCancelFullScreen) await document.mozCancelFullScreen()
+        else if (document.webkitCancelFullScreen) await document.webkitCancelFullScreen()
+        else if (document.msExitFullscreen) await document.msExitFullscreen()
+      } else {
+        if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen()
+        else if (document.documentElement.mozRequestFullScreen) await document.documentElement.mozRequestFullScreen()
+        else if (document.documentElement.webkitRequestFullScreen) await document.documentElement.webkitRequestFullScreen()
+        else if (document.documentElement.msRequestFullscreen) await document.documentElement.msRequestFullscreen()
+      }
+    },
+    checkFullscreen () {
+      return !!(
+        document.fullScreen ||
+        document.webkitIsFullScreen ||
+        document.mozFullScreen ||
+        document.msFullscreenElement ||
+        document.fullscreenElement
+      )
+    },
+    onFullscreenChange () {
+      this.isFullscreen = this.checkFullscreen()
     }
   }
 }

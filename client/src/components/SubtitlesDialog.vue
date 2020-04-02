@@ -11,7 +11,6 @@
       v-if="show"
       class="fixed w-screen h-screen top-0 left-0 flex justify-center items-center modal-background"
       @click="show = false"
-      @keypress.esc="show = false"
     >
       <div
         class="bg-black py-4"
