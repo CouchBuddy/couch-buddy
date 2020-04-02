@@ -21,11 +21,16 @@ body {
   color: white;
 }
 
-button {
+button,
+nav a {
   transition: all 0.3s;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.185);
+    background: rgba(255, 255, 255, 0.13);
+  }
+
+  &:active {
+    background: rgba(255, 255, 255, 0.18);
   }
 
   &:focus {

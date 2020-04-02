@@ -1,6 +1,8 @@
 <template>
   <div>
-    <div class="grid grid-cols-5 gap-4 p-4">
+    <main-navigation />
+
+    <div class="grid grid-cols-5 gap-4 ml-16 p-4">
       <div
         v-for="item in library"
         :key="item.id"
@@ -86,11 +88,13 @@ import { mapState } from 'vuex'
 import client from '@/client'
 import config from '@/config'
 import CastControl from '@/components/CastControl'
+import MainNavigation from '@/components/MainNavigation'
 
 export default {
   name: 'Home',
   components: {
-    CastControl
+    CastControl,
+    MainNavigation
   },
   data: () => ({
     library: [],
