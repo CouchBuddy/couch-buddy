@@ -9,8 +9,7 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-*:focus,
-button:focus {
+*:focus {
   outline: none;
 }
 
@@ -20,5 +19,17 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: #141414;
   color: white;
+}
+
+button {
+  transition: all 0.3s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.185);
+  }
+
+  &:focus {
+    outline: none;
+  }
 }
 </style>

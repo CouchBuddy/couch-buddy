@@ -43,22 +43,31 @@
       />
     </button>
 
-    <button
-      class="flex-shrink-0 w-10 h-10 rounded-full"
-    >
-      <span class="mdi mdi-closed-caption text-2xl" />
-    </button>
+    <subtitles-dialog
+      :subtitles="subtitles"
+      @set="onSubsSelect"
+      @add="onSubsAdd"
+    />
   </div>
 </template>
 
 <script>
+import SubtitlesDialog from './SubtitlesDialog'
+
 export default {
   name: 'VideoControls',
+  components: {
+    SubtitlesDialog
+  },
   props: {
     // Tell if this control is visible, so we can avoid to update UI if it isn't
     showing: {
       type: Boolean,
       default: true
+    },
+    subtitles: {
+      type: Array,
+      default: () => []
     },
     video: {
       type: HTMLVideoElement,
@@ -134,20 +143,18 @@ export default {
       this.currentTime = this.video.currentTime
       this.seekPosition = this.video.currentTime
       this.updateRemainingTime()
+    },
+    onSubsSelect (id) {
+      this.$emit('subtitles:set', id)
+    },
+    onSubsAdd (id) {
+      this.$emit('subtitles:add', id)
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-button {
-  transition: all 0.3s;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.185);
-  }
-}
-
 input[type=range] {
   -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
   width: 100%; /* Specific width is required for Firefox. */

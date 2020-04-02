@@ -6,6 +6,7 @@ const OS = require('opensubtitles-api')
 var srt2vtt = require('srt-to-vtt')
 
 const { Episode, MediaFile, Movie, SubtitlesFile } = require('../models')
+const getSubLangID = require('../utils/openSubtitlesLangs')
 
 const OpenSubtitles = new OS(process.env.OPENSUBTITLES_UA)
 
@@ -93,9 +94,12 @@ async function getSubtitles (ctx) {
 }
 
 async function downloadSubtitles (ctx) {
+  ctx.assert(/^(e|m)\d+$/.test(ctx.params.wid), 400, 'Invalid ID format')
+
   const mediaId = parseInt(ctx.params.wid.slice(1))
   const mediaType = ctx.params.wid[0] === 'm' ? 'movie' : 'episode'
   const lang = ctx.request.body.lang
+  const sublanguageId = getSubLangID(lang)
 
   let media
   if (mediaType === 'movie') {
@@ -113,11 +117,19 @@ async function downloadSubtitles (ctx) {
 
   ctx.assert(mediaFile, 404, 'Media not found')
 
-  const result = await OpenSubtitles.search({
-    sublanguageid: lang,
-    path: process.env.MEDIA_BASE_DIR + mediaFile.fileName,
-    imdbid: media.imdbid
+  // Search subtitles using movie hash
+  let result = await OpenSubtitles.search({
+    sublanguageid: sublanguageId,
+    path: process.env.MEDIA_BASE_DIR + mediaFile.fileName
   })
+
+  // Search again using only IMDB ID
+  if (!result[lang]) {
+    result = await OpenSubtitles.search({
+      sublanguageid: sublanguageId,
+      imdbid: media.imdbid
+    })
+  }
 
   const subtitles = result[lang]
   ctx.assert(subtitles, 404, 'No subtitles found')
@@ -155,14 +167,12 @@ async function downloadSubtitles (ctx) {
   }
   await stream.pipe(fs.createWriteStream(process.env.MEDIA_BASE_DIR + fileName))
 
-  await SubtitlesFile.create({
+  ctx.body = await SubtitlesFile.create({
     fileName,
     lang,
     mediaId,
     mediaType
   })
-
-  ctx.status = 204
 }
 
 module.exports = {

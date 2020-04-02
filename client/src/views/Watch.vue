@@ -15,12 +15,12 @@
       >
         <track
           v-for="sub in subtitles"
+          :id="`subs-${sub.id}`"
           :key="`subs-${sub.id}`"
           :label="sub.lang"
           kind="subtitles"
           :srclang="sub.lang"
           :src="`${sourceSubs}/${sub.id}`"
-          default
         >
       </video>
 
@@ -49,8 +49,11 @@
       v-if="$refs.video"
       :video="$refs.video"
       :showing="showOverlay"
+      :subtitles="subtitles"
       class="absolute bottom-0 left-0 w-full p-8 video-controls"
       :class="{ 'active': showOverlay }"
+      @subtitles:set="setSubtitles"
+      @subtitles:add="addSubtitles"
     />
   </div>
 </template>
@@ -86,16 +89,12 @@ export default {
 
     // get available subtitles
     this.subtitles = (await client.get(`/api/watch/${this.watchId}/subtitles`)).data
+      .map(sub => { sub.active = false; return sub })
 
     this.source = `${config.serverUrl}/api/watch/${this.watchId}`
     this.sourceSubs = `${config.serverUrl}/api/subtitles`
   },
   methods: {
-    async downloadSubtitles (lang) {
-      await client.post(`/api/subtitles/${this.watchId}/download`, {
-        lang
-      })
-    },
     onMouseMove () {
       if (this.$refs.video.paused) { return }
 
@@ -112,6 +111,22 @@ export default {
     },
     onVideoError () {
       this.error = true
+    },
+    setSubtitles (id) {
+      for (const track of this.$refs.video.textTracks) {
+        const active = parseInt(track.id.slice(5)) === id
+        track.mode = active ? 'showing' : 'hidden'
+        track.default = active
+      }
+
+      for (const sub of this.subtitles) {
+        sub.active = sub.id === id
+      }
+    },
+    addSubtitles (subs) {
+      this.subtitles.push(subs)
+      this.subtitles.sort(({ lang: a }, { lang: b }) => (a > b) ? -1 : ((b > a) ? 1 : 0))
+      this.setSubtitles(subs.id)
     }
   }
 }
