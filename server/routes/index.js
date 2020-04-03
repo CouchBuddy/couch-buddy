@@ -3,6 +3,9 @@ const router = require('@koa/router')()
 const downloads = require('./downloads')
 const library = require('./library')
 const streaming = require('./streaming')
+const system = require('./system')
+
+router.get('/system', system.getSystemInfo)
 
 router.get('/library', library.listLibrary)
 router.get('/library/:id', library.getLibrary)
