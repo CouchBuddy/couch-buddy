@@ -78,8 +78,6 @@
         </div>
       </div>
     </div>
-
-    <cast-control />
   </div>
 </template>
 
@@ -89,13 +87,9 @@ import { mapState } from 'vuex'
 
 import client from '@/client'
 import config from '@/config'
-import CastControl from '@/components/CastControl'
 
 export default {
   name: 'Home',
-  components: {
-    CastControl
-  },
   data: () => ({
     library: [],
     selectedItem: null,
