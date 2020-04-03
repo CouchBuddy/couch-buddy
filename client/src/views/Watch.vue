@@ -33,16 +33,25 @@
     </div>
 
     <div
-      class="video-overlay"
+      class="flex items-center video-overlay"
       :class="{ 'active': showOverlay }"
     >
-      <div><small>NOW PLAYING</small></div>
-      <h1>
-        {{ movie.title }}
-        <span v-if="movie.season && movie.episode">
-          - S{{ movie.season }}E{{ movie.episode }}
-        </span>
-      </h1>
+      <button
+        class="flex-shrink-0 w-10 h-10 mr-2 rounded-full"
+        @click="$router.go(-1)"
+      >
+        <span class="mdi mdi-arrow-left text-2xl" />
+      </button>
+
+      <div class="flex-grow">
+        <div><small>NOW PLAYING</small></div>
+        <h1>
+          {{ movie.title }}
+          <span v-if="movie.season && movie.episode">
+            - S{{ movie.season }}E{{ movie.episode }}
+          </span>
+        </h1>
+      </div>
     </div>
 
     <video-controls
