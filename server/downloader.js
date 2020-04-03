@@ -16,3 +16,5 @@ async function restoreTorrents () {
     client.add(download.magnetURI, opts)
   }
 }
+
+module.exports = client
