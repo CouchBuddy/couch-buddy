@@ -1,9 +1,5 @@
-const WebTorrent = require('webtorrent')
-
+const client = require('../downloader')
 const { Download } = require('../models')
-
-const client = new WebTorrent()
-restoreTorrents()
 
 async function addTorrent (ctx) {
   const magnetURI = ctx.request.body.magnetURI
@@ -23,18 +19,6 @@ async function addTorrent (ctx) {
 
 async function listTorrents (ctx) {
   ctx.body = client.torrents.map(serializeTorrent)
-}
-
-async function restoreTorrents () {
-  const downloads = await Download.findAll({
-    where: { done: false }
-  })
-
-  const opts = { path: process.env.MEDIA_BASE_DIR }
-
-  for (const download of downloads) {
-    client.add(download.magnetURI, opts)
-  }
 }
 
 function serializeTorrent (t) {

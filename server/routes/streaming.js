@@ -5,38 +5,55 @@ const sendFile = require('koa-send')
 const OS = require('opensubtitles-api')
 var srt2vtt = require('srt-to-vtt')
 
+const torrentClient = require('../downloader')
 const { Episode, MediaFile, Movie, SubtitlesFile } = require('../models')
 const getSubLangID = require('../utils/openSubtitlesLangs')
 
+const SUPPORTED_EXTENSIONS = [ 'mp4', 'mkv', 'avi' ]
 const OpenSubtitles = new OS(process.env.OPENSUBTITLES_UA)
 
 async function watch (ctx) {
-  ctx.assert(/^(e|m)\d+$/.test(ctx.params.id), 400, 'Invalid ID format')
+  ctx.assert(/^(e|m|t)[a-f0-9]+$/.test(ctx.params.id), 400, 'Invalid ID format')
 
-  const mediaId = parseInt(ctx.params.id.slice(1))
-  const mediaType = ctx.params.id[0] === 'm' ? 'movie' : 'episode'
+  const isTorrent = ctx.params.id[0] === 't'
 
-  const mediaFile = await MediaFile.findOne({
-    where: {
-      mediaId,
-      mediaType
-    }
-  })
+  let mediaFile
+  let torrentFile
 
-  ctx.assert(mediaFile, 404, 'Media not found')
+  if (isTorrent) {
+    const torrent = torrentClient.get(ctx.params.id.slice(1))
+    ctx.assert(torrent, 404, 'Media not found')
 
-  const path = process.env.MEDIA_BASE_DIR + mediaFile.fileName
-  let stat
+    torrentFile = torrent.files.find(file => SUPPORTED_EXTENSIONS.includes(file.name.split('.').pop()))
+  } else {
+    const mediaId = parseInt(ctx.params.id.slice(1))
+    const mediaType = ctx.params.id[0] === 'm' ? 'movie' : 'episode'
 
-  try {
-    stat = fs.statSync(path)
-  } catch (e) {
-    ctx.throw(404, 'File not found: ' + path)
+    mediaFile = await MediaFile.findOne({
+      where: {
+        mediaId,
+        mediaType
+      }
+    })
   }
 
-  const fileSize = stat.size
+  ctx.assert(mediaFile || torrentFile, 404, 'Media not found')
+
+  let path
+  let stat
+
+  if (!isTorrent) {
+    path = process.env.MEDIA_BASE_DIR + mediaFile.fileName
+    try {
+      stat = fs.statSync(path)
+    } catch (e) {
+      ctx.throw(404, 'File not found: ' + path)
+    }
+  }
+
+  const fileSize = isTorrent ? torrentFile.length : stat.size
   const range = ctx.request.get('range')
-  const mimeType = mime.lookup(path)
+  const mimeType = mime.lookup(isTorrent ? torrentFile.path : path)
 
   if (range) {
     const parts = range.replace(/bytes=/, '').split('-')
@@ -44,7 +61,14 @@ async function watch (ctx) {
     const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1
 
     const chunksize = (end - start) + 1
-    const file = fs.createReadStream(path, { start, end })
+
+    let stream
+
+    if (isTorrent) {
+      stream = torrentFile.createReadStream({ start, end })
+    } else {
+      stream = fs.createReadStream(path, { start, end })
+    }
 
     ctx.status = 206
     ctx.set({
@@ -54,7 +78,7 @@ async function watch (ctx) {
       'Content-Type': mimeType
     })
 
-    ctx.body = file
+    ctx.body = stream
   } else {
     ctx.status = 206
     ctx.set({
@@ -62,7 +86,15 @@ async function watch (ctx) {
       'Content-Type': mimeType
     })
 
-    ctx.body = fs.createReadStream(path)
+    let stream
+
+    if (isTorrent) {
+      stream = torrentFile.createReadStream()
+    } else {
+      stream = fs.createReadStream(path)
+    }
+
+    ctx.body = stream
   }
 }
 
