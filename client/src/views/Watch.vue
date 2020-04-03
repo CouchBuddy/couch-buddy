@@ -83,12 +83,14 @@ export default {
     const resourcePath = this.watchId[0] === 'e' ? 'episodes' : 'library'
     const resourceId = this.watchId.slice(1)
 
-    // get movie info
-    this.movie = (await client.get(`/api/${resourcePath}/${resourceId}`)).data
+    if (this.watchId[0] !== 't') {
+      // get movie info
+      this.movie = (await client.get(`/api/${resourcePath}/${resourceId}`)).data
 
-    // get available subtitles
-    this.subtitles = (await client.get(`/api/watch/${this.watchId}/subtitles`)).data
-      .map(sub => { sub.active = false; return sub })
+      // get available subtitles
+      this.subtitles = (await client.get(`/api/watch/${this.watchId}/subtitles`)).data
+        .map(sub => { sub.active = false; return sub })
+    }
 
     this.source = `${config.serverUrl}/api/watch/${this.watchId}`
     this.sourceSubs = `${config.serverUrl}/api/subtitles`

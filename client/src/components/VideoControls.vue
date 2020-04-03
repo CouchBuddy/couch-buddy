@@ -64,6 +64,7 @@
 
 <script>
 import SubtitlesDialog from './SubtitlesDialog'
+import { formatTime } from '@/utils'
 
 export default {
   name: 'VideoControls',
@@ -121,16 +122,7 @@ export default {
       this.video.muted = !this.video.muted
     },
     updateRemainingTime () {
-      const time = this.duration - this.currentTime
-
-      const hours = Math.floor(time / 3600)
-      let minutes = Math.floor((time - (hours * 3600)) / 60)
-      let seconds = Math.round(time - (hours * 3600) - (minutes * 60))
-
-      minutes = minutes.toString().padStart(2, '0')
-      seconds = seconds.toString().padStart(2, '0')
-
-      this.remainingTime = `${hours}:${minutes}:${seconds}`
+      this.remainingTime = formatTime(this.duration - this.currentTime)
     },
     onSeek () {
       this.video.currentTime = this.seekPosition

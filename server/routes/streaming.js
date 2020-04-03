@@ -24,6 +24,7 @@ async function watch (ctx) {
     const torrent = torrentClient.get(ctx.params.id.slice(1))
     ctx.assert(torrent, 404, 'Media not found')
 
+    // Find the first playable file
     torrentFile = torrent.files.find(file => SUPPORTED_EXTENSIONS.includes(file.name.split('.').pop()))
   } else {
     const mediaId = parseInt(ctx.params.id.slice(1))

@@ -22,18 +22,28 @@
     <div
       v-for="torrent in torrents"
       :key="torrent.infoHash"
-      class="p-4 mb-4 bg-black"
+      class="flex items-center p-4 mb-4 bg-black"
     >
-      <h2 class="text-xl">
-        {{ torrent.name }}
-      </h2>
+      <div class="flex-grow">
+        <h2 class="text-xl">
+          {{ torrent.name }}
+        </h2>
 
-      <div>
-        {{ parseInt(torrent.progress * 100) }}% -
-        {{ torrent.timeRemaining }}s -
-        <span class="mdi mdi-download-network" /> {{ torrent.downloadSpeed }} B/s
-        <span class="mdi mdi-upload-network" /> {{ torrent.uploadSpeed }} B/s
+        <div>
+          {{ parseInt(torrent.progress * 100) }}% -
+          {{ torrent.timeRemaining | time }} -
+          <span class="mdi mdi-download-network" /> {{ torrent.downloadSpeed }} B/s
+          <span class="mdi mdi-upload-network" /> {{ torrent.uploadSpeed }} B/s
+        </div>
       </div>
+
+      <router-link
+        :to="{ name: 'watch', params: { id: `t${torrent.infoHash}` } }"
+        tag="button"
+        class="w-16 h-16 flex-shrink-0 rounded-full"
+      >
+        <span class="mdi mdi-play-circle text-4xl" />
+      </router-link>
     </div>
   </div>
 </template>
