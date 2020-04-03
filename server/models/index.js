@@ -9,7 +9,7 @@ const sequelize = new Sequelize({
 
 const models = {}
 
-async function init () {
+async function sync () {
   try {
     await sequelize.authenticate()
     console.log('Connected to DB')
@@ -44,5 +44,5 @@ for (const file of modelFiles) {
 
 models.Episode.belongsTo(models.Movie)
 
-models.init = init
+models.sync = sync
 module.exports = models
