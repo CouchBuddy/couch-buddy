@@ -5,11 +5,13 @@
   >
     <div v-if="controller && player.canPause">
       <button
-        class=""
-        :disabled="!player.canPause"
+        class="w-10 h-10 mr-2 rounded-full"
         @click="controller.playOrPause()"
       >
-        {{ player.isPaused ? 'Play' : 'Pause' }}
+        <span
+          class="mdi text-2xl"
+          :class="player.isPaused ? 'mdi-play' : 'mdi-pause'"
+        />
       </button>
     </div>
 
@@ -45,7 +47,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['setCastConnected']),
+    ...mapMutations([ 'setCastConnected' ]),
     initCast (isAvailable) {
       if (!isAvailable || !chrome || !cast) {
         console.warn('Cast is not supported on this browser')
