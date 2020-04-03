@@ -8,6 +8,7 @@
         ref="video"
         :src="source"
         crossorigin="anonymous"
+        @click="togglePlay()"
         @pause="onPause"
         @play="onPlay"
         @error="onVideoError"
@@ -96,6 +97,9 @@ export default {
     this.sourceSubs = `${config.serverUrl}/api/subtitles`
   },
   methods: {
+    togglePlay () {
+      this.$refs.video.paused ? this.$refs.video.play() : this.$refs.video.pause()
+    },
     onMouseMove () {
       if (this.$refs.video.paused) { return }
 
