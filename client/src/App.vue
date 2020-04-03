@@ -4,6 +4,14 @@
   </div>
 </template>
 
+<script>
+export default {
+  mounted () {
+    this.$store.dispatch('fetchSystemInfo')
+  }
+}
+</script>
+
 <style lang="scss">
 @import "tailwindcss/base";
 @import "tailwindcss/components";

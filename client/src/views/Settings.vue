@@ -50,15 +50,16 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 import client from '@/client'
 
 export default {
   data: () => ({
-    scanningLibrary: false,
-    systemInfo: null
+    scanningLibrary: false
   }),
-  mounted () {
-    this.fetchSystemInfo()
+  computed: {
+    ...mapState([ 'systemInfo' ])
   },
   methods: {
     async scanLibrary () {
@@ -68,9 +69,6 @@ export default {
       } finally {
         this.scanningLibrary = false
       }
-    },
-    async fetchSystemInfo () {
-      this.systemInfo = (await client.get('/api/system')).data
     }
   }
 }

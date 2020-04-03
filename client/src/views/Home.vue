@@ -86,7 +86,6 @@
 import { mapState } from 'vuex'
 
 import client from '@/client'
-import config from '@/config'
 
 export default {
   name: 'Home',
@@ -96,7 +95,7 @@ export default {
     showDetailsModal: false
   }),
   computed: {
-    ...mapState(['isCastConnected'])
+    ...mapState([ 'isCastConnected', 'serverUrl' ])
   },
   async mounted () {
     const response = await client.get('/api/library')
@@ -118,7 +117,7 @@ export default {
     async castMovie (movie) {
       const castSession = cast.framework.CastContext.getInstance().getCurrentSession()
 
-      const url = `${config.serverUrl}/api/watch/${this.getWatchId(movie)}`
+      const url = `${this.serverUrl}/api/watch/${this.getWatchId(movie)}`
       const mimeType = `video/${movie.container}`
 
       const mediaInfo = new chrome.cast.media.MediaInfo(url, mimeType)

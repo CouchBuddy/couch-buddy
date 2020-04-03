@@ -68,8 +68,9 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 import client from '@/client'
-import config from '@/config'
 import VideoControls from '@/components/VideoControls'
 
 export default {
@@ -87,6 +88,9 @@ export default {
     subtitles: [],
     watchId: null
   }),
+  computed: {
+    ...mapState([ 'serverUrl' ])
+  },
   async mounted () {
     this.watchId = this.$route.params.id
 
@@ -102,8 +106,8 @@ export default {
         .map(sub => { sub.active = false; return sub })
     }
 
-    this.source = `${config.serverUrl}/api/watch/${this.watchId}`
-    this.sourceSubs = `${config.serverUrl}/api/subtitles`
+    this.source = `${this.serverUrl}/api/watch/${this.watchId}`
+    this.sourceSubs = `${this.serverUrl}/api/subtitles`
   },
   methods: {
     togglePlay () {
