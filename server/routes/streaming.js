@@ -73,6 +73,9 @@ async function watch (ctx) {
 
     videoStream = require('stream').PassThrough()
 
+    const metadata = await getVideoMetadata(path)
+    console.log(`Video dimension: ${metadata.width}x${metadata.height}`)
+
     ffmpeg(path)
       .withAudioCodec('aac')
       .format('mp4')
@@ -239,6 +242,22 @@ async function downloadSubtitles (ctx) {
     lang,
     mediaId,
     mediaType
+  })
+}
+
+function getVideoMetadata (path) {
+  return new Promise((resolve, reject) => {
+    ffmpeg.ffprobe(path, (err, metadata) => {
+      if (err) { return reject(err) }
+
+      const video = metadata.streams.find(s => s.codec_type === 'video')
+
+      if (video) {
+        resolve(video)
+      } else {
+        return reject(new Error('no video stream'))
+      }
+    })
   })
 }
 
