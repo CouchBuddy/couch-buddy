@@ -1,9 +1,16 @@
 const axios = require('axios')
+const ffmpeg = require('fluent-ffmpeg')
 const fs = require('fs')
 const mime = require('mime-types')
 const sendFile = require('koa-send')
 const OS = require('opensubtitles-api')
-var srt2vtt = require('srt-to-vtt')
+const srt2vtt = require('srt-to-vtt')
+// const { PassThrough } = require('stream')
+
+const SUPPORTED_MIMETYPES = [
+  'video/mp4',
+  'video/mkv'
+]
 
 const torrentClient = require('../downloader')
 const { Episode, MediaFile, Movie, SubtitlesFile } = require('../models')
@@ -53,50 +60,77 @@ async function watch (ctx) {
   }
 
   const fileSize = isTorrent ? torrentFile.length : stat.size
-  const range = ctx.request.get('range')
-  const mimeType = mime.lookup(isTorrent ? torrentFile.path : path)
+  let range = ctx.request.get('range')
+  let mimeType = mime.lookup(isTorrent ? torrentFile.path : path)
 
-  if (range) {
-    const parts = range.replace(/bytes=/, '').split('-')
-    const start = parseInt(parts[0], 10)
-    const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1
+  // Stream that will be sent as response
+  let videoStream
 
-    const chunksize = (end - start) + 1
+  // Need transcoding
+  if (!SUPPORTED_MIMETYPES.includes(mimeType)) {
+    mimeType = 'video/mp4'
+    range = null
 
-    let stream
+    videoStream = require('stream').PassThrough()
 
-    if (isTorrent) {
-      stream = torrentFile.createReadStream({ start, end })
-    } else {
-      stream = fs.createReadStream(path, { start, end })
-    }
+    ffmpeg(path)
+      .withAudioCodec('aac')
+      .format('mp4')
+      .on('end', () => {
+        console.log('convertion done')
+      })
+      .on('progress', (info) => {
+        console.log('progress ', info.timemark)
+      })
+      .on('error', (err) => {
+        console.log('FFMPEG error:', err)
+      })
+      .addOption('-movflags', 'frag_keyframe+empty_moov')
+      .pipe(videoStream, { end: true })
 
-    ctx.status = 206
-    ctx.set({
-      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-      'Accept-Ranges': 'bytes',
-      'Content-Length': chunksize,
-      'Content-Type': mimeType
-    })
-
-    ctx.body = stream
-  } else {
-    ctx.status = 206
+    ctx.status = 200
     ctx.set({
       'Content-Length': fileSize,
       'Content-Type': mimeType
     })
+  } else {
+    // Serve a static file
+    if (range) {
+      const parts = range.replace(/bytes=/, '').split('-')
+      const start = parseInt(parts[0], 10)
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1
 
-    let stream
+      const chunksize = (end - start) + 1
 
-    if (isTorrent) {
-      stream = torrentFile.createReadStream()
+      if (isTorrent) {
+        videoStream = torrentFile.createReadStream({ start, end })
+      } else {
+        videoStream = fs.createReadStream(path, { start, end })
+      }
+
+      ctx.status = 206
+      ctx.set({
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunksize,
+        'Content-Type': mimeType
+      })
     } else {
-      stream = fs.createReadStream(path)
-    }
+      ctx.status = 200
+      ctx.set({
+        'Content-Length': fileSize,
+        'Content-Type': mimeType
+      })
 
-    ctx.body = stream
+      if (isTorrent) {
+        videoStream = torrentFile.createReadStream()
+      } else {
+        videoStream = fs.createReadStream(path)
+      }
+    }
   }
+
+  ctx.body = videoStream
 }
 
 async function listSubtitles (ctx) {

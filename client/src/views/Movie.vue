@@ -107,11 +107,9 @@ export default {
       const mediaInfo = new chrome.cast.media.MediaInfo(url)
       const request = new chrome.cast.media.LoadRequest(mediaInfo)
 
-      try {
-        await castSession.loadMedia(request)
-      } catch (e) {
-        console.error(e, url)
-      }
+      castSession.loadMedia(request, null, err => {
+        console.warn('Error while casting', err)
+      })
     },
     getWatchId (movie) {
       return `${movie.type === 'movie' ? 'm' : 'e'}${movie.id}`
