@@ -84,7 +84,7 @@ export default {
   },
   data: () => ({
     // langs supported by OS.org
-    allLanguageCodes: ['an', 'ar', 'bg', 'ca', 'cs', 'da', 'de', 'en', 'eo', 'es', 'et', 'eu', 'fa', 'fi', 'fr', 'gl', 'gr', 'he', 'hi', 'hr', 'hu', 'id', 'is', 'it', 'ja', 'ka', 'km', 'ko', 'mc', 'mk', 'nl', 'no', 'oc', 'pb', 'pl', 'pt', 'ro', 'ru', 'si', 'sk', 'sq', 'sr', 'sv', 'th', 'tl', 'tr', 'uk', 'vi', 'zh'],
+    allLanguageCodes: [ 'an', 'ar', 'bg', 'ca', 'cs', 'da', 'de', 'en', 'eo', 'es', 'et', 'eu', 'fa', 'fi', 'fr', 'gl', 'gr', 'he', 'hi', 'hr', 'hu', 'id', 'is', 'it', 'ja', 'ka', 'km', 'ko', 'mc', 'mk', 'nl', 'no', 'oc', 'pb', 'pl', 'pt', 'ro', 'ru', 'si', 'sk', 'sq', 'sr', 'sv', 'th', 'tl', 'tr', 'uk', 'vi', 'zh' ],
     downloadLang: 'en',
     show: false
   }),
