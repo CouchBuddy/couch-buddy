@@ -28,7 +28,7 @@
         v-if="error"
         class="video-error"
       >
-        Sorry, this video format is not supported
+        {{ error }}
       </div>
     </div>
 
@@ -79,7 +79,7 @@ export default {
     VideoControls
   },
   data: () => ({
-    error: false,
+    error: null,
     movie: {},
     overlayTimeout: null,
     showOverlay: true,
@@ -128,7 +128,7 @@ export default {
       this.overlayTimeout = setTimeout(() => { this.showOverlay = false }, 5000)
     },
     onVideoError () {
-      this.error = true
+      this.error = this.$refs.video.error.message
     },
     setSubtitles (id) {
       for (const track of this.$refs.video.textTracks) {
