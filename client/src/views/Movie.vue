@@ -39,16 +39,16 @@
     </div>
 
     <div
-      v-for="(episodes, season) in episodesBySeason"
-      :key="`season-${season}`"
+      v-for="group in episodesBySeason"
+      :key="`season-${group.season}`"
     >
       <div class="mt-8 mb-4">
-        SEASON {{ season }}
+        SEASON {{ group.season }}
       </div>
 
       <div class="horizontal-scroller">
         <div
-          v-for="episode in episodes"
+          v-for="episode in group.episodes"
           :key="`episode-${episode.id}`"
           class="flex justify-center items-center text-4xl bg-gray-600 rounded-lg"
           @click="playMovie(episode)"
@@ -89,7 +89,21 @@ export default {
   methods: {
     async fetchEpisodes (seriesId) {
       const response = await client.get(`/api/library/${this.movieId}/episodes`)
-      this.episodesBySeason = response.data.reduce((r, v, i, a, k = v.season) => { (r[k] || (r[k] = [])).push(v); return r }, {})
+
+      // Group episodes by season as object:
+      //   { '1': [ {}, ... ] }
+      const groupedEpisodes = response.data.reduce((r, v, i, a, k = v.season) => { (r[k] || (r[k] = [])).push(v); return r }, {})
+
+      // Convert the object to array and sort both seasons and episodes:
+      //   [ { season: 1, episodes: [ {}, ... ] } ]
+      this.episodesBySeason = []
+      for (const season in groupedEpisodes) {
+        this.episodesBySeason.push({
+          season: parseInt(season),
+          episodes: groupedEpisodes[season].sort((a, b) => a.episode - b.episode)
+        })
+      }
+      this.episodesBySeason.sort((a, b) => a.season - b.season)
     },
     playMovie (movie) {
       if (this.isCastConnected) {
