@@ -50,10 +50,16 @@
         <div
           v-for="episode in group.episodes"
           :key="`episode-${episode.id}`"
-          class="flex justify-center items-center text-4xl bg-gray-600 rounded-lg"
+          class="cursor-pointer"
           @click="playMovie(episode)"
         >
-          {{ episode.episode }}
+          <img
+            :src="`${serverUrl}/api/episodes/${episode.id}/thumbnail`"
+            class="w-full object-cover rounded-lg"
+          >
+          <div class="text-center mt-1">
+            Episode {{ episode.episode }}
+          </div>
         </div>
       </div>
     </div>

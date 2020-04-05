@@ -13,6 +13,7 @@
     "@koa/router": "^8.0.8",
     "axios": "^0.19.2",
     "check-disk-space": "^2.1.0",
+    "cli-progress": "^3.6.1",
     "dotenv": "^8.2.0",
     "fluent-ffmpeg": "^2.1.2",
     "glob": "^7.1.6",

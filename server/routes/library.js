@@ -1,8 +1,10 @@
 const axios = require('axios')
+const ffmpeg = require('fluent-ffmpeg')
 const glob = require('glob')
 const mime = require('mime-types')
 const ptt = require('parse-torrent-title')
 const path = require('path')
+const sendFile = require('koa-send')
 
 const { Episode, MediaFile, Movie } = require('../models')
 
@@ -14,6 +16,8 @@ async function scanLibrary (ctx = {}) {
   console.log(`Found ${videos.length} video files in ${process.env.MEDIA_BASE_DIR}`)
 
   for (const fileName of videos) {
+    const absolutePath = process.env.MEDIA_BASE_DIR + fileName
+
     // Parse filename to obtain basic info
     const basicInfo = ptt.parse(path.basename(fileName))
 
@@ -71,8 +75,11 @@ async function scanLibrary (ctx = {}) {
     let episode
 
     if (isSeries) {
+      const thumbnail = await takeScreenshot(absolutePath)
+
       episode = await Episode.create({
         movieId: movie.id,
+        thumbnail,
         ...item
       })
     }
@@ -121,6 +128,15 @@ async function getEpisode (ctx) {
   ctx.body = episode
 }
 
+async function getEpisodeThumbnail (ctx) {
+  const episodeId = parseInt(ctx.params.id)
+  const episode = await Episode.findByPk(episodeId)
+
+  ctx.assert(episode, 404)
+
+  await sendFile(ctx, episode.thumbnail, { root: process.env.MEDIA_BASE_DIR })
+}
+
 function searchVideoFiles (dir) {
   return new Promise((resolve, reject) => {
     const options = {
@@ -140,11 +156,28 @@ function searchVideoFiles (dir) {
   })
 }
 
+function takeScreenshot (file) {
+  const folder = path.dirname(file)
+  const folderRelative = path.relative(process.env.MEDIA_BASE_DIR, folder)
+
+  return new Promise((resolve) => {
+    ffmpeg(file)
+      .on('filenames', (filenames) => {
+        resolve(path.join(folderRelative, filenames[0]))
+      })
+      .screenshots({ count: 1, filename: '%b.png', folder })
+  })
+}
+
 module.exports = {
   getLibrary,
   listLibrary,
   scanLibrary,
 
   listEpisodes,
-  getEpisode
+  getEpisode,
+  getEpisodeThumbnail,
+
+  takeScreenshot,
+  searchVideoFiles
 }
