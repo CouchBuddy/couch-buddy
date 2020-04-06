@@ -41,6 +41,12 @@
             <span class="mdi mdi-information" />
             More Info
           </router-link>
+
+          <div
+            v-if="type === 'movie'"
+            class="h-1 mt-2 self-start bg-red-700"
+            :style="{ width: `${Math.min(item.watched || 0, 100)}%` }"
+          />
         </div>
       </div>
     </div>
