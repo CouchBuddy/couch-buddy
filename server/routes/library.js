@@ -146,16 +146,20 @@ async function updateLibrary (ctx) {
 
 async function findMovieInfo (ctx) {
   const title = ctx.request.query.title
+  const imdbId = ctx.request.query.imdbId
 
-  ctx.assert(title, 400, 'Param `title` is required')
+  ctx.assert(title || imdbId, 400, 'Param `title` or `imdbDb` are required')
+
+  const params = { apikey: OMDB_KEY }
+
+  if (imdbId) {
+    params.i = imdbId
+  } else {
+    params.t = title
+  }
 
   try {
-    const response = await axios.get('http://www.omdbapi.com/', {
-      params: {
-        t: title,
-        apikey: OMDB_KEY
-      }
-    })
+    const response = await axios.get('http://www.omdbapi.com/', { params })
 
     if (response.data.Error) {
       ctx.body = 'null'

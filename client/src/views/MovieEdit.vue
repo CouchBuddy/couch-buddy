@@ -18,7 +18,7 @@
     <div class="flex mb-4">
       <input
         v-model="query"
-        placeholder="2001: A Space..."
+        placeholder="2001: A Space... or tt1234"
         class="flex-grow px-4 py-2 bg-gray-800"
         @input="searchOmdb"
       >
@@ -93,12 +93,17 @@ export default {
     searchOmdb: debounce(async function () {
       if (!this.query) { return }
 
-      this.movie = (await client.get('/api/library/find-info', {
-        params: { title: this.query }
-      })).data
+      const params = {}
+      if (this.query.startsWith('tt')) {
+        params.imdbId = this.query
+      } else {
+        params.title = this.query
+      }
+
+      this.movie = (await client.get('/api/library/find-info', { params })).data || {}
     }, 350),
     async saveMovie () {
-      await client.put(`/api/library/${this.$route.params.id}`, this.movie)
+      await client.patch(`/api/library/${this.$route.params.id}`, this.movie)
     }
   }
 }
