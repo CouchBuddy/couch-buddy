@@ -8,10 +8,19 @@
     />
 
     <cast-control />
+
+    <div
+      v-if="systemInfo.mediaDirAvailable === false"
+      class="flex fixed bottom-0 left-0 mb-20 md:ml-20 md:mb-4 h-16 w-16 items-center justify-center text-4xl"
+    >
+      <span class="mdi mdi-folder-alert" />
+    </div>
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 import MainNavigation from './MainNavigation'
 import CastControl from '@/components/CastControl'
 
@@ -20,6 +29,9 @@ export default {
   components: {
     CastControl,
     MainNavigation
+  },
+  computed: {
+    ...mapState([ 'systemInfo' ])
   }
 }
 </script>
