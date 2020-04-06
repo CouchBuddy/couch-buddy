@@ -7,8 +7,10 @@ const system = require('./system')
 
 router.get('/system', system.getSystemInfo)
 
+router.get('/library/find-info', library.findMovieInfo)
 router.get('/library', library.listLibrary)
 router.get('/library/:id', library.getLibrary)
+router.put('/library/:id', library.updateLibrary)
 router.post('/library/scan', library.scanLibrary)
 router.get('/library/:id/episodes', library.listEpisodes)
 router.get('/episodes/:id', library.getEpisode)

@@ -34,6 +34,14 @@
           >
             {{ movie.type === 'series' ? 'Play Next Episode' : 'Play' }}
           </button>
+
+          <router-link
+            tag="button"
+            :to="{ name: 'movie-edit', params: { id: movie.id } }"
+            class="px-4 py-2"
+          >
+            Edit Info
+          </router-link>
         </div>
       </div>
     </div>

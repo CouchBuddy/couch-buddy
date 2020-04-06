@@ -47,6 +47,7 @@ import debounce from 'debounce'
 import client from '@/client'
 
 export default {
+  name: 'Search',
   data: () => ({
     loading: false,
     noResults: false,

@@ -117,6 +117,54 @@ async function getLibrary (ctx) {
   ctx.body = movie
 }
 
+async function updateLibrary (ctx) {
+  const movieId = parseInt(ctx.params.id)
+
+  ctx.assert(movieId > 0, 404)
+
+  const [ count ] = await Movie.update(ctx.request.body, { where: { id: movieId } })
+
+  ctx.status = count === 1 ? 204 : 400
+}
+
+async function findMovieInfo (ctx) {
+  const title = ctx.request.query.title
+
+  ctx.assert(title, 400, 'Param `title` is required')
+
+  try {
+    const response = await axios.get('http://www.omdbapi.com/', {
+      params: {
+        t: title,
+        apikey: OMDB_KEY
+      }
+    })
+
+    if (response.data.Error) {
+      ctx.body = 'null'
+    } else {
+      const item = {}
+
+      // Found info on OMDb, refactor object to match Movie/Episode model
+      for (const k in response.data) {
+        item[k.toLowerCase()] = response.data[k]
+      }
+
+      item.imdbId = item.imdbid
+      item.ratingImdb = parseFloat(item.imdbrating)
+      item.ratingMetacritic = parseInt(item.metascore)
+
+      const rt = item.ratings.find(x => x.Source === 'Rotten Tomatoes')
+      if (rt) {
+        item.ratingRottenTomatoes = parseInt(rt.Value)
+      }
+      ctx.body = item
+    }
+  } catch (e) {
+    ctx.throw(500, e.message)
+  }
+}
+
 async function listEpisodes (ctx) {
   const movieId = parseInt(ctx.params.id)
   ctx.assert(movieId, 404, 'Please provide an ID in the URL')
@@ -177,9 +225,11 @@ function takeScreenshot (file) {
 }
 
 module.exports = {
+  findMovieInfo,
   getLibrary,
   listLibrary,
   scanLibrary,
+  updateLibrary,
 
   listEpisodes,
   getEpisode,
