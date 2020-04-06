@@ -37,7 +37,7 @@
 
           <router-link
             tag="button"
-            :to="{ name: 'movie-edit', params: { id: movie.id } }"
+            :to="{ name: 'movie-edit', params: { id: $route.params.id } }"
             class="px-4 py-2"
           >
             Edit Info
