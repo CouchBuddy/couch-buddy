@@ -7,8 +7,7 @@
       <div
         v-for="item in library"
         :key="item.id"
-        class="flex justify-center items-center cursor-pointer bg-red-700"
-        @click="showItemDetails(item)"
+        class="relative flex justify-center items-center cursor-pointer bg-red-700 movie-card"
       >
         <img
           v-if="item.poster"
@@ -21,58 +20,25 @@
         >
           {{ item.title }}
         </div>
-      </div>
-    </div>
 
-    <div
-      v-if="showDetailsModal"
-      class="fixed top-0 left-0 flex w-2/3 h-screen details-modal"
-    >
-      <div class="w-1/2">
-        <img
-          class="w-full"
-          :src="selectedItem.poster"
-        >
-      </div>
+        <div class="absolute flex flex-col justify-between items-center w-full h-full movie-card__details">
+          <div class="text-xl text-center mt-8">
+            {{ item.title }}
+          </div>
 
-      <div class="mx-4 w-1/2">
-        <div
-          class="text-3xl text-right mr-4 cursor-pointer"
-          @click="showDetailsModal = false"
-        >
-          &times;
-        </div>
-
-        <h2 class="text-4xl">
-          {{ selectedItem.title }}
-        </h2>
-
-        <div class="mb-2 text-gray-600">
-          <small>{{ selectedItem.year }}</small>
-        </div>
-
-        <div>{{ selectedItem.plot }}</div>
-
-        <div class="mt-4 text-gray-600">
-          Cast: {{ selectedItem.actors }}
-        </div>
-
-        <div class="mt-4 text-gray-600">
-          Directed by {{ selectedItem.director }}
-        </div>
-
-        <div class="flex justify-evenly mt-8 text-center">
           <button
-            class="px-4 py-2 border-2 border-white"
-            @click="playMovie(selectedItem)"
+            class="px-4 text-6xl rounded-full"
+            @click="playMovie(item)"
           >
-            {{ selectedItem.type === 'series' ? 'Play Next Episode' : 'Play' }}
+            <span class="mdi mdi-play-circle" />
           </button>
 
           <router-link
-            :to="{ name: 'movie', params: { id: selectedItem.id } }"
-            class="px-4 py-2 border-2 border-white"
+            tag="button"
+            :to="{ name: 'movie', params: { id: item.id } }"
+            class="px-4 py-2 mb-4"
           >
+            <span class="mdi mdi-information" />
             More Info
           </router-link>
         </div>
@@ -91,8 +57,7 @@ export default {
   name: 'Home',
   data: () => ({
     library: [],
-    selectedItem: null,
-    showDetailsModal: false
+    selectedItem: null
   }),
   computed: {
     ...mapState([ 'isCastConnected', 'serverUrl' ])
@@ -103,10 +68,6 @@ export default {
     this.library = response.data
   },
   methods: {
-    showItemDetails (item) {
-      this.showDetailsModal = true
-      this.selectedItem = item
-    },
     playMovie (movie) {
       if (this.isCastConnected) {
         this.castMovie(movie)
@@ -137,8 +98,17 @@ export default {
 </script>
 
 <style lang="scss">
-.details-modal {
-  background: rgba(0,0,0,0.95);
-  box-shadow: 10px 0 10px rgba(0,0,0,0.40);
+.movie-card {
+  &__details {
+    background: linear-gradient(45deg, black, transparent);
+    opacity: 0;
+    transform: translateY(100%);
+    transition: all .3s;
+  }
+
+  &:hover .movie-card__details {
+    opacity: 1;
+    transform: none;
+  }
 }
 </style>
