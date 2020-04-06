@@ -66,6 +66,10 @@ module.exports = (sequelize) => {
       type: Sequelize.TEXT,
       validate: { isIn: [[ 'series', 'movie' ]] }
     },
+    watched: {
+      type: Sequelize.INTEGER,
+      validate: { min: 0, max: 100 }
+    },
     writer: {
       type: Sequelize.TEXT
     },
