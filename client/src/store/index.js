@@ -9,7 +9,7 @@ export default new Vuex.Store({
   state: {
     isCastConnected: false,
     serverUrl: `${location.protocol}//${location.hostname}:3000`,
-    systemInfo: null
+    systemInfo: {}
   },
   mutations: {
     setCastConnected (state, payload) {
