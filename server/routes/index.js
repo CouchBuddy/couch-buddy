@@ -5,6 +5,9 @@ const library = require('./library')
 const streaming = require('./streaming')
 const system = require('./system')
 
+// Import and init the discovery service (not really a route...)
+require('./discovery')
+
 router.get('/system', system.getSystemInfo)
 
 router.get('/library/find-info', library.findMovieInfo)
