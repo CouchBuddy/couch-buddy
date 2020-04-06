@@ -169,7 +169,10 @@ async function listEpisodes (ctx) {
   const movieId = parseInt(ctx.params.id)
   ctx.assert(movieId, 404, 'Please provide an ID in the URL')
 
-  const episodes = await Episode.findAll({ where: { movieId } })
+  const episodes = await Episode.findAll({
+    where: { movieId },
+    order: [[ 'season', 'ASC' ], [ 'episode', 'ASC' ]]
+  })
 
   ctx.body = episodes
 }

@@ -29,10 +29,15 @@
 
         <div class="flex justify-evenly mt-8 text-center">
           <button
+            :disabled="!nextEpisode"
             class="px-4 py-2 border-2 border-white"
             @click="playMovie(movie)"
           >
-            {{ movie.type === 'series' ? 'Play Next Episode' : 'Play' }}
+            <span class="mdi mdi-play mr-2" />
+            Watch
+            <span v-if="nextEpisode">
+              S{{ nextEpisode.season }}E{{ nextEpisode.episode }}
+            </span>
           </button>
 
           <router-link
@@ -40,6 +45,7 @@
             :to="{ name: 'movie-edit', params: { id: $route.params.id } }"
             class="px-4 py-2"
           >
+            <span class="mdi mdi-pencil mr-2" />
             Edit Info
           </router-link>
         </div>
@@ -54,20 +60,29 @@
         SEASON {{ group.season }}
       </div>
 
-      <div class="horizontal-scroller">
+      <div
+        :id="`s${group.season}`"
+        class="relative horizontal-scroller"
+      >
         <div
           v-for="episode in group.episodes"
+          :id="`s${group.season}e${episode.episode}`"
           :key="`episode-${episode.id}`"
-          class="cursor-pointer"
+          class="relative rounded-lg overflow-hidden cursor-pointer"
           @click="playMovie(episode)"
         >
           <img
             :src="`${serverUrl}/api/episodes/${episode.id}/thumbnail`"
-            class="w-full object-cover rounded-lg"
+            class="w-full h-full object-cover"
           >
-          <div class="text-center mt-1">
+          <div class="absolute w-full text-center bottom-0 mb-1">
             Episode {{ episode.episode }}
           </div>
+
+          <div
+            class="absolute bottom-0 h-1 bg-red-700"
+            :style="{ width: `${episode.watched || 0}%` }"
+          />
         </div>
       </div>
     </div>
@@ -85,7 +100,8 @@ export default {
   data: () => ({
     episodesBySeason: {},
     movie: {},
-    movieId: null
+    movieId: null,
+    nextEpisode: null
   }),
   computed: {
     ...mapState([ 'isCastConnected', 'serverUrl' ])
@@ -103,6 +119,8 @@ export default {
   methods: {
     async fetchEpisodes (seriesId) {
       const response = await client.get(`/api/library/${this.movieId}/episodes`)
+
+      this.nextEpisode = response.data.find(e => e.watched < 95)
 
       // Group episodes by season as object:
       //   { '1': [ {}, ... ] }

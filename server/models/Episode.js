@@ -51,6 +51,10 @@ module.exports = (sequelize) => {
       type: Sequelize.TEXT,
       allowNull: false
     },
+    watched: {
+      type: Sequelize.INTEGER,
+      validate: { min: 0, max: 100 }
+    },
     writer: {
       type: Sequelize.TEXT
     },
