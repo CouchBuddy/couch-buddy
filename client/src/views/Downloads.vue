@@ -31,7 +31,7 @@
 
         <div>
           {{ parseInt(torrent.progress * 100) }}% -
-          {{ torrent.timeRemaining | time }} -
+          {{ torrent.timeRemaining / 1000 | time(true) }} -
           <span class="mdi mdi-download-network" /> {{ torrent.downloadSpeed | bytes }} /s
           <span class="mdi mdi-upload-network" /> {{ torrent.uploadSpeed | bytes }} /s
         </div>
