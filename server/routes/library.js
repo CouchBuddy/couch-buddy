@@ -17,16 +17,23 @@ async function scanLibrary (ctx = {}) {
   console.log(`Found ${videos.length} video files in ${process.env.MEDIA_BASE_DIR}`)
 
   for (const fileName of videos) {
-    const absolutePath = process.env.MEDIA_BASE_DIR + fileName
-
-    addFileToLibrary(absolutePath)
+    addFileToLibrary(fileName)
   }
 
   ctx.status = 204
 }
 
 async function addFileToLibrary (fileName) {
-  if (!fileName) { return }
+  if (!fileName) {
+    console.error('fileName is null')
+    return
+  }
+
+  const mimeType = mime.lookup(fileName)
+  if (!mimeType.startsWith('video/')) {
+    console.log('Ignoring non-video file')
+    return
+  }
 
   // If the file has already been indexed, skip it
   const existingFile = await MediaFile.findOne({ where: { fileName } })
@@ -84,7 +91,8 @@ async function addFileToLibrary (fileName) {
   let episode
 
   if (isSeries) {
-    const thumbnail = await takeScreenshot(fileName)
+    const absolutePath = process.env.MEDIA_BASE_DIR + fileName
+    const thumbnail = await takeScreenshot(absolutePath)
 
     episode = await Episode.create({
       movieId: movie.id,
@@ -97,7 +105,7 @@ async function addFileToLibrary (fileName) {
     fileName,
     mediaId: isSeries ? episode.id : movie.id,
     mediaType: isSeries ? 'episode' : 'movie',
-    mimeType: mime.lookup(fileName)
+    mimeType
   })
 
   return movie
@@ -130,8 +138,7 @@ async function updateLibrary (ctx) {
   ctx.assert(movieId > 0, 404)
 
   const [ count ] = await Movie.update(ctx.request.body, {
-    where: { id: movieId },
-    attributes: Object.keys(ctx.request.body)
+    where: { id: movieId }
   })
 
   ctx.status = count === 1 ? 204 : 400

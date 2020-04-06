@@ -1,8 +1,15 @@
 const WebTorrent = require('webtorrent')
 
 const { Download } = require('./models')
+const { addFileToLibrary } = require('./routes/library')
 
 const client = new WebTorrent()
+
+// handle torrents completion
+client.on('torrent', (torrent) => {
+  torrent.on('done', onTorrentDone)
+})
+
 restoreTorrents()
 
 async function restoreTorrents () {
@@ -14,6 +21,17 @@ async function restoreTorrents () {
 
   for (const download of downloads) {
     client.add(download.magnetURI, opts)
+  }
+}
+
+async function onTorrentDone () {
+  // this = torrent
+  await Download.update({ done: true }, {
+    where: { infoHash: this.infoHash }
+  })
+
+  for (const file of this.files) {
+    addFileToLibrary(file.path)
   }
 }
 
