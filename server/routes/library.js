@@ -5,6 +5,7 @@ const mime = require('mime-types')
 const ptt = require('parse-torrent-title')
 const path = require('path')
 const sendFile = require('koa-send')
+const { Op } = require('sequelize')
 
 const { Episode, MediaFile, Movie } = require('../models')
 
@@ -96,7 +97,13 @@ async function scanLibrary (ctx = {}) {
 }
 
 async function listLibrary (ctx) {
-  const library = await Movie.findAll({ order: [[ 'title', 'ASC' ]] })
+  const where = {}
+
+  if (ctx.request.query.search) {
+    where.title = { [Op.like]: `%${ctx.request.query.search}%` }
+  }
+
+  const library = await Movie.findAll({ where, order: [[ 'title', 'ASC' ]] })
 
   ctx.body = library
 }
