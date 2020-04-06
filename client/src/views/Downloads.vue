@@ -32,8 +32,8 @@
         <div>
           {{ parseInt(torrent.progress * 100) }}% -
           {{ torrent.timeRemaining | time }} -
-          <span class="mdi mdi-download-network" /> {{ torrent.downloadSpeed }} B/s
-          <span class="mdi mdi-upload-network" /> {{ torrent.uploadSpeed }} B/s
+          <span class="mdi mdi-download-network" /> {{ torrent.downloadSpeed | bytes }} /s
+          <span class="mdi mdi-upload-network" /> {{ torrent.uploadSpeed | bytes }} /s
         </div>
       </div>
 
@@ -55,10 +55,16 @@ export default {
   name: 'Downloads',
   data: () => ({
     magnetURI: null,
+    intervalHandle: null,
     torrents: []
   }),
   mounted () {
     this.fetchDownloads()
+
+    this.intervalHandle = setInterval(this.fetchDownloads, 5000)
+  },
+  beforeDestroy () {
+    clearInterval(this.intervalHandle)
   },
   methods: {
     async addTorrent () {
