@@ -24,6 +24,7 @@ export default {
     menu: [
       { to: 'home', icon: 'mdi-sofa' },
       { to: 'downloads', icon: 'mdi-download' },
+      { to: 'search', icon: 'mdi-magnify' },
       { to: 'settings', icon: 'mdi-cog' }
     ]
   })
