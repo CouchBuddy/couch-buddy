@@ -7,7 +7,7 @@
       <div
         v-for="item in library"
         :key="item.id"
-        class="relative flex justify-center items-center cursor-pointer bg-red-700 movie-card"
+        class="relative flex justify-center items-center overflow-hidden cursor-pointer bg-red-700 movie-card"
       >
         <img
           v-if="item.poster"
