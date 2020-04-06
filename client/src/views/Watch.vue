@@ -82,10 +82,13 @@ export default {
     error: null,
     movie: {},
     overlayTimeout: null,
+    resourcePath: null,
+    resourceId: null,
     showOverlay: true,
     source: null,
     sourceSubs: null,
     subtitles: [],
+    updateWatchedEvery: 0.1,
     watchId: null
   }),
   computed: {
@@ -94,12 +97,12 @@ export default {
   async mounted () {
     this.watchId = this.$route.params.id
 
-    const resourcePath = this.watchId[0] === 'e' ? 'episodes' : 'library'
-    const resourceId = this.watchId.slice(1)
+    this.resourcePath = this.watchId[0] === 'e' ? 'episodes' : 'library'
+    this.resourceId = this.watchId.slice(1)
 
     if (this.watchId[0] !== 't') {
       // get movie info
-      this.movie = (await client.get(`/api/${resourcePath}/${resourceId}`)).data
+      this.movie = (await client.get(`/api/${this.resourcePath}/${this.resourceId}`)).data
 
       // get available subtitles
       this.subtitles = (await client.get(`/api/watch/${this.watchId}/subtitles`)).data
@@ -108,6 +111,13 @@ export default {
 
     this.source = `${this.serverUrl}/api/watch/${this.watchId}`
     this.sourceSubs = `${this.serverUrl}/api/subtitles`
+
+    this.$refs.video.addEventListener('timeupdate', this.onTimeUpdate)
+    this.$refs.video.addEventListener('loadedmetadata', this.onLoadMetadata)
+  },
+  beforeDestroy () {
+    this.$refs.video.removeEventListener('timeupdate', this.onTimeUpdate)
+    this.$refs.video.removeEventListener('loadedmetadata', this.onLoadMetadata)
   },
   methods: {
     togglePlay () {
@@ -129,6 +139,20 @@ export default {
     },
     onVideoError () {
       this.error = this.$refs.video.error.message
+    },
+    onLoadMetadata () {
+      // compute the hysteresis threshold (%) for updating Movie `watched` prop
+      this.updateWatchedEvery = 10 / this.$refs.video.duration
+    },
+    async onTimeUpdate () {
+      const watched = this.$refs.video.currentTime / this.$refs.video.duration
+
+      if (watched > this.movie.watched + this.updateWatchedEvery) {
+        this.movie.watched = watched
+        await client.patch(`/api/${this.resourcePath}/${this.resourceId}`, {
+          watched
+        })
+      }
     },
     setSubtitles (id) {
       for (const track of this.$refs.video.textTracks) {

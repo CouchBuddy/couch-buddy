@@ -122,7 +122,10 @@ async function updateLibrary (ctx) {
 
   ctx.assert(movieId > 0, 404)
 
-  const [ count ] = await Movie.update(ctx.request.body, { where: { id: movieId } })
+  const [ count ] = await Movie.update(ctx.request.body, {
+    where: { id: movieId },
+    attributes: Object.keys(ctx.request.body)
+  })
 
   ctx.status = count === 1 ? 204 : 400
 }
