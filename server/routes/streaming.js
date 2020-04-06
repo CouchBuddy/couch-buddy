@@ -67,7 +67,7 @@ async function watch (ctx) {
   let videoStream
 
   // Need transcoding
-  if (!SUPPORTED_MIMETYPES.includes(mimeType)) {
+  if (!isTorrent && !SUPPORTED_MIMETYPES.includes(mimeType)) {
     mimeType = 'video/mp4'
     range = null
 
