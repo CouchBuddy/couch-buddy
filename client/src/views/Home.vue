@@ -27,6 +27,7 @@
           </div>
 
           <button
+            v-if="item.type === 'movie'"
             class="px-4 text-6xl rounded-full"
             @click="playMovie(item)"
           >
@@ -43,7 +44,7 @@
           </router-link>
 
           <div
-            v-if="type === 'movie'"
+            v-if="item.type === 'movie'"
             class="h-1 mt-2 self-start bg-red-700"
             :style="{ width: `${Math.min(item.watched || 0, 100)}%` }"
           />
