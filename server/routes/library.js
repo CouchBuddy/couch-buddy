@@ -235,6 +235,18 @@ function searchVideoFiles (dir) {
   })
 }
 
+async function updateEpisode (ctx) {
+  const episodeId = parseInt(ctx.params.id)
+
+  ctx.assert(episodeId > 0, 404)
+
+  const [ count ] = await Episode.update(ctx.request.body, {
+    where: { id: episodeId }
+  })
+
+  ctx.status = count === 1 ? 204 : 400
+}
+
 function takeScreenshot (file) {
   const folder = path.dirname(file)
   const folderRelative = path.relative(process.env.MEDIA_BASE_DIR, folder)
@@ -258,6 +270,7 @@ module.exports = {
   listEpisodes,
   getEpisode,
   getEpisodeThumbnail,
+  updateEpisode,
 
   addFileToLibrary,
   searchVideoFiles,

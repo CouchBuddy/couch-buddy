@@ -150,7 +150,7 @@ export default {
       if (watched > this.movie.watched + this.updateWatchedEvery) {
         this.movie.watched = watched
         await client.patch(`/api/${this.resourcePath}/${this.resourceId}`, {
-          watched
+          watched: watched * 100
         })
       }
     },
