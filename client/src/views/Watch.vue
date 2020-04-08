@@ -142,15 +142,17 @@ export default {
     },
     onLoadMetadata () {
       // compute the hysteresis threshold (%) for updating Movie `watched` prop
-      this.updateWatchedEvery = 10 / this.$refs.video.duration
+      if (this.$refs.video.duration > 60) {
+        this.updateWatchedEvery = 10 / this.$refs.video.duration
+      }
     },
     async onTimeUpdate () {
-      const watched = this.$refs.video.currentTime / this.$refs.video.duration
+      const watched = (this.$refs.video.currentTime / this.$refs.video.duration) * 100
 
       if (watched > this.movie.watched + this.updateWatchedEvery) {
         this.movie.watched = watched
         await client.patch(`/api/${this.resourcePath}/${this.resourceId}`, {
-          watched: watched * 100
+          watched
         })
       }
     },
