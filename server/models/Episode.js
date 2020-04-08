@@ -20,6 +20,10 @@ module.exports = (sequelize) => {
     plot: {
       type: Sequelize.TEXT
     },
+    poster: {
+      type: Sequelize.TEXT,
+      validate: { isUrl: true }
+    },
     ratingImdb: {
       type: Sequelize.FLOAT,
       validate: { min: 0, max: 10 }

@@ -9,23 +9,23 @@
       :items="continueWatching"
     >
       <img
-        :src="item.type === 'movie' ? item.poster : `${serverUrl}/api/episodes/${item.id}/thumbnail`"
+        :src="item.poster"
         class="w-full h-full object-cover"
       >
 
+      <small
+        v-if="item.season && item.episode"
+        class="absolute top-0 right-0 m-4 rounded"
+        style="padding: 1px 3px; background: rgba(40,40,40,.8)"
+      >
+        S{{ item.season }}E{{ item.episode }}
+      </small>
+
       <div
-        class="absolute w-full text-center bottom-0 pb-1"
-        style="background: linear-gradient(to top, #0000009e, transparent)"
+        class="absolute w-full text-xl text-center bottom-0 pb-1"
+        style="background: linear-gradient(to top, #000000f7, transparent)"
       >
         {{ item.title }}
-
-        <small
-          v-if="item.season && item.episode"
-          class="rounded"
-          style="padding: 1px 3px; background: rgba(40,40,40,.8)"
-        >
-          S{{ item.season }}E{{ item.episode }}
-        </small>
       </div>
 
       <div
