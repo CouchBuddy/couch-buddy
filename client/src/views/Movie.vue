@@ -31,7 +31,7 @@
           <button
             :disabled="!nextEpisode"
             class="px-4 py-2 border-2 border-white"
-            @click="playMovie(movie)"
+            @click="playMovie(nextEpisode)"
           >
             <span class="mdi mdi-play mr-2" />
             Watch
