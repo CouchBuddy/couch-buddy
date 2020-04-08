@@ -93,8 +93,7 @@
 </template>
 
 <script>
-/* global chrome, cast */
-import { mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 
 import client from '@/client'
 
@@ -120,10 +119,13 @@ export default {
     }
   },
   methods: {
+    ...mapActions([ 'castMovie' ]),
     async fetchEpisodes (seriesId) {
       const response = await client.get(`/api/library/${this.movieId}/episodes`)
 
       this.nextEpisode = response.data.find(e => e.watched < 95)
+      // Dirty workaround to pass the series poster to vuex during movie casting
+      this.nextEpisode.poster = this.movie.poster
 
       // Group episodes by season as object:
       //   { '1': [ {}, ... ] }
@@ -151,42 +153,6 @@ export default {
       } else {
         this.$router.push({ name: 'watch', params: { id: this.getWatchId(movie) } })
       }
-    },
-    async castMovie (movie) {
-      const castSession = cast.framework.CastContext.getInstance().getCurrentSession()
-
-      const url = `${this.serverUrl}/api/watch/${this.getWatchId(movie)}`
-      // const mimeType = `video/${movie.container}`
-
-      let metadata
-      if (movie.type === 'movie') {
-        metadata = new chrome.cast.media.MovieMediaMetadata()
-        metadata.title = movie.title
-        metadata.releaseDate = `${movie.year}`
-        metadata.images = [
-          new chrome.cast.Image(movie.poster)
-        ]
-      } else {
-        metadata = new chrome.cast.media.TvShowMediaMetadata()
-        metadata.seriesTitle = movie.title
-        metadata.season = movie.season
-        metadata.episode = movie.episode
-        metadata.originalAirdate = `${movie.year}`
-        metadata.images = [
-          // the poster of the main movie, not the thumb of the episode
-          new chrome.cast.Image(this.movie.poster)
-        ]
-      }
-
-      const mediaInfo = new chrome.cast.media.MediaInfo(url)
-      // mediaInfo.contentId = url
-      mediaInfo.metadata = metadata
-
-      const request = new chrome.cast.media.LoadRequest(mediaInfo)
-
-      castSession.loadMedia(request, null, err => {
-        console.warn('Error while casting', err)
-      })
     },
     getWatchId (movie) {
       return `${movie.type === 'movie' ? 'm' : 'e'}${movie.id}`

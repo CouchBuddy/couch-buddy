@@ -58,8 +58,7 @@
 </template>
 
 <script>
-/* global chrome, cast */
-import { mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 
 import client from '@/client'
 
@@ -78,26 +77,17 @@ export default {
     this.library = response.data
   },
   methods: {
+    ...mapActions([ 'castMovie' ]),
     playMovie (movie) {
+      if (this.movie.type !== 'movies') {
+        console.error('Can\'t play a Movie of type series')
+        return
+      }
+
       if (this.isCastConnected) {
         this.castMovie(movie)
       } else {
         this.$router.push({ name: 'watch', params: { id: this.getWatchId(movie) } })
-      }
-    },
-    async castMovie (movie) {
-      const castSession = cast.framework.CastContext.getInstance().getCurrentSession()
-
-      const url = `${this.serverUrl}/api/watch/${this.getWatchId(movie)}`
-      const mimeType = `video/${movie.container}`
-
-      const mediaInfo = new chrome.cast.media.MediaInfo(url, mimeType)
-      const request = new chrome.cast.media.LoadRequest(mediaInfo)
-
-      try {
-        await castSession.loadMedia(request)
-      } catch (e) {
-        console.error(e, url, mimeType)
       }
     },
     getWatchId (movie) {

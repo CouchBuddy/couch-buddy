@@ -29,7 +29,7 @@
           <div class="h-1 mx-2 mt-1 bg-gray-900">
             <div
               class="h-full bg-red-700"
-              :style="{ width: `${mediaStatus.currentTime / mediaStatus.media.duration * 100}%` }"
+              :style="{ width: `${latestCurrentTime / mediaStatus.media.duration * 100}%` }"
             />
           </div>
         </div>
@@ -66,16 +66,22 @@
 
 <script>
 /* global cast, chrome */
-import { mapMutations } from 'vuex'
+import { mapMutations, mapState } from 'vuex'
+
+import client from '@/client'
 
 export default {
   data: () => ({
     anyDeviceAvailable: false,
     isCastLoaded: false,
     controller: null,
+    latestCurrentTime: 0,
     mediaStatus: null,
     player: null
   }),
+  computed: {
+    ...mapState([ 'castingMovie' ])
+  },
   created () {
     if (window.cast) {
       this.isCastLoaded = !!cast.framework
@@ -124,6 +130,11 @@ export default {
         cast.framework.RemotePlayerEventType.MEDIA_INFO_CHANGED,
         this.onRemotePlayerChange
       )
+
+      this.controller.addEventListener(
+        cast.framework.RemotePlayerEventType.CURRENT_TIME_CHANGED,
+        this.onRemotePlayerChange
+      )
     },
     castConnectionListener (event) {
       switch (event.sessionState) {
@@ -140,11 +151,27 @@ export default {
     castStateListener (event) {
       this.anyDeviceAvailable = event.castState !== cast.framework.CastState.NO_DEVICES_AVAILABLE
     },
-    onRemotePlayerChange (event) {
-      const session = cast.framework.CastContext.getInstance().getCurrentSession()
-      if (!session) { return }
+    async onRemotePlayerChange (event) {
+      switch (event.type) {
+        case cast.framework.RemotePlayerEventType.MEDIA_INFO_CHANGED:
+          this.mediaStatus = cast.framework.CastContext
+            .getInstance()
+            .getCurrentSession()
+            .getMediaSession()
+          break
 
-      this.mediaStatus = session.getMediaSession()
+        case cast.framework.RemotePlayerEventType.CURRENT_TIME_CHANGED:
+          if (event.value > this.latestCurrentTime + 10) {
+            this.latestCurrentTime = event.value
+
+            const resourcePath = this.castingMovie.type === 'movie' ? 'library' : 'episodes'
+
+            await client.patch(`/api/${resourcePath}/${this.castingMovie.id}`, {
+              watched: (this.latestCurrentTime / this.mediaStatus.media.duration) * 100
+            })
+          }
+          break
+      }
     }
   }
 }
