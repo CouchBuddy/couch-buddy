@@ -42,7 +42,10 @@
         tag="button"
         class="w-16 h-16 flex-shrink-0 rounded-full"
       >
-        <span class="mdi mdi-play-circle text-4xl" />
+        <span
+          class="mdi text-4xl"
+          :class="isCastConnected ? 'mdi-cast' : 'mdi-play-circle'"
+        />
       </router-link>
     </div>
   </div>

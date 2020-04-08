@@ -31,7 +31,10 @@
             class="px-4 text-6xl rounded-full"
             @click="playMovie(item)"
           >
-            <span class="mdi mdi-play-circle" />
+            <span
+              class="mdi"
+              :class="isCastConnected ? 'mdi-cast' : 'mdi-play-circle'"
+            />
           </button>
 
           <router-link

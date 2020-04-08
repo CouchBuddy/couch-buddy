@@ -33,7 +33,10 @@
             class="px-4 py-2 border-2 border-white"
             @click="playMovie(nextEpisode)"
           >
-            <span class="mdi mdi-play mr-2" />
+            <span
+              class="mdi mr-2"
+              :class="isCastConnected ? 'mdi-cast' : 'mdi-play'"
+            />
             Watch
             <span v-if="nextEpisode">
               S{{ nextEpisode.season }}E{{ nextEpisode.episode }}
