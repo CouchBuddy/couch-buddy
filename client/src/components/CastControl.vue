@@ -1,11 +1,43 @@
 <template>
   <div
     v-if="anyDeviceAvailable"
-    class="fixed bottom-0 right-0 flex items-center p-4 mb-20 mr-4 md:m-4 bg-black shadow-lg rounded-full"
+    class="fixed bottom-0 right-0 flex items-center mb-20 mr-4 md:m-4"
   >
-    <div v-if="controller && player.canPause">
+    <div
+      v-if="controller"
+      class="flex items-center h-16 mr-4 bg-black shadow-lg"
+    >
+      <template v-if="mediaStatus">
+        <img
+          :src="mediaStatus.media.metadata.images ? mediaStatus.media.metadata.images[0].url : null"
+          class="h-16 w-16 object-cover"
+        >
+
+        <div class="w-48 ml-2 text-center truncate">
+          <div class="font-bold">
+            {{ mediaStatus.media.metadata.title }}
+          </div>
+
+          <div
+            v-if="mediaStatus.media.metadata.season && mediaStatus.media.metadata.episode"
+            class="text-sm"
+          >
+            Season {{ mediaStatus.media.metadata.season }}
+            Episode{{ mediaStatus.media.metadata.episode }}
+          </div>
+
+          <div class="h-1 mx-2 mt-1 bg-gray-900">
+            <div
+              class="h-full bg-red-700"
+              :style="{ width: `${mediaStatus.currentTime / mediaStatus.media.duration * 100}%` }"
+            />
+          </div>
+        </div>
+      </template>
+
       <button
-        class="w-10 h-10 mr-2 rounded-full"
+        v-if="player.canPause"
+        class="w-10 h-10 mr-3"
         @click="controller.playOrPause()"
       >
         <span
@@ -13,11 +45,20 @@
           :class="player.isPaused ? 'mdi-play' : 'mdi-pause'"
         />
       </button>
+
+      <button
+        v-if="player.canPause"
+        class="w-10 h-10 mr-3"
+        @click="controller.playOrPause()"
+      >
+        <span class="mdi mdi-arrow-expand text-2xl" />
+      </button>
     </div>
 
-    <div class="w-6 h-6 cursor-pointer">
+    <div class="h-12 w-12 p-3 bg-black shadow-lg rounded-full">
       <google-cast-launcher
         v-if="isCastLoaded"
+        class="cursor-pointer"
       />
     </div>
   </div>
@@ -32,6 +73,7 @@ export default {
     anyDeviceAvailable: false,
     isCastLoaded: false,
     controller: null,
+    mediaStatus: null,
     player: null
   }),
   created () {
@@ -77,6 +119,11 @@ export default {
 
       this.player = new cast.framework.RemotePlayer()
       this.controller = new cast.framework.RemotePlayerController(this.player)
+
+      this.controller.addEventListener(
+        cast.framework.RemotePlayerEventType.MEDIA_INFO_CHANGED,
+        this.onRemotePlayerChange
+      )
     },
     castConnectionListener (event) {
       switch (event.sessionState) {
@@ -92,6 +139,12 @@ export default {
     },
     castStateListener (event) {
       this.anyDeviceAvailable = event.castState !== cast.framework.CastState.NO_DEVICES_AVAILABLE
+    },
+    onRemotePlayerChange (event) {
+      const session = cast.framework.CastContext.getInstance().getCurrentSession()
+      if (!session) { return }
+
+      this.mediaStatus = session.getMediaSession()
     }
   }
 }
