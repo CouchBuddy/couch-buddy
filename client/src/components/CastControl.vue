@@ -152,12 +152,17 @@ export default {
       this.anyDeviceAvailable = event.castState !== cast.framework.CastState.NO_DEVICES_AVAILABLE
     },
     async onRemotePlayerChange (event) {
+      let tmp
+
       switch (event.type) {
         case cast.framework.RemotePlayerEventType.MEDIA_INFO_CHANGED:
-          this.mediaStatus = cast.framework.CastContext
+          tmp = cast.framework.CastContext
             .getInstance()
             .getCurrentSession()
-            .getMediaSession()
+
+          if (tmp) {
+            this.mediaStatus = tmp.getMediaSession()
+          }
           break
 
         case cast.framework.RemotePlayerEventType.CURRENT_TIME_CHANGED:
