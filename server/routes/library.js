@@ -31,7 +31,7 @@ async function addFileToLibrary (fileName) {
 
   const mimeType = mime.lookup(fileName)
   if (!mimeType.startsWith('video/')) {
-    console.log('Ignoring non-video file')
+    console.log('Ignoring non-video file', fileName)
     return
   }
 

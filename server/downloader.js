@@ -1,3 +1,4 @@
+const path = require('path')
 const WebTorrent = require('webtorrent')
 
 const { Download } = require('./models')
@@ -31,7 +32,7 @@ async function onTorrentDone () {
   })
 
   for (const file of this.files) {
-    addFileToLibrary(file.path)
+    addFileToLibrary(path.relative(process.env.MEDIA_BASE_DIR, file.path))
   }
 }
 
