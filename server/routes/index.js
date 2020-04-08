@@ -19,6 +19,7 @@ router.get('/library/:id/episodes', library.listEpisodes)
 router.get('/episodes/:id', library.getEpisode)
 router.get('/episodes/:id/thumbnail', library.getEpisodeThumbnail)
 router.patch('/episodes/:id', library.updateEpisode)
+router.get('/collections/:what', library.getCollection)
 
 router.get('/watch/:id', streaming.watch)
 router.get('/watch/:wid/subtitles', streaming.listSubtitles)

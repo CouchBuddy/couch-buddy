@@ -186,6 +186,40 @@ async function findMovieInfo (ctx) {
   }
 }
 
+async function getCollection (ctx) {
+  if (ctx.params.what === 'continue-watching') {
+    // Find series where at least 1 episode has been watched
+    const seriesWatched = await Episode.findAll({
+      where: { watched: { [Op.gte]: 95 } },
+      group: [ 'movieId' ]
+    })
+
+    // now find the next episodes (if any) of the watched series
+    const nextEpisodes = await Episode.findAll({
+      where: {
+        [Op.or]: [
+          {
+            movieId: { [Op.in]: seriesWatched.map(e => e.movieId) },
+            watched: { [Op.or]: [{ [Op.lt]: 95 }, null ] }
+          },
+          { watched: { [Op.gt]: 0, [Op.lt]: 95 } }
+        ]
+      },
+      order: [[ 'season', 'ASC' ], [ 'episode', 'ASC' ]],
+      group: [ 'movieId' ]
+    })
+
+    const pendingMovies = await Movie.findAll({
+      where: { watched: { [Op.gt]: 0, [Op.lt]: 95 } }
+    })
+
+    ctx.body = [
+      ...nextEpisodes,
+      ...pendingMovies
+    ]
+  }
+}
+
 async function listEpisodes (ctx) {
   const movieId = parseInt(ctx.params.id)
   ctx.assert(movieId, 404, 'Please provide an ID in the URL')
@@ -266,6 +300,8 @@ module.exports = {
   listLibrary,
   scanLibrary,
   updateLibrary,
+
+  getCollection,
 
   listEpisodes,
   getEpisode,

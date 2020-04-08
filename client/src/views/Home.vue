@@ -1,5 +1,39 @@
 <template>
   <div>
+    <div class="mb-4 text-xl">
+      Continue watching
+    </div>
+
+    <horizontal-scroller
+      v-slot="item"
+      :items="continueWatching"
+    >
+      <img
+        :src="item.type === 'movie' ? item.poster : `${serverUrl}/api/episodes/${item.id}/thumbnail`"
+        class="w-full h-full object-cover"
+      >
+
+      <div
+        class="absolute w-full text-center bottom-0 pb-1"
+        style="background: linear-gradient(to top, #0000009e, transparent)"
+      >
+        {{ item.title }}
+
+        <small
+          v-if="item.season && item.episode"
+          class="rounded"
+          style="padding: 1px 3px; background: rgba(40,40,40,.8)"
+        >
+          S{{ item.season }}E{{ item.episode }}
+        </small>
+      </div>
+
+      <div
+        class="absolute bottom-0 h-1 bg-red-700"
+        :style="{ width: `${item.watched || 0}%` }"
+      />
+    </horizontal-scroller>
+
     <div
       class="grid gap-4 p-4"
       style="grid-auto-rows: minmax(200px, 1fr); grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));"
@@ -61,10 +95,15 @@
 import { mapActions, mapState } from 'vuex'
 
 import client from '@/client'
+import HorizontalScroller from '@/components/base/HorizontalScroller'
 
 export default {
   name: 'Home',
+  components: {
+    HorizontalScroller
+  },
   data: () => ({
+    continueWatching: [],
     library: [],
     selectedItem: null
   }),
@@ -72,9 +111,9 @@ export default {
     ...mapState([ 'isCastConnected', 'serverUrl' ])
   },
   async mounted () {
-    const response = await client.get('/api/library')
+    this.library = (await client.get('/api/library')).data
 
-    this.library = response.data
+    this.continueWatching = (await client.get('/api/collections/continue-watching')).data
   },
   methods: {
     ...mapActions([ 'castMovie' ]),
