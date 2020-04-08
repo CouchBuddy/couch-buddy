@@ -29,9 +29,9 @@
 
         <div class="flex justify-evenly mt-8 text-center">
           <button
-            :disabled="!nextEpisode"
+            :disabled="movie.type === 'series' && !nextEpisode"
             class="px-4 py-2 border-2 border-white"
-            @click="playMovie(nextEpisode)"
+            @click="playMovie()"
           >
             <span
               class="mdi mr-2"
@@ -140,7 +140,12 @@ export default {
       }
       this.episodesBySeason.sort((a, b) => a.season - b.season)
     },
-    playMovie (movie) {
+    playMovie () {
+      const movie = this.movie.type === 'series' ? this.nextEpisode : this.movie
+      if (!movie) {
+        console.error('Nothing to play')
+      }
+
       if (this.isCastConnected) {
         this.castMovie(movie)
       } else {
@@ -153,7 +158,30 @@ export default {
       const url = `${this.serverUrl}/api/watch/${this.getWatchId(movie)}`
       // const mimeType = `video/${movie.container}`
 
+      let metadata
+      if (movie.type === 'movie') {
+        metadata = new chrome.cast.media.MovieMediaMetadata()
+        metadata.title = movie.title
+        metadata.releaseDate = `${movie.year}`
+        metadata.images = [
+          new chrome.cast.Image(movie.poster)
+        ]
+      } else {
+        metadata = new chrome.cast.media.TvShowMediaMetadata()
+        metadata.seriesTitle = movie.title
+        metadata.season = movie.season
+        metadata.episode = movie.episode
+        metadata.originalAirdate = `${movie.year}`
+        metadata.images = [
+          // the poster of the main movie, not the thumb of the episode
+          new chrome.cast.Image(this.movie.poster)
+        ]
+      }
+
       const mediaInfo = new chrome.cast.media.MediaInfo(url)
+      // mediaInfo.contentId = url
+      mediaInfo.metadata = metadata
+
       const request = new chrome.cast.media.LoadRequest(mediaInfo)
 
       castSession.loadMedia(request, null, err => {
