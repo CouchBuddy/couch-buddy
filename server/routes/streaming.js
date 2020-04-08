@@ -5,7 +5,6 @@ const mime = require('mime-types')
 const sendFile = require('koa-send')
 const OS = require('opensubtitles-api')
 const srt2vtt = require('srt-to-vtt')
-// const { PassThrough } = require('stream')
 
 const SUPPORTED_MIMETYPES = [
   'video/mp4',
