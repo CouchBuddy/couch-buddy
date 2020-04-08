@@ -9,7 +9,7 @@ const srt2vtt = require('srt-to-vtt')
 
 const SUPPORTED_MIMETYPES = [
   'video/mp4',
-  'video/mkv'
+  'video/x-matroska'
 ]
 
 const torrentClient = require('../downloader')
