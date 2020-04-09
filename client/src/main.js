@@ -1,4 +1,6 @@
 import Vue from 'vue'
+import VueSK from 'vue-shortkey'
+
 import App from './App.vue'
 import router from './router'
 import store from './store'
@@ -8,6 +10,8 @@ Vue.config.productionTip = false
 
 Vue.filter('time', formatTime)
 Vue.filter('bytes', formatBytes)
+
+Vue.use(VueSK)
 
 new Vue({
   router,

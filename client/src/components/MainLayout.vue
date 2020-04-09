@@ -15,6 +15,8 @@
     >
       <span class="mdi mdi-folder-alert" />
     </div>
+
+    <shortcut-help-dialog />
   </div>
 </template>
 
@@ -23,12 +25,14 @@ import { mapState } from 'vuex'
 
 import MainNavigation from './MainNavigation'
 import CastControl from '@/components/CastControl'
+import ShortcutHelpDialog from './ShortcutHelpDialog'
 
 export default {
   name: 'MainLayout',
   components: {
     CastControl,
-    MainNavigation
+    MainNavigation,
+    ShortcutHelpDialog
   },
   computed: {
     ...mapState([ 'systemInfo' ])

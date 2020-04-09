@@ -4,10 +4,12 @@
       <router-link
         v-for="item in menu"
         :key="`menu-${item.to}`"
+        v-shortkey="item.shortkey"
         :to="{ name: item.to }"
         active-class="border-t-4 md:border-t-0 md:border-r-4"
         exact
         class="flex h-16 w-16 items-center justify-center text-4xl"
+        @shortkey.native="goTo(item)"
       >
         <span
           class="mdi"
@@ -22,12 +24,19 @@
 export default {
   data: () => ({
     menu: [
-      { to: 'home', icon: 'mdi-sofa' },
-      { to: 'downloads', icon: 'mdi-download' },
-      { to: 'search', icon: 'mdi-magnify' },
+      { to: 'home', icon: 'mdi-sofa', shortkey: [ 'ctrl', 'h' ] },
+      { to: 'downloads', icon: 'mdi-download', shortkey: [ 'ctrl', 'd' ] },
+      { to: 'search', icon: 'mdi-magnify', shortkey: [ 'ctrl', 'f' ] },
       { to: 'settings', icon: 'mdi-cog' }
     ]
-  })
+  }),
+  methods: {
+    goTo (item) {
+      if (!this.$route.matched.some(({ name }) => name === item.to)) {
+        this.$router.push({ name: item.to })
+      }
+    }
+  }
 }
 </script>
 

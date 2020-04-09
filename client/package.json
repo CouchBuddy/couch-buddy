@@ -15,6 +15,7 @@
     "tailwindcss": "^1.2.0",
     "vue": "^2.6.11",
     "vue-router": "^3.1.5",
+    "vue-shortkey": "^3.1.7",
     "vuex": "^3.1.2"
   },
   "devDependencies": {
