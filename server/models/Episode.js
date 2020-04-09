@@ -17,6 +17,9 @@ module.exports = (sequelize) => {
     firstAired: {
       type: Sequelize.TEXT
     },
+    imdbId: {
+      type: Sequelize.TEXT
+    },
     plot: {
       type: Sequelize.TEXT
     },

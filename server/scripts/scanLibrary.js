@@ -1,15 +1,36 @@
+const ArgumentParser = require('argparse').ArgumentParser
 const assert = require('assert')
 
 require('./boot')
 const { addFileToLibrary, scanLibrary } = require('../routes/library')
 
-const file = process.argv[3]
+const parser = new ArgumentParser({
+  addHelp: true,
+  description: 'Scan Library utility'
+})
 
-switch (process.argv[2]) {
+parser.addArgument('cmd', {
+  choices: [ 'add', 'scan' ]
+})
+
+parser.addArgument('file', {
+})
+
+parser.addArgument(
+  [ '--force' ],
+  {
+    help: 'Update a movie or episode info even if a file has already been indexed',
+    action: 'storeTrue'
+  }
+)
+
+const args = parser.parseArgs()
+
+switch (args.cmd) {
   case 'add':
-    assert(file, 'File argument required')
+    assert(args.file, 'File argument required')
 
-    addFileToLibrary(file).then(movie => {
+    addFileToLibrary(args.file, args.force).then(movie => {
       console.log(movie)
     })
     break
@@ -19,6 +40,6 @@ switch (process.argv[2]) {
     break
 
   default:
-    console.log('Unsupported command', process.argv[2])
+    console.log('Unsupported command', args.cmd)
     break
 }

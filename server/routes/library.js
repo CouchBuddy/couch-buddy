@@ -1,4 +1,3 @@
-const axios = require('axios')
 const ffmpeg = require('fluent-ffmpeg')
 const glob = require('glob')
 const mime = require('mime-types')
@@ -8,8 +7,9 @@ const sendFile = require('koa-send')
 const { Op } = require('sequelize')
 
 const { Episode, MediaFile, Movie } = require('../models')
+const omdb = require('../services/omdb')
 
-const OMDB_KEY = process.env.OMDB_KEY
+ptt.addHandler('part', /(?:Part|CD)[. ]?([0-9])/i, { type: 'integer' })
 
 async function scanLibrary (ctx = {}) {
   // Scan directory to search video files
@@ -23,11 +23,15 @@ async function scanLibrary (ctx = {}) {
   ctx.status = 204
 }
 
-async function addFileToLibrary (fileName) {
-  if (!fileName) {
+async function addFileToLibrary (_fileName, force = false) {
+  if (!_fileName) {
     console.error('fileName is null')
     return
   }
+
+  const fileName = path.isAbsolute(_fileName)
+    ? path.relative(process.env.MEDIA_BASE_DIR, _fileName)
+    : _fileName
 
   const mimeType = mime.lookup(fileName)
   if (!mimeType.startsWith('video/')) {
@@ -35,80 +39,107 @@ async function addFileToLibrary (fileName) {
     return
   }
 
-  // If the file has already been indexed, skip it
   const existingFile = await MediaFile.findOne({ where: { fileName } })
 
-  if (existingFile) { return }
+  if (existingFile) { console.log('File exists:', fileName) }
+
+  // If the file has already been indexed, skip it or not based on `force`
+  if (existingFile && !force) { return }
 
   // Parse filename to obtain basic info
-  const basicInfo = ptt.parse(path.basename(fileName))
+  const fileBaseName = path.basename(fileName)
+  const basicInfo = ptt.parse(fileBaseName)
 
-  const item = { ...basicInfo }
+  // Worst case scenario: ptt can't even find a title, so try to clean the filename
+  if (!basicInfo.title) {
+    basicInfo.title = fileBaseName
+      // remove extension
+      .replace(/\.[^/.]+$/, '')
+      // replace . and _ with whitespace
+      .replace(/[._]/, ' ')
+      // remove parenthesis and their content
+      .replace(/(\(.*\)|\[.*\])/, '')
+      // remove everything after a dash
+      .replace(/-.*$/, '')
+      .trim()
 
-  // Search movie info on OMDb through title
-  try {
-    const response = await axios.get('http://www.omdbapi.com/', {
-      params: {
-        t: basicInfo.title,
-        apikey: OMDB_KEY
-      }
-    })
+    // worst-worst case: filename cleaned too much, just remove the extension
+    basicInfo.title = basicInfo.title || fileBaseName.replace(/\.[^/.]+$/, '')
 
-    if (!response.data.Error) {
-      // Found info on OMDb, refactor object to match Movie/Episode model
-      for (const k in response.data) {
-        item[k.toLowerCase()] = response.data[k]
-      }
+    console.log('PTT failed, obtained title from filename', basicInfo.title)
+  }
 
-      item.imdbId = item.imdbid
-      item.ratingImdb = parseFloat(item.imdbrating)
-      item.ratingMetacritic = parseInt(item.metascore)
+  // Search movie info on OMDb
+  let item = await omdb(basicInfo)
 
-      const rt = item.ratings.find(x => x.Source === 'Rotten Tomatoes')
-      if (rt) {
-        item.ratingRottenTomatoes = parseInt(rt.Value)
-      }
-    } else {
-      // Not found on OMDb
-      console.warn(response.data.Error, basicInfo.title)
+  // If we can't find anything on OMDb, at least we have basicInfo
+  if (!item) {
+    item = basicInfo
+  }
+
+  const isEpisode = !!item.season || !!item.episode || item.type === 'series'
+  item.type = isEpisode ? 'series' : 'movie'
+
+  let mediaId
+
+  if (isEpisode) {
+    // Search if the parent series of this episode is already in the DB
+    let series = await Movie.findOne({ where: { imdbId: item.seriesID } })
+
+    if (!series) {
+      item = await omdb({ imdbId: item.seriesID })
+      series = await Movie.create(item)
     }
-  } catch (e) {
-    console.log('OMDb request failed for:', basicInfo.title)
-    console.error(e.message)
-  }
 
-  const where = {}
-  if (item.imdbid) {
-    where.imdbid = item.imdbid
+    const thumbnail = await takeScreenshot(process.env.MEDIA_BASE_DIR + fileName)
+
+    if (!existingFile) {
+      const episode = await Episode.create({
+        movieId: series.id,
+        thumbnail,
+        ...item
+      })
+      mediaId = episode.id
+    } else {
+      await Episode.update(item, { where: { id: existingFile.mediaId } })
+      mediaId = existingFile.mediaId
+    }
   } else {
-    where.title = item.title
+    // It's a movie, create it if it doesn't exist already, this handles multiple
+    // movie versions and parts (CD1, 2, ...)
+    if (!existingFile) {
+      const where = {}
+      if (item.imdbId) {
+        where.imdbId = item.imdbId
+      } else {
+        where.title = item.title
+      }
+
+      const [ movie ] = await Movie.findOrCreate({ where, defaults: item })
+      mediaId = movie.id
+    } else {
+      await Movie.update(item, { where: { id: existingFile.mediaId } })
+      mediaId = existingFile.mediaId
+    }
   }
 
-  const isSeries = !!item.season || !!item.episode || item.type === 'series'
-  item.type = isSeries ? 'series' : 'movie'
-
-  const [ movie ] = await Movie.findOrCreate({ where, defaults: item })
-  let episode
-
-  if (isSeries) {
-    const absolutePath = process.env.MEDIA_BASE_DIR + fileName
-    const thumbnail = await takeScreenshot(absolutePath)
-
-    episode = await Episode.create({
-      movieId: movie.id,
-      thumbnail,
-      ...item
+  if (!existingFile) {
+    await MediaFile.create({
+      fileName,
+      mediaId,
+      mediaType: isEpisode ? 'episode' : 'movie',
+      mimeType,
+      part: basicInfo.part
+    })
+  } else {
+    await MediaFile.update({
+      mediaId,
+      mediaType: isEpisode ? 'episode' : 'movie',
+      part: basicInfo.part
+    }, {
+      where: { id: existingFile.id }
     })
   }
-
-  await MediaFile.create({
-    fileName,
-    mediaId: isSeries ? episode.id : movie.id,
-    mediaType: isSeries ? 'episode' : 'movie',
-    mimeType
-  })
-
-  return movie
 }
 
 async function listLibrary (ctx) {
@@ -148,42 +179,10 @@ async function findMovieInfo (ctx) {
   const title = ctx.request.query.title
   const imdbId = ctx.request.query.imdbId
 
-  ctx.assert(title || imdbId, 400, 'Param `title` or `imdbDb` are required')
+  ctx.assert(title || imdbId, 400, 'Param `title` or `imdbId` are required')
 
-  const params = { apikey: OMDB_KEY }
-
-  if (imdbId) {
-    params.i = imdbId
-  } else {
-    params.t = title
-  }
-
-  try {
-    const response = await axios.get('http://www.omdbapi.com/', { params })
-
-    if (response.data.Error) {
-      ctx.body = 'null'
-    } else {
-      const item = {}
-
-      // Found info on OMDb, refactor object to match Movie/Episode model
-      for (const k in response.data) {
-        item[k.toLowerCase()] = response.data[k]
-      }
-
-      item.imdbId = item.imdbid
-      item.ratingImdb = parseFloat(item.imdbrating)
-      item.ratingMetacritic = parseInt(item.metascore)
-
-      const rt = item.ratings.find(x => x.Source === 'Rotten Tomatoes')
-      if (rt) {
-        item.ratingRottenTomatoes = parseInt(rt.Value)
-      }
-      ctx.body = item
-    }
-  } catch (e) {
-    ctx.throw(500, e.message)
-  }
+  ctx.status = 200
+  ctx.body = await omdb({ imdbId, title })
 }
 
 async function getCollection (ctx) {

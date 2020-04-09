@@ -22,6 +22,10 @@ module.exports = (sequelize) => {
       type: Sequelize.TEXT,
       validate: { is: /^[-\w.]+\/[-\w.+]+$/ },
       allowNull: false
+    },
+    part: {
+      type: Sequelize.INTEGER,
+      validate: { min: 1 }
     }
   }, {
     sequelize,

@@ -11,6 +11,7 @@
   "dependencies": {
     "@koa/cors": "^3.0.0",
     "@koa/router": "^8.0.8",
+    "argparse": "^1.0.10",
     "axios": "^0.19.2",
     "check-disk-space": "^2.1.0",
     "cli-progress": "^3.6.1",
