@@ -1,5 +1,7 @@
 const axios = require('axios')
 
+const ALLOWED_TYPES = [ 'episode', 'movie', 'series' ]
+
 /**
  * Search a movie, episode or show on OMDb. The query accepts multiple parameters,
  * but if IMDB ID is provided (`imdbId` field), the other search params are ignored.
@@ -21,6 +23,8 @@ module.exports = async function searchOmdb (search) {
       params.i = search.imdbId
     } else {
       if (search.title) { params.t = search.title }
+      if (search.year) { params.y = search.year }
+      if (ALLOWED_TYPES.includes(search.type)) { params.type = search.type }
 
       // If it's an episode, add S and E to force looking for a series' episode.
       // This helps for issue #34, series and movie with the same name

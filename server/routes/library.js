@@ -16,11 +16,15 @@ async function scanLibrary (ctx = {}) {
   const videos = await searchVideoFiles(process.env.MEDIA_BASE_DIR)
   console.log(`Found ${videos.length} video files in ${process.env.MEDIA_BASE_DIR}`)
 
+  const added = []
+
   for (const fileName of videos) {
-    addFileToLibrary(fileName)
+    if (await addFileToLibrary(fileName)) {
+      added.push(fileName)
+    }
   }
 
-  ctx.status = 204
+  ctx.body = added
 }
 
 async function addFileToLibrary (_fileName, force = false) {
@@ -41,10 +45,14 @@ async function addFileToLibrary (_fileName, force = false) {
 
   const existingFile = await MediaFile.findOne({ where: { fileName } })
 
-  if (existingFile) { console.log('File exists:', fileName) }
-
   // If the file has already been indexed, skip it or not based on `force`
-  if (existingFile && !force) { return }
+  if (existingFile) {
+    if (force) {
+      console.log('Updating existing file:', fileName)
+    } else {
+      return
+    }
+  }
 
   // Parse filename to obtain basic info
   const fileBaseName = path.basename(fileName)
@@ -77,17 +85,27 @@ async function addFileToLibrary (_fileName, force = false) {
     item = basicInfo
   }
 
-  const isEpisode = !!item.season || !!item.episode || item.type === 'series'
+  const isEpisode = !!item.season || !!item.episode || item.type === 'series' || item.type === 'episode'
   item.type = isEpisode ? 'series' : 'movie'
 
   let mediaId
 
   if (isEpisode) {
-    // Search if the parent series of this episode is already in the DB
-    let series = await Movie.findOne({ where: { imdbId: item.seriesID } })
+    // Search if the parent series of this episode is already in the DB,
+    // if not, this is the first episode of the series encountered
+    // and we need to find the series info
+    const where = { type: 'series' }
+
+    if (item.seriesID) {
+      where.imdbId = item.seriesID
+    } else {
+      where.title = item.title
+    }
+
+    let series = await Movie.findOne({ where })
 
     if (!series) {
-      item = await omdb({ imdbId: item.seriesID })
+      item = await omdb(where)
       series = await Movie.create(item)
     }
 
@@ -140,6 +158,8 @@ async function addFileToLibrary (_fileName, force = false) {
       where: { id: existingFile.id }
     })
   }
+
+  return true
 }
 
 async function listLibrary (ctx) {
