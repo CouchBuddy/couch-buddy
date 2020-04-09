@@ -11,6 +11,7 @@
       <img
         :src="item.poster"
         class="w-full h-full object-cover"
+        @click="$router.push({ name: 'movie', params: { id: item.id } })"
       >
 
       <small

@@ -1,7 +1,9 @@
 <template>
   <div
+    v-shortkey="[ 'space' ]"
     class="relative w-screen h-screen overflow-hidden"
     @mousemove="onMouseMove"
+    @shortkey="togglePlay()"
   >
     <div class="video-container">
       <video
