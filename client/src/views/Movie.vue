@@ -142,16 +142,23 @@ export default {
       }
       this.episodesBySeason.sort((a, b) => a.season - b.season)
     },
-    playMovie () {
-      const movie = this.movie.type === 'series' ? this.nextEpisode : this.movie
-      if (!movie) {
+    playMovie (episode) {
+      let toPlay
+
+      if (episode) {
+        toPlay = episode
+      } else {
+        toPlay = this.movie.type === 'series' ? this.nextEpisode : this.movie
+      }
+
+      if (!toPlay) {
         console.error('Nothing to play')
       }
 
       if (this.isCastConnected) {
-        this.castMovie(movie)
+        this.castMovie(toPlay)
       } else {
-        this.$router.push({ name: 'watch', params: { id: this.getWatchId(movie) } })
+        this.$router.push({ name: 'watch', params: { id: this.getWatchId(toPlay) } })
       }
     },
     getWatchId (movie) {
