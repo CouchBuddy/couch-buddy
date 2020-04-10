@@ -34,6 +34,7 @@
           {{ torrent.timeRemaining / 1000 | time(true) }} -
           <span class="mdi mdi-download-network" /> {{ torrent.downloadSpeed | bytes }} /s
           <span class="mdi mdi-upload-network" /> {{ torrent.uploadSpeed | bytes }} /s
+          {{ torrent.numPeers }}
         </div>
       </div>
 
@@ -52,7 +53,9 @@
 </template>
 
 <script>
-import client from '@/client'
+import { mapState } from 'vuex'
+
+import client, { socket } from '@/client'
 
 export default {
   name: 'Downloads',
@@ -61,13 +64,23 @@ export default {
     intervalHandle: null,
     torrents: []
   }),
-  mounted () {
-    this.fetchDownloads()
+  computed: {
+    ...mapState([ 'isCastConnected' ])
+  },
+  async mounted () {
+    await this.fetchDownloads()
 
-    this.intervalHandle = setInterval(this.fetchDownloads, 5000)
+    // this.intervalHandle = setInterval(this.fetchDownloads, 5000)
+    socket.bind('torrent:download', torrent => {
+      const i = this.torrents.findIndex(t => t.infoHash === torrent.infoHash)
+
+      if (i >= 0) {
+        this.$set(this.torrents, i, torrent)
+      }
+    })
   },
   beforeDestroy () {
-    clearInterval(this.intervalHandle)
+    // clearInterval(this.intervalHandle)
   },
   methods: {
     async addTorrent () {

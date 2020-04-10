@@ -10,10 +10,16 @@ const config = {
   mediaDir: process.env.MEDIA_DIR,
   omdbApiKey: process.env.OMDB_API_KEY,
   openSubtitlesUa: process.env.OPEN_SUBTITLES_UA,
+
   /**
    * Server port
    */
-  port: parseInt(process.env.PORT) || 3000
+  port: parseInt(process.env.PORT) || 3000,
+
+  /**
+   * WebSocket port
+   */
+  wsPort: parseInt(process.env.WS_PORT) || 3001
 }
 
 // Check configuration correctness

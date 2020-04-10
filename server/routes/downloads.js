@@ -1,4 +1,4 @@
-const client = require('../services/downloader')
+const { client, serializeTorrent } = require('../services/downloader')
 const config = require('../config')
 const { Download } = require('../models')
 
@@ -20,19 +20,6 @@ async function addTorrent (ctx) {
 
 async function listTorrents (ctx) {
   ctx.body = client.torrents.map(serializeTorrent)
-}
-
-function serializeTorrent (t) {
-  return {
-    infoHash: t.infoHash,
-    name: t.name,
-    timeRemaining: t.timeRemaining,
-    progress: t.progress,
-    downloadSpeed: t.downloadSpeed,
-    uploadSpeed: t.uploadSpeed,
-    paused: t.paused,
-    done: t.done
-  }
 }
 
 module.exports = {

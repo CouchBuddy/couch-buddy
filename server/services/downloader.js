@@ -1,15 +1,18 @@
+const debounce = require('debounce')
 const path = require('path')
 const WebTorrent = require('webtorrent')
 
 const config = require('../config')
 const { Download } = require('../models')
-const { addFileToLibrary } = require('../services/library')
+const { addFileToLibrary } = require('./library')
+const { wss } = require('./web-socket')
 
 const client = new WebTorrent()
 
 // handle torrents completion
 client.on('torrent', (torrent) => {
   torrent.on('done', onTorrentDone)
+  torrent.on('download', debounce(onTorrentDownload))
 })
 
 restoreTorrents()
@@ -37,4 +40,30 @@ async function onTorrentDone () {
   }
 }
 
-module.exports = client
+function onTorrentDownload () {
+  for (const ws of wss.clients) {
+    ws.send(JSON.stringify({
+      event: 'torrent:download',
+      data: serializeTorrent(this)
+    }))
+  }
+}
+
+function serializeTorrent (t) {
+  return {
+    infoHash: t.infoHash,
+    name: t.name,
+    timeRemaining: t.timeRemaining,
+    progress: t.progress,
+    downloadSpeed: t.downloadSpeed,
+    uploadSpeed: t.uploadSpeed,
+    paused: t.paused,
+    done: t.done,
+    numPeers: t.numPeers
+  }
+}
+
+module.exports = {
+  client,
+  serializeTorrent
+}
