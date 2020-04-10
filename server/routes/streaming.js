@@ -12,10 +12,20 @@ const { Episode, MediaFile, Movie, SubtitlesFile } = require('../models')
 const getSubLangID = require('../utils/openSubtitlesLangs')
 
 const SUPPORTED_EXTENSIONS = [ 'mp4', 'mkv', 'avi' ]
-const SUPPORTED_MIMETYPES = [
-  'video/mp4',
-  'video/x-matroska'
-]
+// const SUPPORTED_MIMETYPES = [
+//   'video/mp4',
+//   'video/x-matroska'
+// ]
+const SUPPORTED_CODECS = {
+  chrome: {
+    audio: [ 'aac', 'ac3', 'mp3', 'vorbis', 'opus' ],
+    video: [ 'h264', 'vp8', 'vp9' ] // msmpeg4v3, mpeg4
+  },
+  chromeCast: {
+    audio: [ 'aac', 'ac3', 'mp3', 'vorbis', 'opus' ],
+    video: [ 'h264', 'vp8' ]
+  }
+}
 
 const OpenSubtitles = new OS(config.openSubtitlesUa)
 
@@ -63,28 +73,33 @@ async function watch (ctx) {
   let range = ctx.request.get('range')
   let mimeType = mime.lookup(isTorrent ? torrentFile.path : path)
 
+  const metadata = await getVideoMetadata(path)
+  const isSupported = { audio: false, video: false }
+
+  for (const stream of metadata.streams) {
+    if (SUPPORTED_CODECS.chrome[stream.codec_type]) {
+      isSupported[stream.codec_type] =
+        SUPPORTED_CODECS.chrome[stream.codec_type].includes(stream.codec_name)
+    } else {
+      isSupported[stream.codec_type] = true
+    }
+  }
+
   // Stream that will be sent as response
   let videoStream
 
   // Need transcoding
-  if (!isTorrent && !SUPPORTED_MIMETYPES.includes(mimeType)) {
+  if (!isTorrent && (!isSupported.audio || !isSupported.video)) {
+    console.log('transcoding')
     mimeType = 'video/mp4'
     range = null
 
     videoStream = require('stream').PassThrough()
 
-    const metadata = await getVideoMetadata(path)
-    console.log(`Video dimension: ${metadata.width}x${metadata.height}`)
-
     ffmpeg(path)
-      .withAudioCodec('aac')
+      .withVideoCodec(isSupported.video ? 'copy' : 'libx264')
+      .withAudioCodec(isSupported.audio ? 'copy' : 'aac')
       .format('mp4')
-      .on('end', () => {
-        console.log('convertion done')
-      })
-      .on('progress', (info) => {
-        console.log('progress ', info.timemark)
-      })
       .on('error', (err) => {
         console.log('FFMPEG error:', err)
       })
@@ -250,13 +265,7 @@ function getVideoMetadata (path) {
     ffmpeg.ffprobe(path, (err, metadata) => {
       if (err) { return reject(err) }
 
-      const video = metadata.streams.find(s => s.codec_type === 'video')
-
-      if (video) {
-        resolve(video)
-      } else {
-        return reject(new Error('no video stream'))
-      }
+      resolve(metadata)
     })
   })
 }
