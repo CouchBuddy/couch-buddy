@@ -39,7 +39,7 @@ async function main () {
 
 if (require.main === module) {
   (async function () {
-    await main(await require('./boot'))
+    await main(await require('../scripts/boot'))
     process.exit(0)
   })()
 }

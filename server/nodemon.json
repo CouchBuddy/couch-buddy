@@ -1,4 +1,4 @@
 {
   "ext": "js",
-  "ignore": [ "scripts" ]
+  "ignore": [ "scripts", "tests" ]
 }
