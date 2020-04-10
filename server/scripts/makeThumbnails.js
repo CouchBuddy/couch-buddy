@@ -1,3 +1,4 @@
+const config = require('../config')
 const { Episode, MediaFile } = require('../models')
 const { takeScreenshot } = require('../routes/library')
 
@@ -7,7 +8,7 @@ async function main ({ bar }) {
 
   for (const episode of episodes) {
     const media = await MediaFile.findOne({ where: { mediaType: 'episode', mediaId: episode.id } })
-    episode.thumbnail = await takeScreenshot(process.env.MEDIA_BASE_DIR + media.fileName)
+    episode.thumbnail = await takeScreenshot(config.mediaDir + media.fileName)
     await episode.save()
     bar.increment()
   }

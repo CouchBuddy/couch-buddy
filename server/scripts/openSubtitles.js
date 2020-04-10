@@ -1,7 +1,9 @@
-require('./boot')
 const OS = require('opensubtitles-api')
 
-const OpenSubtitles = new OS(process.env.OPENSUBTITLES_UA)
+require('./boot')
+const config = require('../config')
+
+const OpenSubtitles = new OS(config.openSubtitlesUa)
 
 OpenSubtitles.api.GetSubLanguages()
   .then(console.log)

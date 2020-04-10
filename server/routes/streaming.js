@@ -6,17 +6,18 @@ const sendFile = require('koa-send')
 const OS = require('opensubtitles-api')
 const srt2vtt = require('srt-to-vtt')
 
-const SUPPORTED_MIMETYPES = [
-  'video/mp4',
-  'video/x-matroska'
-]
-
+const config = require('../config')
 const torrentClient = require('../downloader')
 const { Episode, MediaFile, Movie, SubtitlesFile } = require('../models')
 const getSubLangID = require('../utils/openSubtitlesLangs')
 
 const SUPPORTED_EXTENSIONS = [ 'mp4', 'mkv', 'avi' ]
-const OpenSubtitles = new OS(process.env.OPENSUBTITLES_UA)
+const SUPPORTED_MIMETYPES = [
+  'video/mp4',
+  'video/x-matroska'
+]
+
+const OpenSubtitles = new OS(config.openSubtitlesUa)
 
 async function watch (ctx) {
   ctx.assert(/^(e|m|t)[a-f0-9]+$/.test(ctx.params.id), 400, 'Invalid ID format')
@@ -50,7 +51,7 @@ async function watch (ctx) {
   let stat
 
   if (!isTorrent) {
-    path = process.env.MEDIA_BASE_DIR + mediaFile.fileName
+    path = config.mediaDir + mediaFile.fileName
     try {
       stat = fs.statSync(path)
     } catch (e) {
@@ -159,7 +160,7 @@ async function getSubtitles (ctx) {
 
   ctx.assert(subtitles, 404)
 
-  await sendFile(ctx, subtitles.fileName, { root: process.env.MEDIA_BASE_DIR })
+  await sendFile(ctx, subtitles.fileName, { root: config.mediaDir })
 }
 
 async function downloadSubtitles (ctx) {
@@ -189,7 +190,7 @@ async function downloadSubtitles (ctx) {
   // Search subtitles using movie hash
   let result = await OpenSubtitles.search({
     sublanguageid: sublanguageId,
-    path: process.env.MEDIA_BASE_DIR + mediaFile.fileName
+    path: config.mediaDir + mediaFile.fileName
   })
 
   // Search again using only IMDB ID
@@ -234,7 +235,7 @@ async function downloadSubtitles (ctx) {
   if (!isVtt) {
     stream = stream.pipe(srt2vtt())
   }
-  await stream.pipe(fs.createWriteStream(process.env.MEDIA_BASE_DIR + fileName))
+  await stream.pipe(fs.createWriteStream(config.mediaDir + fileName))
 
   ctx.body = await SubtitlesFile.create({
     fileName,

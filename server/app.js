@@ -4,8 +4,8 @@ const koaMount = require('koa-mount')
 const koaStatic = require('koa-static')
 const koaCors = require('@koa/cors')
 
-// load env vars from .env file
-require('dotenv').config()
+// Initialize config
+const config = require('./config')
 
 // Initialize DB
 require('./models')
@@ -31,7 +31,6 @@ const router = require('./routes')
 app.use(koaMount('/api', router.routes()))
 app.use(koaMount('/api', router.allowedMethods()))
 
-const PORT = process.env.PORT || 3000
-app.listen(PORT, async () => {
-  console.log(`Server running on port ${PORT}`)
+app.listen(config.port, async () => {
+  console.log(`Server running on port ${config.port}`)
 })

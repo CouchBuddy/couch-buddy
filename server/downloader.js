@@ -1,6 +1,7 @@
 const path = require('path')
 const WebTorrent = require('webtorrent')
 
+const config = require('./config')
 const { Download } = require('./models')
 const { addFileToLibrary } = require('./routes/library')
 
@@ -18,7 +19,7 @@ async function restoreTorrents () {
     where: { done: false }
   })
 
-  const opts = { path: process.env.MEDIA_BASE_DIR }
+  const opts = { path: config.mediaDir }
 
   for (const download of downloads) {
     client.add(download.magnetURI, opts)
@@ -32,7 +33,7 @@ async function onTorrentDone () {
   })
 
   for (const file of this.files) {
-    addFileToLibrary(path.relative(process.env.MEDIA_BASE_DIR, file.path))
+    addFileToLibrary(path.relative(config.mediaDir, file.path))
   }
 }
 

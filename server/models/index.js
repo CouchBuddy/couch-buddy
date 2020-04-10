@@ -2,9 +2,11 @@ const glob = require('glob')
 const path = require('path')
 const Sequelize = require('sequelize')
 
+const config = require('../config')
+
 const sequelize = new Sequelize({
   dialect: 'sqlite',
-  storage: process.env.DB_SQLITE_PATH,
+  storage: config.dbSqlitePath,
   logging: false
 })
 

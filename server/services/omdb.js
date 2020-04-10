@@ -1,5 +1,7 @@
 const axios = require('axios')
 
+const config = require('../config')
+
 const ALLOWED_TYPES = [ 'episode', 'movie', 'series' ]
 
 /**
@@ -15,7 +17,7 @@ module.exports = async function searchOmdb (search) {
 
   try {
     const params = {
-      apikey: process.env.OMDB_KEY
+      apikey: config.omdbApiKey
     }
 
     // If the IMDB ID is provided, it has precedence over anything else

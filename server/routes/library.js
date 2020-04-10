@@ -6,6 +6,7 @@ const path = require('path')
 const sendFile = require('koa-send')
 const { Op } = require('sequelize')
 
+const config = require('../config')
 const { Episode, MediaFile, Movie } = require('../models')
 const omdb = require('../services/omdb')
 
@@ -13,8 +14,8 @@ ptt.addHandler('part', /(?:Part|CD)[. ]?([0-9])/i, { type: 'integer' })
 
 async function scanLibrary (ctx = {}) {
   // Scan directory to search video files
-  const videos = await searchVideoFiles(process.env.MEDIA_BASE_DIR)
-  console.log(`Found ${videos.length} video files in ${process.env.MEDIA_BASE_DIR}`)
+  const videos = await searchVideoFiles(config.mediaDir)
+  console.log(`Found ${videos.length} video files in ${config.mediaDir}`)
 
   const added = []
 
@@ -34,7 +35,7 @@ async function addFileToLibrary (_fileName, force = false) {
   }
 
   const fileName = path.isAbsolute(_fileName)
-    ? path.relative(process.env.MEDIA_BASE_DIR, _fileName)
+    ? path.relative(config.mediaDir, _fileName)
     : _fileName
 
   const mimeType = mime.lookup(fileName)
@@ -109,7 +110,7 @@ async function addFileToLibrary (_fileName, force = false) {
       series = await Movie.create(item)
     }
 
-    const thumbnail = await takeScreenshot(process.env.MEDIA_BASE_DIR + fileName)
+    const thumbnail = await takeScreenshot(config.mediaDir + fileName)
 
     if (!existingFile) {
       const episode = await Episode.create({
@@ -266,7 +267,7 @@ async function getEpisodeThumbnail (ctx) {
 
   ctx.assert(episode, 404)
 
-  await sendFile(ctx, episode.thumbnail, { root: process.env.MEDIA_BASE_DIR })
+  await sendFile(ctx, episode.thumbnail, { root: config.mediaDir })
 }
 
 function searchVideoFiles (dir) {
@@ -302,7 +303,7 @@ async function updateEpisode (ctx) {
 
 function takeScreenshot (file) {
   const folder = path.dirname(file)
-  const folderRelative = path.relative(process.env.MEDIA_BASE_DIR, folder)
+  const folderRelative = path.relative(config.mediaDir, folder)
 
   return new Promise((resolve) => {
     ffmpeg(file)

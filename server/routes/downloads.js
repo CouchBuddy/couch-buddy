@@ -1,3 +1,4 @@
+const config = require('../config')
 const client = require('../downloader')
 const { Download } = require('../models')
 
@@ -5,7 +6,7 @@ async function addTorrent (ctx) {
   const magnetURI = ctx.request.body.magnetURI
   ctx.assert(magnetURI, 400, 'Body field magnetURI is required')
 
-  const opts = { path: process.env.MEDIA_BASE_DIR }
+  const opts = { path: config.mediaDir }
 
   const t = await new Promise((resolve) => {
     client.add(magnetURI, opts, async (torrent) => {
