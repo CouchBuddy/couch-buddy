@@ -1,5 +1,4 @@
 const debounce = require('debounce')
-const path = require('path')
 const WebTorrent = require('webtorrent')
 
 const config = require('../config')
@@ -36,7 +35,7 @@ async function onTorrentDone () {
   })
 
   for (const file of this.files) {
-    addFileToLibrary(path.relative(config.mediaDir, file.path))
+    addFileToLibrary(file.path)
   }
 }
 
@@ -57,6 +56,8 @@ function serializeTorrent (t) {
     progress: t.progress,
     downloadSpeed: t.downloadSpeed,
     uploadSpeed: t.uploadSpeed,
+    length: t.length,
+    downloaded: t.downloaded,
     paused: t.paused,
     done: t.done,
     numPeers: t.numPeers
