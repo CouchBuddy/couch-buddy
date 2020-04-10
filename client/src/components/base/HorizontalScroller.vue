@@ -1,13 +1,10 @@
 <template>
   <div class="relative horizontal-scroller">
-    <div
+    <slot
       v-for="item in items"
-      :key="`hs-item-${item.id}`"
-      class="relative overflow-hidden cursor-pointer"
+      v-bind="item"
       @click.stop
-    >
-      <slot v-bind="item" />
-    </div>
+    />
   </div>
 </template>
 

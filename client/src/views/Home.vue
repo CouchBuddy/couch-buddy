@@ -8,31 +8,36 @@
       v-slot="item"
       :items="continueWatching"
     >
-      <img
-        :src="item.poster"
-        class="w-full h-full object-cover"
-        @click="$router.push({ name: 'movie', params: { id: item.id } })"
+      <router-link
+        tag="div"
+        :to="{ name: 'watch', params: { id: getWatchId(item) } }"
+        class="relative overflow-hidden cursor-pointer"
       >
+        <img
+          :src="item.poster"
+          class="w-full h-full object-cover"
+        >
 
-      <small
-        v-if="item.season && item.episode"
-        class="absolute top-0 right-0 m-4 rounded"
-        style="padding: 1px 3px; background: rgba(40,40,40,.8)"
-      >
-        S{{ item.season }}E{{ item.episode }}
-      </small>
+        <small
+          v-if="item.season && item.episode"
+          class="absolute top-0 right-0 m-4 rounded"
+          style="padding: 1px 3px; background: rgba(40,40,40,.8)"
+        >
+          S{{ item.season }}E{{ item.episode }}
+        </small>
 
-      <div
-        class="absolute w-full text-xl text-center bottom-0 pb-1"
-        style="background: linear-gradient(to top, #000000f7, transparent)"
-      >
-        {{ item.title }}
-      </div>
+        <div
+          class="absolute w-full text-xl text-center bottom-0 pb-1"
+          style="background: linear-gradient(to top, #000000f7, transparent)"
+        >
+          {{ item.title }}
+        </div>
 
-      <div
-        class="absolute bottom-0 h-1 bg-red-700"
-        :style="{ width: `${item.watched || 0}%` }"
-      />
+        <div
+          class="absolute bottom-0 h-1 bg-red-700"
+          :style="{ width: `${item.watched || 0}%` }"
+        />
+      </router-link>
     </horizontal-scroller>
 
     <div
