@@ -6,9 +6,10 @@ const koaCors = require('@koa/cors')
 
 // Initialize config
 const config = require('./config')
-
 // Initialize DB
 require('./models')
+// Initialize services
+require('./services')
 
 const app = new Koa()
 

@@ -1,9 +1,9 @@
 const path = require('path')
 const WebTorrent = require('webtorrent')
 
-const config = require('./config')
-const { Download } = require('./models')
-const { addFileToLibrary } = require('./routes/library')
+const config = require('../config')
+const { Download } = require('../models')
+const { addFileToLibrary } = require('../services/library')
 
 const client = new WebTorrent()
 

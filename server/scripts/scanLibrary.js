@@ -2,7 +2,7 @@ const ArgumentParser = require('argparse').ArgumentParser
 const assert = require('assert')
 
 require('./boot')
-const { addFileToLibrary, scanLibrary } = require('../routes/library')
+const { addFileToLibrary, scanLibrary } = require('../services/library')
 
 const parser = new ArgumentParser({
   addHelp: true,

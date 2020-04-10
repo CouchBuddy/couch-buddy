@@ -1,6 +1,6 @@
 const config = require('../config')
 const { Episode, MediaFile } = require('../models')
-const { takeScreenshot } = require('../routes/library')
+const { takeScreenshot } = require('../services/library')
 
 async function main ({ bar }) {
   const episodes = await Episode.findAll()

@@ -1,5 +1,5 @@
+const client = require('../services/downloader')
 const config = require('../config')
-const client = require('../downloader')
 const { Download } = require('../models')
 
 async function addTorrent (ctx) {

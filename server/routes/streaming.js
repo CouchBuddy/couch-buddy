@@ -7,7 +7,7 @@ const OS = require('opensubtitles-api')
 const srt2vtt = require('srt-to-vtt')
 
 const config = require('../config')
-const torrentClient = require('../downloader')
+const torrentClient = require('../services/downloader')
 const { Episode, MediaFile, Movie, SubtitlesFile } = require('../models')
 const getSubLangID = require('../utils/openSubtitlesLangs')
 
