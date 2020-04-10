@@ -172,7 +172,7 @@ export default {
             const resourcePath = this.castingMovie.type === 'movie' ? 'library' : 'episodes'
 
             await client.patch(`/api/${resourcePath}/${this.castingMovie.id}`, {
-              watched: (this.latestCurrentTime / this.mediaStatus.media.duration) * 100
+              watched: Math.min((this.latestCurrentTime / this.mediaStatus.media.duration) * 100, 100)
             })
           }
           break
