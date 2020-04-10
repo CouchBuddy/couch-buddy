@@ -14,13 +14,6 @@ const models = {}
 
 async function sync () {
   try {
-    await sequelize.authenticate()
-    console.log('Connected to DB')
-  } catch (err) {
-    console.error('Error while connecting and syncing database:', err)
-  }
-
-  try {
     await sequelize.sync()
     console.log('DB synced correctly')
   } catch (err) {
@@ -39,13 +32,18 @@ for (const file of modelFiles) {
   models[file.split('.')[0]] = model
 }
 
-// for (const modelName in models) {
-//   if (models[modelName].associate) {
-//     models[modelName].associate(models)
-//   }
-// }
-
+/**
+ * Declare models relationships
+ */
 models.Episode.belongsTo(models.Movie)
+
+/**
+ * In production environment, automatically create tables on
+ * app start-up
+ */
+if (config.isProduction) {
+  sync()
+}
 
 models.sync = sync
 module.exports = models

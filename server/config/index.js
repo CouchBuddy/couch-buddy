@@ -3,7 +3,11 @@ const { constantCase } = require('change-case')
 require('dotenv').config()
 
 const config = {
+  nodeEnv: process.env.NODE_ENV || 'development',
+  isProduction: process.env.NODE_ENV === 'production',
+
   dbSqlitePath: process.env.DB_SQLITE_PATH,
+
   /**
    * Directory where media files are stored, the path is absolute
    */
@@ -25,7 +29,7 @@ const config = {
 // Check configuration correctness
 const missingConfigs = []
 for (const key in config) {
-  if (!config[key]) {
+  if (typeof config[key] === 'undefined') {
     missingConfigs.push(constantCase(key))
   }
 }
@@ -33,6 +37,7 @@ for (const key in config) {
 if (missingConfigs.length) {
   console.warn('The following configurations are missing, please set them in the .env file or in your enrivonment:')
   console.warn(missingConfigs.join(', '))
+  process.exit(1)
 }
 
 module.exports = config
