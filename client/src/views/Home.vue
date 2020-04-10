@@ -1,46 +1,52 @@
 <template>
   <div>
-    <div class="mb-4 text-xl">
-      Continue watching
-    </div>
-
-    <horizontal-scroller
-      v-slot="item"
-      :items="continueWatching"
+    <section
+      v-if="continueWatching.length"
+      class="mb-8"
     >
-      <router-link
-        tag="div"
-        :to="{ name: 'watch', params: { id: getWatchId(item) } }"
-        class="relative overflow-hidden cursor-pointer"
+      <div class="mb-4 text-xl">
+        Continue watching
+      </div>
+
+      <horizontal-scroller
+        v-slot="item"
+        :items="continueWatching"
       >
-        <img
-          :src="item.poster"
-          class="w-full h-full object-cover"
+        <router-link
+          tag="div"
+          :to="{ name: 'watch', params: { id: getWatchId(item) } }"
+          class="relative overflow-hidden cursor-pointer"
         >
+          <img
+            :src="item.poster"
+            class="w-full h-full object-cover"
+          >
 
-        <small
-          v-if="item.season && item.episode"
-          class="absolute top-0 right-0 m-4 rounded"
-          style="padding: 1px 3px; background: rgba(40,40,40,.8)"
-        >
-          S{{ item.season }}E{{ item.episode }}
-        </small>
+          <small
+            v-if="item.season && item.episode"
+            class="absolute top-0 right-0 m-4 rounded"
+            style="padding: 1px 3px; background: rgba(40,40,40,.8)"
+          >
+            S{{ item.season }}E{{ item.episode }}
+          </small>
 
-        <div
-          class="absolute w-full text-xl text-center bottom-0 pb-1"
-          style="background: linear-gradient(to top, #000000f7, transparent)"
-        >
-          {{ item.title }}
-        </div>
+          <div
+            class="absolute w-full text-xl text-center bottom-0 pb-1"
+            style="background: linear-gradient(to top, #000000f7, transparent)"
+          >
+            {{ item.title }}
+          </div>
 
-        <div
-          class="absolute bottom-0 h-1 bg-red-700"
-          :style="{ width: `${item.watched || 0}%` }"
-        />
-      </router-link>
-    </horizontal-scroller>
+          <div
+            class="absolute bottom-0 h-1 bg-red-700"
+            :style="{ width: `${item.watched || 0}%` }"
+          />
+        </router-link>
+      </horizontal-scroller>
+    </section>
 
     <div
+      v-if="library.length"
       class="grid gap-4 p-4"
       style="grid-auto-rows: minmax(200px, 1fr); grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));"
     >
@@ -93,6 +99,28 @@
           />
         </div>
       </div>
+    </div>
+
+    <div
+      v-else
+      class="text-center"
+    >
+      <h1 class="text-4xl">
+        Your library is empty!
+      </h1>
+
+      <div class="text-xl text-gray-400">
+        Go to settings and scan your media directory now
+      </div>
+
+      <router-link
+        tag="button"
+        :to="{ name: 'settings' }"
+        class="border-2 text-xl px-4 py-2 mt-16"
+      >
+        <span class="mdi mdi-cog mr-2" />
+        Settings
+      </router-link>
     </div>
   </div>
 </template>
