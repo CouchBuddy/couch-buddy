@@ -3,6 +3,7 @@ const { Op } = require('sequelize')
 
 const config = require('../config')
 const { Episode, Movie } = require('../models')
+const { getResource, updateResource } = require('./rest-endpoints')
 const { addFileToLibrary, searchVideoFiles } = require('../services/library')
 const omdb = require('../services/omdb')
 
@@ -34,26 +35,8 @@ async function listLibrary (ctx) {
   ctx.body = library
 }
 
-async function getLibrary (ctx) {
-  const movieId = parseInt(ctx.params.id)
-  const movie = await Movie.findByPk(movieId)
-
-  ctx.assert(movie, 404)
-
-  ctx.body = movie
-}
-
-async function updateLibrary (ctx) {
-  const movieId = parseInt(ctx.params.id)
-
-  ctx.assert(movieId > 0, 404)
-
-  const [ count ] = await Movie.update(ctx.request.body, {
-    where: { id: movieId }
-  })
-
-  ctx.status = count === 1 ? 204 : 400
-}
+const getLibrary = getResource(Movie)
+const updateLibrary = updateResource(Movie)
 
 async function findMovieInfo (ctx) {
   const title = ctx.request.query.title
@@ -111,14 +94,8 @@ async function listEpisodes (ctx) {
   ctx.body = episodes
 }
 
-async function getEpisode (ctx) {
-  const episodeId = parseInt(ctx.params.id)
-  const episode = await Episode.findByPk(episodeId)
-
-  ctx.assert(episode, 404)
-
-  ctx.body = episode
-}
+const getEpisode = getResource(Episode)
+const updateEpisode = updateResource(Episode)
 
 async function getEpisodeThumbnail (ctx) {
   const episodeId = parseInt(ctx.params.id)
@@ -127,18 +104,6 @@ async function getEpisodeThumbnail (ctx) {
   ctx.assert(episode, 404)
 
   await sendFile(ctx, episode.thumbnail, { root: config.mediaDir })
-}
-
-async function updateEpisode (ctx) {
-  const episodeId = parseInt(ctx.params.id)
-
-  ctx.assert(episodeId > 0, 404)
-
-  const [ count ] = await Episode.update(ctx.request.body, {
-    where: { id: episodeId }
-  })
-
-  ctx.status = count === 1 ? 204 : 400
 }
 
 module.exports = {
