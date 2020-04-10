@@ -55,7 +55,7 @@ export default new Vuex.Store({
         metadata.originalAirdate = `${movie.year}`
         metadata.images = [
           // the poster of the main movie, not the thumb of the episode
-          new chrome.cast.Image(this.movie.poster)
+          new chrome.cast.Image(movie.poster)
         ]
       }
 
