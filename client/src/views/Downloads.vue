@@ -25,16 +25,25 @@
     <div
       v-for="torrent in torrents"
       :key="torrent.infoHash"
-      class="flex items-center p-4 mb-4 bg-black"
+      class="relative flex items-center p-4 mb-4 bg-black"
     >
-      <div class="flex-grow">
-        <h2 class="text-xl">
+      <div
+        class="absolute h-full left-0 top-0 bg-red-700 opacity-25"
+        :style="{ width: `${torrent.progress * 100}%` }"
+      />
+
+      <div class="relative flex-grow">
+        <h2 class="text-xl font-bold">
           {{ torrent.name }}
         </h2>
 
         <div>
-          {{ parseInt(torrent.progress * 100) }}% -
-          {{ torrent.timeRemaining / 1000 | time(true) }} -
+          {{ torrent.downloaded | bytes }} / {{ torrent.length | bytes }}
+          <small class="ml-2 text-gray-400">{{ parseInt(torrent.progress * 100) }}%</small>
+        </div>
+
+        <div class="text-gray-400">
+          Remaining {{ torrent.timeRemaining / 1000 | time(true) }} -
           <span class="mdi mdi-download-network" /> {{ torrent.downloadSpeed | bytes }}/s
           <span class="mdi mdi-upload-network" /> {{ torrent.uploadSpeed | bytes }}/s
           <span class="ml-2">{{ torrent.numPeers }} peers</span>
@@ -44,7 +53,7 @@
       <router-link
         :to="{ name: 'watch', params: { id: `t${torrent.infoHash}` } }"
         tag="button"
-        class="w-16 h-16 flex-shrink-0 rounded-full"
+        class="relative w-16 h-16 flex-shrink-0 rounded-full"
       >
         <span
           class="mdi text-4xl"
