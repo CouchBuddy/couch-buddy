@@ -4,7 +4,7 @@
     class="fixed bottom-0 right-0 flex items-center mb-20 mr-4 md:m-4"
   >
     <div
-      v-if="controller"
+      v-if="isCastConnected && controller"
       class="flex items-center h-16 mr-4 bg-black shadow-lg"
     >
       <template v-if="mediaStatus">
@@ -81,7 +81,7 @@ export default {
     player: null
   }),
   computed: {
-    ...mapState([ 'castingMovie' ])
+    ...mapState([ 'castingMovie', 'isCastConnected' ])
   },
   created () {
     if (window.cast) {
