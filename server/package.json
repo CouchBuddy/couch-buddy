@@ -1,13 +1,11 @@
 {
-  "name": "couch-buddy",
+  "name": "couch-buddy-server",
   "version": "0.1.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Couch Buddy Koa server",
+  "private": true,
   "scripts": {
     "dev": "nodemon app.js"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@koa/cors": "^3.0.0",
     "@koa/router": "^8.0.8",
