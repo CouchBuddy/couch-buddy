@@ -26,7 +26,12 @@ app.use(koaBody({
 }))
 
 app.use(koaStatic('public'))
-app.use(koaMount('/uploads', koaStatic('uploads')))
+
+if (config.isProduction) {
+  // In production, Vue SPA client is served by the server,
+  // so all URLs but /api and static files are rewritten to / and handled by the SPA
+  app.use(require('./middlewares/spa-rewrite')('api', '/'))
+}
 
 const router = require('./routes')
 app.use(koaMount('/api', router.routes()))
