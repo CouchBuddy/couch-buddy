@@ -151,9 +151,7 @@ export default {
         toPlay = this.movie.type === 'series' ? this.nextEpisode : this.movie
       }
 
-      if (!toPlay) {
-        console.error('Nothing to play')
-      }
+      if (!toPlay) { return }
 
       if (this.isCastConnected) {
         this.castMovie(toPlay)

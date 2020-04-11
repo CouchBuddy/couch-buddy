@@ -152,10 +152,7 @@ export default {
   methods: {
     ...mapActions([ 'castMovie' ]),
     playMovie (movie) {
-      if (movie.type !== 'movie') {
-        console.error('Can\'t play a Movie of type series')
-        return
-      }
+      if (movie.type !== 'movie') { return }
 
       if (this.isCastConnected) {
         this.castMovie(movie)

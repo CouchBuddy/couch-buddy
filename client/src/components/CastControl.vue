@@ -98,10 +98,7 @@ export default {
   methods: {
     ...mapMutations([ 'setCastConnected' ]),
     initCast (isAvailable) {
-      if (!isAvailable || !chrome || !cast) {
-        console.warn('Cast is not supported on this browser')
-        return
-      }
+      if (!isAvailable || !chrome || !cast) { return }
 
       this.isCastLoaded = true
 
