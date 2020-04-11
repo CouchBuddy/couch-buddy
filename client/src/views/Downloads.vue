@@ -8,11 +8,14 @@
       <input
         v-model="magnetURI"
         placeholder="magnet://"
+        :disabled="loading"
         class="flex-grow px-4 py-2 bg-transparent border-0"
+        @keypress.enter="addTorrent"
       >
 
       <button
         class="px-4 py-2 text-xl"
+        :disabled="loading"
         @click="addTorrent"
       >
         <span class="mdi mdi-send" />
@@ -60,6 +63,7 @@ import client, { socket } from '@/client'
 export default {
   name: 'Downloads',
   data: () => ({
+    loading: false,
     magnetURI: null,
     intervalHandle: null,
     torrents: []
@@ -84,11 +88,19 @@ export default {
   },
   methods: {
     async addTorrent () {
-      const response = await client.post('/api/downloads', {
-        magnetURI: this.magnetURI
-      })
+      this.loading = true
+      try {
+        const response = await client.post('/api/downloads', {
+          magnetURI: this.magnetURI
+        })
 
-      this.torrents.push(response.data)
+        this.torrents.push(response.data)
+        this.magnetURI = null
+      } catch (e) {
+
+      } finally {
+        this.loading = false
+      }
     },
     async fetchDownloads () {
       this.torrents = (await client.get('/api/downloads')).data
