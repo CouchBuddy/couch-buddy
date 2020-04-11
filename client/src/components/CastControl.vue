@@ -69,6 +69,7 @@
 import { mapMutations, mapState } from 'vuex'
 
 import client from '@/client'
+import config from '@/config'
 
 export default {
   data: () => ({
@@ -109,7 +110,7 @@ export default {
       this.anyDeviceAvailable = context.getCastState() !== cast.framework.CastState.NO_DEVICES_AVAILABLE
 
       context.setOptions({
-        receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+        receiverApplicationId: config.castReceiverAppId || chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
         autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
         resumeSavedSession: true
       })

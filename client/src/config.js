@@ -1,3 +1,4 @@
 export default {
-  serverUrl: `${location.protocol}//${location.hostname}:3000`
+  castReceiverAppId: null,
+  serverUrl: `${location.protocol}//${location.hostname}:3000`,
 }
