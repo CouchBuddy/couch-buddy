@@ -30,7 +30,13 @@ npm run install
 npm run dev
 ```
 
-Be sure to configure the server, see [#Configuration]
+Be sure to configure the server, see [#Configuration].
+
+The first time you run the server, you must also initialize the DB (that is, creating the tables), just run this script:
+
+```sh
+node server/scripts/syncDb.js
+```
 
 Now open the client at: http://localhost:8080
 
