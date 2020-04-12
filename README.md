@@ -21,7 +21,7 @@ Now open the client at: http://localhost:8080
 
 ## Configuration
 
-> **Important**: Currently, all configurations are required to run the server
+> **Important**: Some configurations are optional, Couch Buddy can work without them, but functionalities may be lost.
 
 The server is configured via environmental variables, the preferred way is to use a file
 named `.env` placed in the `server/` folder, at startup, CouchBuddy reads it and loads the
@@ -32,6 +32,16 @@ to your needs:
 cp server/.env.sample server/.env
 # edit server/.env
 ```
+
+### All configurations
+
+|Name               |Required|Default|Description|
+|-------------------|:-:|-------|-----------|
+|DB_SQLITE_PATH     | Y ||SQLite DB file path, ex: `db.sqlite`|
+|MEDIA_BASE_DIR     | Y ||Directoty with your video files, ex: `/media/luca/MyHDD/videos/`|
+|OMDB_KEY           | N ||OMDb API key, needed for getting movies info. Register and get your key at http://www.omdbapi.com/apikey.aspx|
+|OPENSUBTITLES_UA   | N ||Open Subtitles UserAgent, needed for downloading movies subs. Request a UserAgent at https://trac.opensubtitles.org/projects/opensubtitles/wiki/DevReadFirst|
+|PORT               | Y |3000|Port where the server listens|
 
 ## Development
 
