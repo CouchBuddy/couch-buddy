@@ -1,8 +1,8 @@
 const sendFile = require('koa-send')
-const { Op } = require('sequelize')
+const { Op, QueryTypes } = require('sequelize')
 
 const config = require('../config')
-const { Episode, Movie } = require('../models')
+const { Episode, Movie, sequelize } = require('../models')
 const { getResource, updateResource } = require('./rest-endpoints')
 const { addFileToLibrary, searchVideoFiles } = require('../services/library')
 const omdb = require('../services/omdb')
@@ -24,15 +24,18 @@ async function scanLibrary (ctx = {}) {
 }
 
 async function listLibrary (ctx) {
-  const where = {}
-
   if (ctx.request.query.search) {
-    where.title = { [Op.like]: `%${ctx.request.query.search}%` }
+    // Search movies with SQLite FTS5 MATCH operator
+    const query = `SELECT movies.* FROM movies_fts
+    INNER JOIN movies ON movies_fts.ID = movies.ID
+    WHERE movies_fts
+    MATCH '-ID:${ctx.request.query.search}'
+    ORDER BY rank`
+
+    ctx.body = await sequelize.query(query, { type: QueryTypes.SELECT })
+  } else {
+    ctx.body = await Movie.findAll({ order: [[ 'title', 'ASC' ]] })
   }
-
-  const library = await Movie.findAll({ where, order: [[ 'title', 'ASC' ]] })
-
-  ctx.body = library
 }
 
 const getLibrary = getResource(Movie)
