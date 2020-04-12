@@ -1,6 +1,5 @@
 {
   "name": "couch-buddy",
-  "version": "0.1.0",
   "description": "Media Center with cast support",
   "scripts": {
     "client:i": "cd client && npm install",

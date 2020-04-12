@@ -1,4 +1,12 @@
 {
   "ext": "js",
-  "ignore": [ "public", "scripts", "tests" ]
+  "watch": [
+    ".env"
+  ],
+  "ignore": [
+    "node_modules",
+    "public",
+    "scripts",
+    "tests"
+  ]
 }
