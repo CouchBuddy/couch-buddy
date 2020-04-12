@@ -36,7 +36,9 @@ export default new Vuex.Store({
     async castMovie ({ commit, state }, movie) {
       const castSession = cast.framework.CastContext.getInstance().getCurrentSession()
 
-      const url = `${state.serverUrl}/api/watch/${movie.type === 'movie' ? 'm' : 'e'}${movie.id}`
+      const watchId = `${movie.type === 'movie' ? 'm' : 'e'}${movie.id}`
+
+      const url = `${state.serverUrl}/api/watch/${watchId}`
       // const mimeType = `video/${movie.container}`
 
       let metadata
@@ -59,11 +61,27 @@ export default new Vuex.Store({
         ]
       }
 
+      const subtitles = (await client.get(`/api/watch/${watchId}/subtitles`)).data
+
       const mediaInfo = new chrome.cast.media.MediaInfo(url)
-      // mediaInfo.contentId = url
       mediaInfo.metadata = metadata
+      mediaInfo.tracks = subtitles.map(sub => {
+        const track = new chrome.cast.media.Track(sub.id, chrome.cast.media.TrackType.TEXT)
+        track.trackContentId = `${state.serverUrl}/api/subtitles/${sub.id}`
+        track.trackContentType = 'text/vtt'
+        track.subtype = chrome.cast.media.TextTrackType.SUBTITLES
+        track.name = `${sub.lang} Subtitles`
+        track.language = sub.lang
+
+        return track
+      })
 
       const request = new chrome.cast.media.LoadRequest(mediaInfo)
+
+      if (subtitles.length) {
+        request.activeTrackIds = [ subtitles[0].id ]
+      }
+
       await castSession.loadMedia(request)
 
       commit('setCastingMovie', movie)
