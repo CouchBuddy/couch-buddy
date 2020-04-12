@@ -26,17 +26,35 @@ const config = {
   wsPort: parseInt(process.env.WS_PORT) || 3001
 }
 
+const MANDATORY_CONFIGS = [
+  'dbSqlitePath',
+  'mediaDir',
+  'port',
+  'wsPort'
+]
+
 // Check configuration correctness
 const missingConfigs = []
+const missingConfigsMandatory = []
+
 for (const key in config) {
   if (typeof config[key] === 'undefined') {
-    missingConfigs.push(constantCase(key))
+    if (MANDATORY_CONFIGS.includes(key)) {
+      missingConfigsMandatory.push(constantCase(key))
+    } else {
+      missingConfigs.push(constantCase(key))
+    }
   }
 }
 
 if (missingConfigs.length) {
-  console.warn('The following configurations are missing, please set them in the .env file or in your enrivonment:')
+  console.warn('The following configurations are missing, they\'re optional but they may limit Couch Buddy features:')
   console.warn(missingConfigs.join(', '))
+}
+
+if (missingConfigsMandatory.length) {
+  console.error('The following configurations are mandatory, Couch Buddy cannot work without them:')
+  console.error(missingConfigsMandatory.join(', '))
   process.exit(1)
 }
 

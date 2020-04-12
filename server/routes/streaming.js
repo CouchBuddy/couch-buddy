@@ -27,7 +27,7 @@ const SUPPORTED_CODECS = {
   }
 }
 
-const OpenSubtitles = new OS(config.openSubtitlesUa)
+let OpenSubtitles = null
 
 async function watch (ctx) {
   ctx.assert(/^(e|m|t)[a-f0-9]+$/.test(ctx.params.id), 400, 'Invalid ID format')
@@ -201,6 +201,10 @@ async function downloadSubtitles (ctx) {
   })
 
   ctx.assert(mediaFile, 404, 'Media not found')
+
+  if (!OpenSubtitles) {
+    OpenSubtitles = new OS(config.openSubtitlesUa)
+  }
 
   // Search subtitles using movie hash
   let result = await OpenSubtitles.search({
