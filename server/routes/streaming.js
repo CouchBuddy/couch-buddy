@@ -224,11 +224,21 @@ async function downloadSubtitles (ctx) {
   ctx.assert(subtitles, 404, 'No subtitles found')
 
   // Remember what format we are downloading, needed later for conversion
-  const isVtt = !!subtitles.vtt
+  const isVtt = false
 
-  const response = await axios.get(subtitles.vtt || subtitles.url, {
-    responseType: 'stream'
-  })
+  let response
+  try {
+    // Note: subtitles download URL is available also in VTT format, but sometimes is a broken URL,
+    // so download the .srt as it is more reliable
+    response = await axios.get(subtitles.url, {
+      responseType: 'stream'
+    })
+  } catch (e) {
+    ctx.status = 400
+    ctx.body = 'OpenSubtitles.org error'
+    console.log('Error downloading subs file', subtitles)
+    return
+  }
 
   // Find subtitles filename with several strategies
   // 1. name of the downloaded file as in HTTP headers
