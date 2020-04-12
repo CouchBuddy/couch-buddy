@@ -155,7 +155,7 @@ export default {
     onLoadMetadata () {
       // compute the hysteresis threshold (%) for updating Movie `watched` prop
       if (this.$refs.video.duration > 60) {
-        this.updateWatchedEvery = 10 / this.$refs.video.duration
+        this.updateWatchedEvery = (10 / this.$refs.video.duration) * 100
       }
     },
     async onTimeUpdate () {
