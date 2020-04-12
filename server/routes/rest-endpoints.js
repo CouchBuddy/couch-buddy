@@ -4,12 +4,12 @@ const Sequelize = require('sequelize')
 /**
  * @param {Sequelize.Model} model
  */
-const getResource = (model) =>
+const getResource = (model, options) =>
   async function getEpisode (ctx) {
     const id = parseInt(ctx.params.id)
     ctx.assert(id > 0, 404, 'Resource ID must be an integer > 0')
 
-    const resource = await model.findByPk(id)
+    const resource = await model.findByPk(id, options)
 
     ctx.assert(resource, 404)
 

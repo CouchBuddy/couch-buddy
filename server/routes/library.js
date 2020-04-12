@@ -94,7 +94,7 @@ async function listEpisodes (ctx) {
   ctx.body = episodes
 }
 
-const getEpisode = getResource(Episode)
+const getEpisode = getResource(Episode, { include: 'movie' })
 const updateEpisode = updateResource(Episode)
 
 async function getEpisodeThumbnail (ctx) {

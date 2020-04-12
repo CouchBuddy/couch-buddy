@@ -35,7 +35,9 @@ for (const file of modelFiles) {
 /**
  * Declare models relationships
  */
-models.Episode.belongsTo(models.Movie)
+models.Episode.belongsTo(models.Movie, {
+  foreignKey: 'movieId'
+})
 
 /**
  * In production environment, automatically create tables on

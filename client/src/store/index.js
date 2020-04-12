@@ -51,12 +51,12 @@ export default new Vuex.Store({
         ]
       } else {
         metadata = new chrome.cast.media.TvShowMediaMetadata()
-        metadata.seriesTitle = movie.title
+        metadata.title = movie.title
         metadata.season = movie.season
         metadata.episode = movie.episode
+        metadata.seriesTitle = movie.series ? movie.series.title : null
         metadata.originalAirdate = `${movie.year}`
         metadata.images = [
-          // the poster of the main movie, not the thumb of the episode
           new chrome.cast.Image(movie.poster)
         ]
       }

@@ -47,12 +47,22 @@
 
       <div class="flex-grow">
         <div><small>NOW PLAYING</small></div>
-        <h1>
+        <h1 class="font-bold">
           {{ movie.title }}
-          <span v-if="movie.season && movie.episode">
-            - S{{ movie.season }}E{{ movie.episode }}
-          </span>
         </h1>
+
+        <h2>
+          <span
+            v-if="movie.series"
+            class="mr-2"
+          >
+            {{ movie.series.title }}
+          </span>
+
+          <span v-if="movie.season && movie.episode">
+            S{{ movie.season }}E{{ movie.episode }}
+          </span>
+        </h2>
       </div>
     </div>
 
