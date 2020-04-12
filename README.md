@@ -2,7 +2,22 @@
 
 Couch Buddy is a free and open-source Media Center for managing your digital media collection. It runs on standard PC, servers and smartphones and supports streaming to ChromeCast.
 
+![All movies](https://raw.githubusercontent.com/lucafaggianelli/couch-buddy/master/docs/screenshots/all-movies.png)
+
 Typical usage of Couch Buddy is to install it on a laptop, a NAS, a Raspberry PI and then casting content to a smart TV or to a ChromeCast, Couch Buddy doesn't need to run on hardware attached to the TV HDMI.
+
+## Features
+
+* Organize your media files into an easy to use app
+* Find movie and TV series info automatically from [Open Movie Db](http://omdbapi.com/)
+* Stream any content to ChromeCast
+* Handle TV series with seasons and episodes
+
+![TV series](https://raw.githubusercontent.com/lucafaggianelli/couch-buddy/master/docs/screenshots/series.png)
+
+* Automatically download subtitles from [Open Subtitles](opensubtitles.org)
+* Integrated download manager/torrent client
+* Useful keyboad shortcut (press `?`)
 
 ## Get started
 
