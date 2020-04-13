@@ -4,22 +4,26 @@
       ref="scroller"
       class="horizontal-scroller"
     >
-      <slot
+      <div
         v-for="item in items"
-        v-bind="item"
-        @click.stop
-      />
+        :key="`hs-${item.id}`"
+      >
+        <slot
+          v-bind="item"
+          @click.stop
+        />
+      </div>
     </div>
 
     <button
-      class="absolute flex flex-col h-full top-0 left-0 justify-center text-5xl"
+      class="absolute hidden md:flex flex flex-col h-full top-0 left-0 justify-center text-5xl"
       @click="scrollBy(-1)"
     >
       <span class="mdi mdi-chevron-left" />
     </button>
 
     <button
-      class="absolute flex flex-col h-full top-0 right-0 justify-center hidden md:block text-5xl"
+      class="absolute hidden md:flex flex-col h-full top-0 right-0 justify-center text-5xl"
       @click="scrollBy(1)"
     >
       <span class="mdi mdi-chevron-right" />

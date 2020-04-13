@@ -69,12 +69,12 @@
         :centered-item-id="nextEpisode.season === group.season ? nextEpisode.id : null"
       >
         <div
-          class="relative rounded-lg overflow-hidden cursor-pointer"
+          class="relative rounded-lg overflow-hidden aspect-ratio-16/9 cursor-pointer"
           @click="playMovie(item)"
         >
           <img
             :src="`${serverUrl}/api/episodes/${item.id}/thumbnail`"
-            class="w-full h-full object-cover"
+            class="absolute w-full h-full object-cover"
           >
           <div class="absolute w-full text-center bottom-0 mb-1">
             Episode {{ item.episode }}
