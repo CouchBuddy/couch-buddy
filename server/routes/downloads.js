@@ -4,12 +4,22 @@ const { Download } = require('../models')
 
 async function addTorrent (ctx) {
   const magnetURI = ctx.request.body.magnetURI
-  ctx.assert(magnetURI, 400, 'Body field magnetURI is required')
+  const torrentFile = ctx.request.files.torrents
+
+  ctx.assert(magnetURI || torrentFile, 400, 'You must provide the magnetURI field or upload a file')
 
   const opts = { path: config.mediaDir }
 
+  // Torrent file has priority over magnetURI if both are present
+  let torrentId
+  if (torrentFile) {
+    torrentId = torrentFile.path
+  } else {
+    torrentId = magnetURI
+  }
+
   const t = await new Promise((resolve) => {
-    client.add(magnetURI, opts, async (torrent) => {
+    client.add(torrentId, opts, async (torrent) => {
       await Download.create(torrent)
       resolve(torrent)
     })

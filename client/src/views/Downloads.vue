@@ -13,6 +13,22 @@
         @keypress.enter="addTorrent"
       >
 
+      <label class="btn w-12 h-12 cursor-pointer">
+        <input
+          ref="upload"
+          name="torrents"
+          type="file"
+          accept=".torrent"
+          class="absolute bg-transparent"
+          style="z-index: -1; height: 1px; width: 1px;"
+          @change="addTorrent"
+        >
+
+        <i
+          class="text-2xl mdi mdi-file-video inline-flex justify-center items-center w-full h-full"
+        />
+      </label>
+
       <x-btn
         icon="mdi-send"
         large
@@ -38,7 +54,7 @@
         </h2>
 
         <div>
-          {{ torrent.downloaded | bytes }} / {{ torrent.length | bytes }}
+          {{ torrent.downloaded | bytes }} / {{ torrent.length || 0 | bytes }}
           <small class="ml-2 text-gray-400">{{ parseInt(torrent.progress * 100) }}%</small>
         </div>
 
@@ -98,16 +114,23 @@ export default {
   methods: {
     async addTorrent () {
       this.loading = true
+
+      const data = new FormData()
+
+      if (this.$refs.upload.files[0]) {
+        data.append('torrents', this.$refs.upload.files[0])
+      } else if (this.magnetURI) {
+        data.append('magnetURI', this.magnetURI)
+      }
+
       try {
-        const response = await client.post('/api/downloads', {
-          magnetURI: this.magnetURI
-        })
+        const response = await client.post('/api/downloads', data)
 
         this.torrents.push(response.data)
         this.magnetURI = null
       } catch (e) {
-
       } finally {
+        this.$refs.upload.value = null
         this.loading = false
       }
     },

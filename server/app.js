@@ -18,9 +18,7 @@ app.use(require('koa-logger')())
 app.proxy = true
 app.use(koaCors({ credentials: true }))
 app.use(koaBody({
-  formidable: {
-    uploadDir: 'uploads/'
-  },
+  formidable: {},
   multipart: true,
   urlencoded: true
 }))

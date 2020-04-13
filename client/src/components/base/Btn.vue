@@ -75,8 +75,8 @@ export default {
 </script>
 
 <style lang="scss">
-button.btn,
-a.btn {
+.btn,
+.btn {
   transition: all 0.3s;
 
   &:not([disabled]):hover {
