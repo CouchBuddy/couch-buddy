@@ -63,31 +63,29 @@
         SEASON {{ group.season }}
       </div>
 
-      <div
-        :id="`s${group.season}`"
-        class="relative horizontal-scroller"
+      <x-horizontal-scroller
+        v-slot="item"
+        :items="group.episodes"
+        :centered-item-id="nextEpisode.season === group.season ? nextEpisode.id : null"
       >
         <div
-          v-for="episode in group.episodes"
-          :id="`s${group.season}e${episode.episode}`"
-          :key="`episode-${episode.id}`"
           class="relative rounded-lg overflow-hidden cursor-pointer"
-          @click="playMovie(episode)"
+          @click="playMovie(item)"
         >
           <img
-            :src="`${serverUrl}/api/episodes/${episode.id}/thumbnail`"
+            :src="`${serverUrl}/api/episodes/${item.id}/thumbnail`"
             class="w-full h-full object-cover"
           >
           <div class="absolute w-full text-center bottom-0 mb-1">
-            Episode {{ episode.episode }}
+            Episode {{ item.episode }}
           </div>
 
           <div
             class="absolute bottom-0 h-1 bg-red-700"
-            :style="{ width: `${episode.watched || 0}%` }"
+            :style="{ width: `${item.watched || 0}%` }"
           />
         </div>
-      </div>
+      </x-horizontal-scroller>
     </div>
   </div>
 </template>
@@ -165,31 +163,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss">
-.horizontal-scroller {
-  display: grid;
-  gap: 2rem;
-  grid-template-columns: 4rem;
-  grid-template-rows: minmax(150px, 1fr);
-  grid-auto-flow: column;
-  grid-auto-columns: calc(30% - 40px * 2);
-  overflow-x: scroll;
-  scroll-snap-type: x proximity;
-  margin: 0px -5vw;
-
-  &:before,
-  &:after {
-    content: '';
-    width: 10px;
-  }
-
-  & > * {
-    scroll-snap-align: center;
-  }
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-</style>

@@ -8,7 +8,7 @@
         Continue watching
       </div>
 
-      <horizontal-scroller
+      <x-horizontal-scroller
         v-slot="item"
         :items="continueWatching"
       >
@@ -42,7 +42,7 @@
             :style="{ width: `${item.watched || 0}%` }"
           />
         </router-link>
-      </horizontal-scroller>
+      </x-horizontal-scroller>
     </section>
 
     <div
@@ -129,13 +129,9 @@
 import { mapActions, mapState } from 'vuex'
 
 import client from '@/client'
-import HorizontalScroller from '@/components/base/HorizontalScroller'
 
 export default {
   name: 'Home',
-  components: {
-    HorizontalScroller
-  },
   data: () => ({
     continueWatching: [],
     library: [],
