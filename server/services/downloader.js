@@ -4,7 +4,7 @@ const WebTorrent = require('webtorrent')
 const config = require('../config')
 const { Download } = require('../models')
 const { addFileToLibrary } = require('./library')
-const { wss } = require('./web-socket')
+const io = require('./socket-io')
 
 const client = new WebTorrent()
 
@@ -40,12 +40,7 @@ async function onTorrentDone () {
 }
 
 function onTorrentDownload () {
-  for (const ws of wss.clients) {
-    ws.send(JSON.stringify({
-      event: 'torrent:download',
-      data: serializeTorrent(this)
-    }))
-  }
+  io.emit('torrent:download', serializeTorrent(this))
 }
 
 function serializeTorrent (t) {

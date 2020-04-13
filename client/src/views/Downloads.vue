@@ -99,8 +99,7 @@ export default {
   async mounted () {
     await this.fetchDownloads()
 
-    // this.intervalHandle = setInterval(this.fetchDownloads, 5000)
-    socket.bind('torrent:download', torrent => {
+    socket.on('torrent:download', torrent => {
       const i = this.torrents.findIndex(t => t.infoHash === torrent.infoHash)
 
       if (i >= 0) {
@@ -109,7 +108,7 @@ export default {
     })
   },
   beforeDestroy () {
-    // clearInterval(this.intervalHandle)
+    socket.removeAllListeners('torrent:download')
   },
   methods: {
     async addTorrent () {

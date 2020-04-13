@@ -10,6 +10,7 @@ const config = require('./config')
 require('./models')
 // Initialize services
 require('./services')
+const server = require('./services/server')
 
 const app = new Koa()
 
@@ -35,6 +36,4 @@ const router = require('./routes')
 app.use(koaMount('/api', router.routes()))
 app.use(koaMount('/api', router.allowedMethods()))
 
-app.listen(config.port, async () => {
-  console.log(`Server running on port ${config.port}`)
-})
+server.on('request', app.callback())
