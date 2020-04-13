@@ -7,6 +7,7 @@
       <div
         v-for="item in items"
         :key="`hs-${item.id}`"
+        class="w-1/3 md:1/4 lg:w-1/5 xl:w-1/6"
       >
         <slot
           v-bind="item"
@@ -81,7 +82,6 @@ export default {
 
   & > div {
     display: inline-block;
-    width: 25%;
     margin-right: 1rem;
 
     &:last-child {
