@@ -17,14 +17,14 @@
     </div>
 
     <button
-      class="absolute hidden md:flex flex flex-col h-full top-0 left-0 justify-center text-5xl"
+      class="absolute hidden md:flex flex flex-col h-full top-0 left-0 justify-center text-5xl btn"
       @click="scrollBy(-1)"
     >
       <span class="mdi mdi-chevron-left" />
     </button>
 
     <button
-      class="absolute hidden md:flex flex-col h-full top-0 right-0 justify-center text-5xl"
+      class="absolute hidden md:flex flex-col h-full top-0 right-0 justify-center text-5xl btn"
       @click="scrollBy(1)"
     >
       <span class="mdi mdi-chevron-right" />

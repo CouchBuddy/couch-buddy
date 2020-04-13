@@ -38,12 +38,12 @@
       class="flex items-center video-overlay"
       :class="{ 'active': showOverlay }"
     >
-      <button
-        class="flex-shrink-0 w-10 h-10 mr-2 rounded-full"
+      <x-btn
+        icon="mdi-arrow-left"
+        large
+        class="mr-4"
         @click="$router.go(-1)"
-      >
-        <span class="mdi mdi-arrow-left text-2xl" />
-      </button>
+      />
 
       <div class="flex-grow">
         <div><small>NOW PLAYING</small></div>

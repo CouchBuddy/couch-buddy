@@ -2,13 +2,12 @@
   <div>
     <x-modal>
       <template #activator="{ on }">
-        <button
-          class="flex-shrink-0 w-10 h-10 rounded-full"
+        <x-btn
+          icon="mdi-closed-caption"
+          large
           v-on="on"
           @click="show = true"
-        >
-          <span class="mdi mdi-closed-caption text-2xl" />
-        </button>
+        />
       </template>
 
       <div class="p-4 rounded bg-black shadow-lg">
@@ -53,12 +52,11 @@
             </option>
           </select>
 
-          <button
-            class="flex-shrink-0 w-10 h-10 ml-2 rounded-full"
+          <x-btn
+            class="ml-2"
+            icon="mdi-download"
             @click="downloadSubtitles()"
-          >
-            <span class="mdi mdi-download text-2xl" />
-          </button>
+          />
         </div>
       </div>
     </x-modal>

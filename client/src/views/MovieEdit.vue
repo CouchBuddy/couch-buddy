@@ -1,12 +1,12 @@
 <template>
   <div>
     <div class="flex items-center mb-8">
-      <button
-        class="w-12 h-12 mr-4 text-2xl rounded-full"
+      <x-btn
+        icon="mdi-arrow-left"
+        large
+        class="mr-4"
         @click="$router.go(-1)"
-      >
-        <span class="mdi mdi-arrow-left" />
-      </button>
+      />
 
       <h1 class="text-4xl">
         Edit Movie
@@ -23,12 +23,12 @@
         @input="searchOmdb"
       >
 
-      <button
-        class="px-4 py-2 bg-green-600"
+      <x-btn
+        class="bg-green-600"
         @click="saveMovie"
       >
         Save
-      </button>
+      </x-btn>
     </div>
 
     <div class="border-t-2" />

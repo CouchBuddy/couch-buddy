@@ -35,24 +35,21 @@
         </div>
       </template>
 
-      <button
+      <x-btn
         v-if="player.canPause"
-        class="w-10 h-10 mr-3"
+        :icon="player.isPaused ? 'mdi-play' : 'mdi-pause'"
+        large
+        class="mr-3"
         @click="controller.playOrPause()"
-      >
-        <span
-          class="mdi text-2xl"
-          :class="player.isPaused ? 'mdi-play' : 'mdi-pause'"
-        />
-      </button>
+      />
 
-      <button
+      <x-btn
         v-if="player.canPause"
-        class="w-10 h-10 mr-3"
+        icon="mdi-arrow-expand"
+        large
+        class="mr-3"
         @click="controller.playOrPause()"
-      >
-        <span class="mdi mdi-arrow-expand text-2xl" />
-      </button>
+      />
     </div>
 
     <div class="h-12 w-12 p-3 bg-black shadow-lg rounded-full">

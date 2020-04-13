@@ -1,14 +1,10 @@
 <template>
   <div class="flex items-center">
-    <button
-      class="flex-shrink-0 w-10 h-10 rounded-full"
+    <x-btn
+      :icon="isPaused ? 'mdi-play' : 'mdi-pause'"
+      large
       @click="togglePlay()"
-    >
-      <span
-        class="mdi text-2xl"
-        :class="{ 'mdi-play': isPaused, 'mdi-pause': !isPaused }"
-      />
-    </button>
+    />
 
     <div class="relative flex flex-grow items-center mx-4">
       <progress
@@ -33,15 +29,12 @@
       {{ remainingTime }}
     </div>
 
-    <button
-      class="flex-shrink-0 w-10 h-10 mr-2 rounded-full"
+    <x-btn
+      :icon="isMuted ? 'mdi-volume-mute' : 'mdi-volume-high'"
+      large
+      class="mr-2"
       @click="toggleMute()"
-    >
-      <span
-        class="mdi text-2xl"
-        :class="{ 'mdi-volume-high': !isMuted, 'mdi-volume-mute': isMuted }"
-      />
-    </button>
+    />
 
     <subtitles-dialog
       :subtitles="subtitles"
@@ -50,15 +43,11 @@
       @add="onSubsAdd"
     />
 
-    <button
-      class="flex-shrink-0 w-10 h-10 rounded-full"
+    <x-btn
+      :icon="isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'"
+      large
       @click="toggleFullscreen()"
-    >
-      <span
-        class="mdi text-2xl"
-        :class="{ 'mdi-fullscreen': !isFullscreen, 'mdi-fullscreen-exit': isFullscreen }"
-      />
-    </button>
+    />
   </div>
 </template>
 

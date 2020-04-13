@@ -10,7 +10,10 @@ module.exports = {
     }
   },
   variants: {
-    aspectRatio: [ 'responsive' ]
+    aspectRatio: [ 'responsive' ],
+    borderColor: [ 'hover', 'focus', 'disabled' ],
+    cursor: [ 'disabled' ],
+    textColor: [ 'hover', 'focus', 'disabled' ]
   },
   plugins: [
     require('tailwindcss-aspect-ratio')

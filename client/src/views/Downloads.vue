@@ -13,13 +13,13 @@
         @keypress.enter="addTorrent"
       >
 
-      <button
-        class="px-4 py-2 text-xl"
-        :disabled="loading"
+      <x-btn
+        icon="mdi-send"
+        large
+        tile
+        :disabled="loading || !magnetURI"
         @click="addTorrent"
-      >
-        <span class="mdi mdi-send" />
-      </button>
+      />
     </div>
 
     <div

@@ -35,13 +35,13 @@
         Library
       </h2>
 
-      <button
-        class="bg-transparent border-2 px-4 py-2"
+      <x-btn
+        bordered
         :disabled="scanningLibrary"
         @click="scanLibrary()"
       >
         {{ scanningLibrary ? 'Scanning...' : 'Scan Library' }}
-      </button>
+      </x-btn>
     </div>
   </div>
 </template>

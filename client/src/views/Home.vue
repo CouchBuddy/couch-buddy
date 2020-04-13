@@ -81,25 +81,20 @@
             {{ item.title }}
           </div>
 
-          <button
+          <x-btn
             v-if="item.type === 'movie'"
-            class="px-4 text-6xl rounded-full"
+            :icon="isCastConnected ? 'mdi-cast' : 'mdi-play-circle'"
+            x-large
             @click="playMovie(item)"
-          >
-            <span
-              class="mdi"
-              :class="isCastConnected ? 'mdi-cast' : 'mdi-play-circle'"
-            />
-          </button>
+          />
 
-          <router-link
-            tag="button"
+          <x-btn
             :to="{ name: 'movie', params: { id: item.id } }"
-            class="px-4 py-2 mb-4"
+            icon="mdi-information"
+            class="mb-4"
           >
-            <span class="mdi mdi-information" />
             More Info
-          </router-link>
+          </x-btn>
 
           <div
             v-if="item.type === 'movie'"

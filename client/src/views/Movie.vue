@@ -28,29 +28,25 @@
         </div>
 
         <div class="flex justify-evenly mt-8 text-center">
-          <button
+          <x-btn
             :disabled="movie.type === 'series' && !nextEpisode"
-            class="px-4 py-2 border-2 border-white"
+            :icon="isCastConnected ? 'mdi-cast' : 'mdi-play'"
+            bordered
             @click="playMovie()"
           >
-            <span
-              class="mdi mr-2"
-              :class="isCastConnected ? 'mdi-cast' : 'mdi-play'"
-            />
             Watch
             <span v-if="nextEpisode">
               S{{ nextEpisode.season }}E{{ nextEpisode.episode }}
             </span>
-          </button>
+          </x-btn>
 
-          <router-link
-            tag="button"
+          <x-btn
             :to="{ name: 'movie-edit', params: { id: $route.params.id } }"
+            icon="mdi-pencil"
             class="px-4 py-2"
           >
-            <span class="mdi mdi-pencil mr-2" />
             Edit Info
-          </router-link>
+          </x-btn>
         </div>
       </div>
     </div>
