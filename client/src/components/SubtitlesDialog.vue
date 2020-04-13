@@ -1,22 +1,17 @@
 <template>
   <div>
-    <button
-      class="flex-shrink-0 w-10 h-10 rounded-full"
-      @click="show = true"
-    >
-      <span class="mdi mdi-closed-caption text-2xl" />
-    </button>
+    <x-modal>
+      <template #activator="{ on }">
+        <button
+          class="flex-shrink-0 w-10 h-10 rounded-full"
+          v-on="on"
+          @click="show = true"
+        >
+          <span class="mdi mdi-closed-caption text-2xl" />
+        </button>
+      </template>
 
-    <div
-      v-if="show"
-      class="fixed w-screen h-screen top-0 left-0 flex justify-center items-center modal-background"
-      @click="show = false"
-    >
-      <div
-        class="bg-black py-4"
-        style="min-width: 350px; max-width: 90%; max-height: 90%"
-        @click.stop
-      >
+      <div class="p-4 rounded bg-black shadow-lg">
         <h2 class="text-2xl px-4 pb-2">
           Subtitles
         </h2>
@@ -66,7 +61,7 @@
           </button>
         </div>
       </div>
-    </div>
+    </x-modal>
   </div>
 </template>
 

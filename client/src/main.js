@@ -6,6 +6,11 @@ import router from './router'
 import store from './store'
 import { formatBytes, formatTime } from './utils'
 
+// Import and automatically register base components
+import './components/base'
+
+import 'animate.css'
+
 Vue.config.productionTip = false
 
 Vue.filter('time', formatTime)
