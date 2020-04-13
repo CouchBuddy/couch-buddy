@@ -71,7 +71,8 @@ async function getCollection (ctx) {
         ]
       },
       order: [[ 'season', 'ASC' ], [ 'episode', 'ASC' ]],
-      group: [ 'movieId' ]
+      group: [ 'movieId' ],
+      include: 'movie'
     })
 
     const pendingMovies = await Movie.findAll({

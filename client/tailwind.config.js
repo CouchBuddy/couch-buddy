@@ -1,11 +1,12 @@
 module.exports = {
   theme: {
-    aspectRatio: { // defaults to {}
+    aspectRatio: {
       none: 0,
-      square: [ 1, 1 ], // or 1 / 1, or simply 1
-      '16/9': [ 16, 9 ], // or 16 / 9
-      '4/3': [ 4, 3 ], // or 4 / 3
-      '21/9': [ 21, 9 ] // or 21 / 9
+      square: [ 1, 1 ],
+      '16/9': [ 16, 9 ],
+      '2/3': [ 2, 3 ], // for movie posters
+      '4/3': [ 4, 3 ],
+      '21/9': [ 21, 9 ]
     }
   },
   variants: {

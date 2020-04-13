@@ -15,11 +15,11 @@
         <router-link
           tag="div"
           :to="{ name: 'watch', params: { id: getWatchId(item) } }"
-          class="relative overflow-hidden cursor-pointer"
+          class="relative overflow-hidden aspect-ratio-2/3 cursor-pointer"
         >
           <img
-            :src="item.poster"
-            class="w-full h-full object-cover"
+            :src="item.movie ? item.movie.poster : item.poster"
+            class="absolute w-full h-full object-cover"
           >
 
           <small
@@ -31,10 +31,19 @@
           </small>
 
           <div
-            class="absolute w-full text-xl text-center bottom-0 pb-1"
-            style="background: linear-gradient(to top, #000000f7, transparent)"
+            class="absolute w-full text-xl text-center bottom-0 py-2"
+            style="background: linear-gradient(to top, rgba(0,0,0,.7), transparent); text-shadow: 1px 1px 0 black"
           >
-            {{ item.title }}
+            <div
+              v-if="item.movie"
+              class="mx-1 text-sm truncate"
+            >
+              {{ item.movie.title }}
+            </div>
+
+            <div class="mx-1 font-bold truncate">
+              {{ item.title }}
+            </div>
           </div>
 
           <div
