@@ -1,11 +1,14 @@
 const router = require('@koa/router')()
 
 const downloads = require('./downloads')
+const extensions = require('./extensions')
 const library = require('./library')
 const streaming = require('./streaming')
 const system = require('./system')
 
 router.get('/system', system.getSystemInfo)
+router.get('/extensions', extensions.listExtensions)
+router.get('/extensions/:id/load', extensions.loadExtension)
 
 router.get('/library/find-info', library.findMovieInfo)
 router.get('/library', library.listLibrary)

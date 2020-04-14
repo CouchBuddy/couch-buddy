@@ -5,7 +5,7 @@ const Sequelize = require('sequelize')
  * @param {Sequelize.Model} model
  */
 const getResource = (model, options) =>
-  async function getEpisode (ctx) {
+  async function (ctx) {
     const id = parseInt(ctx.params.id)
     ctx.assert(id > 0, 404, 'Resource ID must be an integer > 0')
 
@@ -14,6 +14,11 @@ const getResource = (model, options) =>
     ctx.assert(resource, 404)
 
     ctx.body = resource
+  }
+
+const listResource = (model, options = {}) =>
+  async function (ctx) {
+    ctx.body = await model.findAll(options)
   }
 
 /**
@@ -38,5 +43,6 @@ const updateResource = (model) =>
 
 module.exports = {
   getResource,
+  listResource,
   updateResource
 }
