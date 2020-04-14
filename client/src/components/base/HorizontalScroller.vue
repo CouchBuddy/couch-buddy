@@ -48,7 +48,9 @@ export default {
     scrollDistance: 0
   }),
   mounted () {
-    this.scrollDistance = this.$refs.scroller.firstElementChild.offsetWidth
+    if (!this.scrollDistance && this.$refs.scroller.firstElementChild) {
+      this.scrollDistance = this.$refs.scroller.firstElementChild.offsetWidth
+    }
 
     // set initial scroll position
     if (typeof this.centeredItemId === 'number' && isFinite(this.centeredItemId)) {
@@ -67,6 +69,10 @@ export default {
      * Scroll by the width of 1 child
      */
     scrollBy (direction = 0) {
+      if (!this.scrollDistance && this.$refs.scroller.firstElementChild) {
+        this.scrollDistance = this.$refs.scroller.firstElementChild.offsetWidth
+      }
+
       this.$refs.scroller.scrollBy({ left: this.scrollDistance * direction, behavior: 'smooth' })
     }
   }

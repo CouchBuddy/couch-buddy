@@ -1,16 +1,17 @@
 <template>
   <div>
     <section
-      v-if="continueWatching.length"
+      v-for="collection in collections"
+      :key="`coll-${collection.name}`"
       class="mb-8"
     >
       <div class="mb-4 text-xl">
-        Continue watching
+        {{ collection.name }}
       </div>
 
       <x-horizontal-scroller
         v-slot="item"
-        :items="continueWatching"
+        :items="collection.items"
       >
         <router-link
           tag="div"
@@ -138,6 +139,18 @@ export default {
   name: 'Home',
   data: () => ({
     continueWatching: [],
+    collections: [
+      {
+        name: 'Continue Watching',
+        url: '/continue-watching',
+        items: []
+      },
+      {
+        name: 'Recently Added',
+        url: '/recently-added',
+        items: []
+      }
+    ],
     library: [],
     selectedItem: null
   }),
@@ -147,7 +160,9 @@ export default {
   async mounted () {
     this.library = (await client.get('/api/library')).data
 
-    this.continueWatching = (await client.get('/api/collections/continue-watching')).data
+    for (const collection of this.collections) {
+      collection.items = (await client.get(`/api/collections${collection.url}`)).data
+    }
   },
   methods: {
     ...mapActions([ 'castMovie' ]),

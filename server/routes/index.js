@@ -3,6 +3,7 @@ const router = require('@koa/router')()
 const downloads = require('./downloads')
 const extensions = require('./extensions')
 const library = require('./library')
+const collections = require('./media-collections')
 const streaming = require('./streaming')
 const system = require('./system')
 
@@ -19,7 +20,9 @@ router.get('/library/:id/episodes', library.listEpisodes)
 router.get('/episodes/:id', library.getEpisode)
 router.get('/episodes/:id/thumbnail', library.getEpisodeThumbnail)
 router.patch('/episodes/:id', library.updateEpisode)
-router.get('/collections/:what', library.getCollection)
+
+router.get('/collections/continue-watching', collections.continueWatching)
+router.get('/collections/recently-added', collections.recentlyAdded)
 
 router.get('/watch/:id', streaming.watch)
 router.get('/watch/:wid/subtitles', streaming.listSubtitles)
