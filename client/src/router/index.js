@@ -7,7 +7,7 @@ import store from '@/store'
 
 Vue.use(VueRouter)
 
-const routes = [
+const getRoutes = () => [
   {
     path: '/',
     component: MainLayout,
@@ -52,10 +52,10 @@ const routes = [
   }
 ]
 
-const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes
-})
-
-export default router
+export default function () {
+  return new VueRouter({
+    mode: 'history',
+    base: process.env.BASE_URL,
+    routes: getRoutes()
+  })
+}
