@@ -4,7 +4,7 @@ const { Download } = require('../models')
 
 async function addTorrent (ctx) {
   const magnetURI = ctx.request.body.magnetURI
-  const torrentFile = ctx.request.files.torrents
+  const torrentFile = ctx.request.files ? ctx.request.files.torrents : null
 
   ctx.assert(magnetURI || torrentFile, 400, 'You must provide the magnetURI field or upload a file')
 
