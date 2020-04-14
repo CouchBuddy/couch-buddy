@@ -21,15 +21,14 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 export default {
   data: () => ({
-    menu: [
-      { to: 'home', icon: 'mdi-sofa', shortkey: [ 'ctrl', 'h' ] },
-      { to: 'downloads', icon: 'mdi-download', shortkey: [ 'ctrl', 'd' ] },
-      { to: 'search', icon: 'mdi-magnify', shortkey: [ 'ctrl', 'f' ] },
-      { to: 'settings', icon: 'mdi-cog' }
-    ]
   }),
+  computed: {
+    ...mapState('navigation', [ 'menu' ])
+  },
   methods: {
     goTo (item) {
       if (!this.$route.matched.some(({ name }) => name === item.to)) {

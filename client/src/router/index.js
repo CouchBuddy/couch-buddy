@@ -1,7 +1,9 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+
 import Home from '@/views/Home.vue'
 import MainLayout from '@/components/MainLayout'
+import store from '@/store'
 
 Vue.use(VueRouter)
 
@@ -39,7 +41,8 @@ const routes = [
         path: '/settings',
         name: 'settings',
         component: () => import(/* webpackChunkName: "settings" */ '@/views/Settings.vue')
-      }
+      },
+      ...store.state.navigation.routes
     ]
   },
   {
