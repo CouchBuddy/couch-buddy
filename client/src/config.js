@@ -1,4 +1,4 @@
-const isProduction = process.env.NODE_ENV
+const isProduction = process.env.NODE_ENV === 'production'
 
 export default {
   castReceiverAppId: null,
