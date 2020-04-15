@@ -2,6 +2,7 @@ const axios = require('axios')
 const fs = require('fs')
 const sendFile = require('koa-send')
 const OS = require('opensubtitles-api')
+const path = require('path')
 const srt2vtt = require('srt-to-vtt')
 
 const config = require('../config')
@@ -123,7 +124,12 @@ async function downloadSubtitles (ctx) {
   if (!isVtt) {
     stream = stream.pipe(srt2vtt())
   }
-  await stream.pipe(fs.createWriteStream(config.mediaDir + fileName))
+  await stream.pipe(
+    fs.createWriteStream(
+      // Save subtitles in video file directory
+      path.join(path.dirname(config.mediaDir + mediaFile.fileName), fileName)
+    )
+  )
 
   ctx.body = await SubtitlesFile.create({
     fileName,
