@@ -26,6 +26,7 @@ router.get('/collections/continue-watching', collections.continueWatching)
 router.get('/collections/recently-added', collections.recentlyAdded)
 
 router.get('/watch/:id', streaming.watch)
+router.get('/watch/:id/metadata', streaming.getMetadata)
 
 router.get('/watch/:wid/subtitles', subtitles.listSubtitles)
 router.get('/subtitles/:id', subtitles.getSubtitles)

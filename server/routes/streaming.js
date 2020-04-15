@@ -66,7 +66,7 @@ async function watch (ctx) {
   let range = ctx.request.get('range')
   let mimeType = mime.lookup(isTorrent ? torrentFile.path : path)
 
-  const metadata = await getVideoMetadata(path)
+  const metadata = await ffprobe(path)
   const isSupported = { audio: false, video: false }
 
   for (const stream of metadata.streams) {
@@ -93,6 +93,7 @@ async function watch (ctx) {
       .withVideoCodec(isSupported.video ? 'copy' : 'libx264')
       .withAudioCodec(isSupported.audio ? 'copy' : 'aac')
       .format('mp4')
+      .seek(ctx.request.query.current_time || 0)
       .on('error', (err) => {
         console.log('FFMPEG error:', err)
       })
@@ -144,7 +145,43 @@ async function watch (ctx) {
   ctx.body = videoStream
 }
 
-function getVideoMetadata (path) {
+async function getMetadata (ctx) {
+  const videoFile = await getVideoFile(ctx)
+
+  ctx.body = await ffprobe(config.mediaDir + (videoFile.fileName || videoFile.path))
+}
+
+async function getVideoFile (ctx) {
+  ctx.assert(/^(e|m|t)[a-f0-9]+$/.test(ctx.params.id), 400, 'Invalid ID format')
+
+  const isTorrent = ctx.params.id[0] === 't'
+
+  let videoFile
+
+  if (isTorrent) {
+    const torrent = torrentClient.get(ctx.params.id.slice(1))
+    ctx.assert(torrent, 404, 'Media not found')
+
+    // Find the first playable file
+    videoFile = torrent.files.find(file => SUPPORTED_EXTENSIONS.includes(file.name.split('.').pop()))
+  } else {
+    const mediaId = parseInt(ctx.params.id.slice(1))
+    const mediaType = ctx.params.id[0] === 'm' ? 'movie' : 'episode'
+
+    videoFile = await MediaFile.findOne({
+      where: {
+        mediaId,
+        mediaType
+      }
+    })
+  }
+
+  ctx.assert(videoFile, 404, 'Media not found')
+
+  return videoFile
+}
+
+function ffprobe (path) {
   return new Promise((resolve, reject) => {
     ffmpeg.ffprobe(path, (err, metadata) => {
       if (err) { return reject(err) }
@@ -155,5 +192,6 @@ function getVideoMetadata (path) {
 }
 
 module.exports = {
+  getMetadata,
   watch
 }
