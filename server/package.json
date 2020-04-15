@@ -1,6 +1,5 @@
 {
   "name": "couch-buddy-server",
-  "version": "0.1.0",
   "description": "Couch Buddy Koa server",
   "private": true,
   "scripts": {
