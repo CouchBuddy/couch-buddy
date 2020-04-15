@@ -26,7 +26,7 @@
     </div>
 
     <div class="text-sm font-bold mr-2">
-      {{ remainingTime }}
+      {{ remainingTime | time }}
     </div>
 
     <x-btn
@@ -53,7 +53,6 @@
 
 <script>
 import SubtitlesDialog from './SubtitlesDialog'
-import { formatTime } from '@/utils'
 
 export default {
   name: 'VideoControls',
@@ -81,7 +80,7 @@ export default {
     isFullscreen: false,
     isMuted: false,
     isPaused: true,
-    remainingTime: '0:00:00',
+    remainingTime: 0,
     seekPosition: 0
   }),
   mounted () {
@@ -111,7 +110,7 @@ export default {
       this.video.muted = !this.video.muted
     },
     updateRemainingTime () {
-      this.remainingTime = formatTime(this.duration - this.currentTime)
+      this.remainingTime = this.duration - this.currentTime
     },
     onSeek () {
       this.video.currentTime = this.seekPosition

@@ -4,20 +4,14 @@ import 'animate.css'
 
 import App from './App.vue'
 import store from './store'
-import { formatBytes, formatTime } from './utils'
-
+import './plugins'
 // Import and automatically register base components
 import './components/base'
-
 import extensionsManager from './extensions'
-
 // Router is loaded last, so extensions can register routes
 import createRouter from './router'
 
 Vue.config.productionTip = false
-
-Vue.filter('time', formatTime)
-Vue.filter('bytes', formatBytes)
 
 Vue.use(VueSK)
 

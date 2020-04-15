@@ -1,3 +1,8 @@
+import Vue from 'vue'
+
+Vue.filter('time', formatTime)
+Vue.filter('bytes', formatBytes)
+
 export function formatTime (time, colonsOrLetters = false) {
   const hours = Math.floor(time / 3600)
   let minutes = Math.floor((time - (hours * 3600)) / 60)

@@ -17,6 +17,8 @@
     </div>
 
     <shortcut-help-dialog />
+
+    <the-notification />
   </div>
 </template>
 
@@ -26,13 +28,15 @@ import { mapState } from 'vuex'
 import MainNavigation from './MainNavigation'
 import CastControl from '@/components/CastControl'
 import ShortcutHelpDialog from './ShortcutHelpDialog'
+import TheNotification from './TheNotification'
 
 export default {
   name: 'MainLayout',
   components: {
     CastControl,
     MainNavigation,
-    ShortcutHelpDialog
+    ShortcutHelpDialog,
+    TheNotification
   },
   computed: {
     ...mapState([ 'systemInfo' ])
