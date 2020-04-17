@@ -124,15 +124,18 @@ async function downloadSubtitles (ctx) {
   if (!isVtt) {
     stream = stream.pipe(srt2vtt())
   }
+
+  const mediaFileDir = path.dirname(mediaFile.fileName)
+
   await stream.pipe(
     fs.createWriteStream(
       // Save subtitles in video file directory
-      path.join(path.dirname(config.mediaDir + mediaFile.fileName), fileName)
+      path.join(config.mediaDir, mediaFileDir, fileName)
     )
   )
 
   ctx.body = await SubtitlesFile.create({
-    fileName,
+    fileName: path.join(mediaFileDir, fileName),
     lang,
     mediaId,
     mediaType
