@@ -1,5 +1,5 @@
 <template>
-  <aside class="fixed w-full md:w-16 h-16 md:h-screen bottom-0 z-30 md:top-0 bg-red-700 main-nav">
+  <aside class="fixed w-full md:w-16 h-16 md:h-screen bottom-0 z-30 md:top-0 bg-primary main-nav">
     <nav class="flex flex-row md:flex-col justify-evenly md:justify-start">
       <router-link
         v-for="item in menu"

@@ -48,7 +48,7 @@
           </div>
 
           <div
-            class="absolute bottom-0 h-1 bg-red-700"
+            class="absolute bottom-0 h-1 bg-primary"
             :style="{ width: `${item.watched || 0}%` }"
           />
         </router-link>
@@ -63,7 +63,7 @@
       <div
         v-for="item in library"
         :key="item.id"
-        class="relative flex justify-center items-center overflow-hidden cursor-pointer bg-red-700 movie-card"
+        class="relative flex justify-center items-center overflow-hidden cursor-pointer bg-primary movie-card"
       >
         <img
           v-if="item.poster"
@@ -99,7 +99,7 @@
 
           <div
             v-if="item.type === 'movie'"
-            class="h-1 mt-2 self-start bg-red-700"
+            class="h-1 mt-2 self-start bg-primary"
             :style="{ width: `${Math.min(item.watched || 0, 100)}%` }"
           />
         </div>

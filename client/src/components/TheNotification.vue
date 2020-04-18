@@ -46,7 +46,7 @@ export default {
   methods: {
     showNotification ({ message, error }) {
       this.message = message
-      this.color = error ? 'text-red-600' : 'text-green-600'
+      this.color = error ? 'text-error' : 'text-success'
       this.icon = error ? 'mdi-close-circle' : 'mdi-check-circle'
       this.show = true
 

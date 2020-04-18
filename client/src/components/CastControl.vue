@@ -28,7 +28,7 @@
 
           <div class="h-1 mx-2 mt-1 bg-gray-900">
             <div
-              class="h-full bg-red-700"
+              class="h-full bg-primary"
               :style="{ width: `${latestCurrentTime / mediaStatus.media.duration * 100}%` }"
             />
           </div>

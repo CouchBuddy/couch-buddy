@@ -16,7 +16,7 @@
         v-for="item in results"
         :key="item.id"
         :to="{ name: 'movie', params: { id: item.id } }"
-        class="flex justify-center items-center cursor-pointer bg-red-700"
+        class="flex justify-center items-center cursor-pointer bg-primary"
       >
         <img
           v-if="item.poster"

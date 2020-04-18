@@ -1,5 +1,12 @@
+const { colors } = require('tailwindcss/defaultTheme')
+
 module.exports = {
   theme: {
+    colors: {
+      primary: colors.red[700],
+      success: colors.green[600],
+      error: colors.red[600]
+    },
     aspectRatio: {
       none: 0,
       square: [ 1, 1 ],

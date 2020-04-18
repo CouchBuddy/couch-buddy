@@ -77,7 +77,7 @@
           </div>
 
           <div
-            class="absolute bottom-0 h-1 bg-red-700"
+            class="absolute bottom-0 h-1 bg-primary"
             :style="{ width: `${item.watched || 0}%` }"
           />
         </div>

@@ -44,7 +44,7 @@
       class="relative flex items-center p-4 mb-4 bg-black"
     >
       <div
-        class="absolute h-full left-0 top-0 bg-red-700 opacity-25"
+        class="absolute h-full left-0 top-0 bg-primary opacity-25"
         :style="{ width: `${torrent.progress * 100}%` }"
       />
 
