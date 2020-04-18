@@ -69,6 +69,7 @@
     <video-controls
       v-if="$refs.video"
       :video="$refs.video"
+      :watch-id="watchId"
       :showing="showOverlay"
       :subtitles="subtitles"
       class="absolute bottom-0 left-0 w-full p-8 video-controls"
@@ -106,9 +107,10 @@ export default {
   computed: {
     ...mapState([ 'serverUrl' ])
   },
-  async mounted () {
+  created () {
     this.watchId = this.$route.params.id
-
+  },
+  async mounted () {
     this.resourcePath = this.watchId[0] === 'e' ? 'episodes' : 'library'
     this.resourceId = this.watchId.slice(1)
 

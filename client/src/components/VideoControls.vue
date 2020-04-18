@@ -72,6 +72,10 @@ export default {
     video: {
       type: HTMLVideoElement,
       default: () => ({})
+    },
+    watchId: {
+      type: String,
+      required: true
     }
   },
   data: () => ({
