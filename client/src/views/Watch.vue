@@ -32,6 +32,11 @@
       >
         {{ error }}
       </div>
+
+      <x-loading
+        v-if="loading"
+        class="w-16 h-16 video-loading"
+      />
     </div>
 
     <div
@@ -93,6 +98,7 @@ export default {
   },
   data: () => ({
     error: null,
+    loading: false,
     movie: {},
     overlayTimeout: null,
     resourcePath: null,
@@ -114,6 +120,9 @@ export default {
     this.resourcePath = this.watchId[0] === 'e' ? 'episodes' : 'library'
     this.resourceId = this.watchId.slice(1)
 
+    this.$refs.video.addEventListener('canplay', this.onReadyStateChange)
+    this.$refs.video.addEventListener('suspend', this.onReadyStateChange)
+
     if (this.watchId[0] !== 't') {
       // get movie info
       this.movie = (await client.get(`/api/${this.resourcePath}/${this.resourceId}`)).data
@@ -125,6 +134,10 @@ export default {
 
     this.source = `${this.serverUrl}/api/watch/${this.watchId}`
     this.sourceSubs = `${this.serverUrl}/api/subtitles`
+  },
+  beforeDestroy () {
+    this.$refs.video.removeEventListener('canplay', this.onReadyStateChange)
+    this.$refs.video.removeEventListener('suspend', this.onReadyStateChange)
   },
   methods: {
     togglePlay () {
@@ -162,6 +175,9 @@ export default {
       this.subtitles.push(subs)
       this.subtitles.sort(({ lang: a }, { lang: b }) => (a > b) ? -1 : ((b > a) ? 1 : 0))
       this.setSubtitles(subs.id)
+    },
+    onReadyStateChange () {
+      this.loading = this.$refs.video.readyState <= 2
     }
   }
 }
@@ -176,7 +192,8 @@ export default {
   height: 100%;
   overflow: hidden;
 
-  .video-error {
+  .video-error,
+  .video-loading {
     position: absolute;
     top: 50%;
     left: 50%;
