@@ -58,7 +58,8 @@ async function recentlyAdded (ctx) {
         watched: { [Op.lt]: 95 }
       },
       order: [[ 'createdAt', 'DESC' ]],
-      limit: 10
+      limit: 10,
+      include: 'movie'
     })
   ].sort((a, b) => b.createdAt - a.createdAt)
 }

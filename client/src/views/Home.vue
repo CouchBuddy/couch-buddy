@@ -13,10 +13,8 @@
         v-slot="item"
         :items="collection.items"
       >
-        <router-link
-          tag="div"
-          :to="{ name: 'watch', params: { id: getWatchId(item) } }"
-          class="relative overflow-hidden aspect-ratio-2/3 cursor-pointer"
+        <div
+          class="relative overflow-hidden aspect-ratio-2/3 movie-card"
         >
           <img
             :src="item.movie ? item.movie.poster : item.poster"
@@ -51,82 +49,32 @@
             class="absolute bottom-0 h-1 bg-primary"
             :style="{ width: `${item.watched || 0}%` }"
           />
-        </router-link>
-      </x-horizontal-scroller>
-    </section>
 
-    <div
-      v-if="library.length"
-      class="grid gap-4 p-4"
-      style="grid-auto-rows: minmax(200px, 1fr); grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));"
-    >
-      <div
-        v-for="item in library"
-        :key="item.id"
-        class="relative flex justify-center items-center overflow-hidden cursor-pointer bg-primary movie-card"
-      >
-        <img
-          v-if="item.poster"
-          :src="item.poster"
-          class="w-full h-full object-cover"
-        >
+          <div class="absolute flex flex-col justify-between items-center w-full h-full p-4 movie-card__details">
+            <div />
 
-        <div
-          v-else
-        >
-          {{ item.title }}
-        </div>
+            <x-btn
+              v-if="item.type === 'movie' || item.episode"
+              :icon="isCastConnected ? 'mdi-cast' : 'mdi-play-circle'"
+              x-large
+              @click="playMovie(item)"
+            />
 
-        <div class="absolute flex flex-col justify-between items-center w-full h-full movie-card__details">
-          <div class="text-xl text-center mt-8">
-            {{ item.title }}
+            <x-btn
+              :to="{ name: 'movie', params: { id: item.movie ? item.movie.id : item.id } }"
+              icon="mdi-information"
+            >
+              More Info
+            </x-btn>
           </div>
-
-          <x-btn
-            v-if="item.type === 'movie'"
-            :icon="isCastConnected ? 'mdi-cast' : 'mdi-play-circle'"
-            x-large
-            @click="playMovie(item)"
-          />
-
-          <x-btn
-            :to="{ name: 'movie', params: { id: item.id } }"
-            icon="mdi-information"
-            class="mb-4"
-          >
-            More Info
-          </x-btn>
-
-          <div
-            v-if="item.type === 'movie'"
-            class="h-1 mt-2 self-start bg-primary"
-            :style="{ width: `${Math.min(item.watched || 0, 100)}%` }"
-          />
         </div>
-      </div>
-    </div>
+      </x-horizontal-scroller>
 
-    <div
-      v-else
-      class="text-center"
-    >
-      <h1 class="text-4xl">
-        Your library is empty!
-      </h1>
-
-      <div class="text-xl text-gray-400">
-        Go to settings and scan your media directory now
-      </div>
-
-      <router-link
-        tag="button"
-        :to="{ name: 'settings' }"
-        class="border-2 text-xl px-4 py-2 mt-16"
-      >
-        <span class="mdi mdi-cog mr-2" />
-        Settings
-      </router-link>
-    </div>
+      <x-loading
+        v-if="collection.loading"
+        class="w-12 h-12 mx-auto"
+      />
+    </section>
   </div>
 </template>
 
@@ -143,31 +91,38 @@ export default {
       {
         name: 'Continue Watching',
         url: '/continue-watching',
-        items: []
+        items: [],
+        loading: false
       },
       {
         name: 'Recently Added',
         url: '/recently-added',
-        items: []
+        items: [],
+        loading: false
       }
     ],
-    library: [],
     selectedItem: null
   }),
   computed: {
     ...mapState([ 'isCastConnected', 'serverUrl' ])
   },
   async mounted () {
-    this.library = (await client.get('/api/library')).data
-
     for (const collection of this.collections) {
-      collection.items = (await client.get(`/api/collections${collection.url}`)).data
+      collection.loading = true
+
+      client.get(`/api/collections${collection.url}`)
+        .then(response => {
+          collection.items = response.data
+        })
+        .finally(() => {
+          collection.loading = false
+        })
     }
   },
   methods: {
     ...mapActions([ 'castMovie' ]),
     playMovie (movie) {
-      if (movie.type !== 'movie') { return }
+      if (movie.type !== 'movie' && !movie.episode) { return }
 
       if (this.isCastConnected) {
         this.castMovie(movie)

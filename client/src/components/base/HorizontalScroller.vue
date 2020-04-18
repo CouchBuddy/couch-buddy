@@ -17,6 +17,7 @@
     </div>
 
     <button
+      v-if="items.length"
       class="absolute hidden md:flex flex flex-col h-full top-0 left-0 justify-center text-5xl btn"
       @click="scrollBy(-1)"
     >
@@ -24,6 +25,7 @@
     </button>
 
     <button
+      v-if="items.length"
       class="absolute hidden md:flex flex-col h-full top-0 right-0 justify-center text-5xl btn"
       @click="scrollBy(1)"
     >
