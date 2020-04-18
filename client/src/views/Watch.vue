@@ -125,13 +125,6 @@ export default {
 
     this.source = `${this.serverUrl}/api/watch/${this.watchId}`
     this.sourceSubs = `${this.serverUrl}/api/subtitles`
-
-    this.$refs.video.addEventListener('timeupdate', this.onTimeUpdate)
-    this.$refs.video.addEventListener('loadedmetadata', this.onLoadMetadata)
-  },
-  beforeDestroy () {
-    this.$refs.video.removeEventListener('timeupdate', this.onTimeUpdate)
-    this.$refs.video.removeEventListener('loadedmetadata', this.onLoadMetadata)
   },
   methods: {
     togglePlay () {
@@ -153,22 +146,6 @@ export default {
     },
     onVideoError () {
       this.error = this.$refs.video.error.message
-    },
-    onLoadMetadata () {
-      // compute the hysteresis threshold (%) for updating Movie `watched` prop
-      if (this.$refs.video.duration > 60) {
-        this.updateWatchedEvery = (10 / this.$refs.video.duration) * 100
-      }
-    },
-    async onTimeUpdate () {
-      const watched = (this.$refs.video.currentTime / this.$refs.video.duration) * 100
-
-      if (watched > this.movie.watched + this.updateWatchedEvery) {
-        this.movie.watched = watched
-        await client.patch(`/api/${this.resourcePath}/${this.resourceId}`, {
-          watched
-        })
-      }
     },
     setSubtitles (id) {
       for (const track of this.$refs.video.textTracks) {

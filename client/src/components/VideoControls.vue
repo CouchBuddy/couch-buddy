@@ -15,13 +15,13 @@
       />
 
       <input
-        v-model="seekPosition"
+        v-model.number="seekPosition"
         type="range"
         min="0"
         :max="duration"
         step="1"
         class="relative w-full h-full"
-        @input="onSeek"
+        @change="onSeek"
       >
     </div>
 
@@ -52,6 +52,9 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
+import client from '@/client'
 import SubtitlesDialog from './SubtitlesDialog'
 
 export default {
@@ -80,29 +83,40 @@ export default {
   },
   data: () => ({
     currentTime: 0,
+    currentTimeOffset: 0,
     duration: 0,
     isFullscreen: false,
     isMuted: false,
     isPaused: true,
     remainingTime: 0,
+    savedCurrentTime: 0,
     seekPosition: 0
   }),
-  mounted () {
+  computed: {
+    ...mapState([ 'serverUrl' ])
+  },
+  async mounted () {
+    this.resourcePath = this.watchId[0] === 'e' ? 'episodes' : 'library'
+    this.resourceId = this.watchId.slice(1)
+
     this.isMuted = this.video.muted
     this.isPaused = this.video.paused
 
     this.video.addEventListener('play', this.onPlayPause)
     this.video.addEventListener('pause', this.onPlayPause)
     this.video.addEventListener('volumechange', this.onVolumeChange)
-    this.video.addEventListener('loadedmetadata', this.onLoadedMetadata)
     this.video.addEventListener('timeupdate', this.onTimeUpdate)
     document.addEventListener('fullscreenchange', this.onFullscreenChange)
+
+    // Get metadata manually, as transcoded videos have a fake duration
+    const metadata = await client.get(`/api/watch/${this.watchId}/metadata`)
+    this.duration = metadata.data.streams.find(s => s.codec_type === 'video').duration
+    this.updateRemainingTime()
   },
   beforeDestroy () {
     this.video.removeEventListener('play', this.onPlayPause)
     this.video.removeEventListener('pause', this.onPlayPause)
     this.video.removeEventListener('volumechange', this.onVolumeChange)
-    this.video.removeEventListener('loadedmetadata', this.onLoadedMetadata)
     this.video.removeEventListener('timeupdate', this.onTimeUpdate)
     document.removeEventListener('fullscreenchange', this.onFullscreenChange)
   },
@@ -117,7 +131,12 @@ export default {
       this.remainingTime = this.duration - this.currentTime
     },
     onSeek () {
-      this.video.currentTime = this.seekPosition
+      if (Math.abs(this.video.duration - this.duration) < 3) {
+        this.video.currentTime = this.seekPosition
+      } else {
+        this.video.src = `${this.serverUrl}/api/watch/${this.watchId}?current_time=${this.seekPosition}`
+        this.currentTimeOffset = this.seekPosition
+      }
     },
     onPlayPause () {
       this.isPaused = this.video.paused
@@ -125,21 +144,20 @@ export default {
     onVolumeChange () {
       this.isMuted = this.video.muted
     },
-    onLoadedMetadata () {
-      this.duration = this.video.duration
-      this.updateRemainingTime()
-    },
-    onTimeUpdate () {
-      // In some browser, duration may not be available at 'loadedmetadata' event
-      if (!this.duration) {
-        this.duration = this.video.duration
+    async onTimeUpdate () {
+      if (this.video.currentTime + this.currentTimeOffset > this.savedCurrentTime + 10) {
+        this.savedCurrentTime = this.video.currentTime + this.currentTimeOffset
+
+        await client.patch(`/api/${this.resourcePath}/${this.resourceId}`, {
+          watched: (this.savedCurrentTime / this.duration) * 100
+        })
       }
 
       // Update UI time only if controls are visible
       if (!this.showing) { return }
 
-      this.currentTime = this.video.currentTime
-      this.seekPosition = this.video.currentTime
+      this.currentTime = this.video.currentTime + this.currentTimeOffset
+      this.seekPosition = this.currentTime
       this.updateRemainingTime()
     },
     onSubsSelect (id) {
