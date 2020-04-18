@@ -109,8 +109,12 @@ export default {
     document.addEventListener('fullscreenchange', this.onFullscreenChange)
 
     // Get metadata manually, as transcoded videos have a fake duration
-    const metadata = await client.get(`/api/watch/${this.watchId}/metadata`)
-    this.duration = metadata.data.streams.find(s => s.codec_type === 'video').duration
+    const metadata = (await client.get(`/api/watch/${this.watchId}/metadata`)).data
+    this.duration = metadata.streams.find(s => s.codec_type === 'video').duration
+    if (!this.duration || this.duration === 'N/A') {
+      this.duration = metadata.format.duration
+    }
+
     this.updateRemainingTime()
   },
   beforeDestroy () {
