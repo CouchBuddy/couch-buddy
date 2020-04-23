@@ -62,7 +62,7 @@
       <x-horizontal-scroller
         v-slot="item"
         :items="group.episodes"
-        :centered-item-id="nextEpisode.season === group.season ? nextEpisode.id : null"
+        :centered-item-id="nextEpisode && (nextEpisode.season === group.season) ? nextEpisode.id : null"
       >
         <div
           class="relative overflow-hidden aspect-ratio-16/9 cursor-pointer"
@@ -118,8 +118,6 @@ export default {
       const response = await client.get(`/api/library/${this.movieId}/episodes`)
 
       this.nextEpisode = response.data.find(e => e.watched < 95)
-      // Dirty workaround to pass the series poster to vuex during movie casting
-      this.nextEpisode.poster = this.movie.poster
 
       // Group episodes by season as object:
       //   { '1': [ {}, ... ] }
