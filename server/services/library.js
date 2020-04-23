@@ -180,6 +180,7 @@ function takeScreenshot (file) {
 
 module.exports = {
   addFileToLibrary,
+  parseTorrentTitle: ptt.parse,
   searchVideoFiles,
   takeScreenshot
 }

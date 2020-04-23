@@ -3,8 +3,8 @@ const WebTorrent = require('webtorrent')
 
 const config = require('../config')
 const { Download } = require('../models')
-const { addFileToLibrary } = require('./library')
-const io = require('./socket-io')
+const { addFileToLibrary, parseTorrentTitle } = require('./library')
+const io = require('./socket-io').of('/downloads')
 
 const client = new WebTorrent()
 
@@ -12,6 +12,10 @@ const client = new WebTorrent()
 client.on('torrent', (torrent) => {
   torrent.on('done', onTorrentDone)
   torrent.on('download', debounce(onTorrentDownload))
+})
+
+io.on('connection', (socket) => {
+  socket.emit('torrent:all', client.torrents.map(serializeTorrent))
 })
 
 restoreTorrents()
@@ -47,6 +51,7 @@ function serializeTorrent (t) {
   return {
     infoHash: t.infoHash,
     name: t.name,
+    info: parseTorrentTitle(t.name),
     timeRemaining: t.timeRemaining,
     progress: t.progress,
     downloadSpeed: t.downloadSpeed,
