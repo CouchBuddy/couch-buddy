@@ -4,12 +4,20 @@ const Sequelize = require('sequelize')
 /**
  * @param {Sequelize.Model} model
  */
-const getResource = (model, options) =>
+const getResource = (model, baseOptions = {}) =>
   async function (ctx) {
     const id = parseInt(ctx.params.id)
-    ctx.assert(id > 0, 404, 'Resource ID must be an integer > 0')
+    ctx.assert(id > 0 || ctx.params.id === 'random', 404, 'Resource ID must be an integer > 0')
 
-    const resource = await model.findByPk(id, options)
+    const options = pick(ctx.request.query, 'include', 'where')
+
+    let resource
+
+    if (isFinite(id)) {
+      resource = await model.findByPk(id, Object.assign(baseOptions, options))
+    } else {
+      resource = await model.findOne({ order: [[ Sequelize.literal('RANDOM()') ]], limit: 1 })
+    }
 
     ctx.assert(resource, 404)
 
@@ -40,6 +48,10 @@ const updateResource = (model) =>
       ctx.body = e.message
     }
   }
+
+function pick (o, ...props) {
+  return Object.assign({}, ...props.map(prop => ({ [prop]: o[prop] })))
+}
 
 module.exports = {
   getResource,
