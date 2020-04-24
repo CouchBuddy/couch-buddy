@@ -1,6 +1,7 @@
 const router = require('@koa/router')()
 
 const downloads = require('./downloads')
+const explore = require('./explore')
 const extensions = require('./extensions')
 const library = require('./library')
 const collections = require('./media-collections')
@@ -34,5 +35,7 @@ router.post('/subtitles/:wid/download', subtitles.downloadSubtitles)
 
 router.post('/downloads', downloads.addTorrent)
 router.get('/downloads', downloads.listTorrents)
+
+router.get('/explore', explore.searchMovies)
 
 module.exports = router
