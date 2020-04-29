@@ -19,6 +19,10 @@ export default {
   outline: none;
 }
 
+html {
+  font-size: 20px;
+}
+
 body {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

@@ -1,19 +1,18 @@
 <template>
   <div>
     <div
-      class="h-64"
-      style="margin: -5vh -5vw;margin-bottom: 0;"
+      style="height: 33vh; margin: -5vh -5vw; margin-bottom: 0;"
     >
       <img
         class="h-full w-full object-cover"
-        :src="movie.background"
+        :src="movie.backdrop"
       >
     </div>
 
     <div class="flex flex-col md:flex-row md:px-24">
       <div class="w-full md:w-1/3 -mt-16">
         <img
-          class="w-2/3 md:w-full mx-auto"
+          class="w-2/3 mx-auto"
           :src="movie.poster"
         >
       </div>
@@ -42,21 +41,23 @@
           </x-btn>
         </div>
 
-        <h2 class="text-4xl">
+        <div class="text-4xl">
           {{ movie.title }}
-        </h2>
-
-        <div class="mb-2 text-gray-600">
-          <small>{{ movie.year }}</small>
         </div>
 
-        <div>{{ movie.plot }}</div>
+        <div class="mb-2 text-gray-600">
+          {{ movie.year }} - {{ movie.genre }}
+        </div>
 
-        <div class="mt-4 text-gray-600">
+        <div class="text-lg">
+          {{ movie.plot }}
+        </div>
+
+        <div class="mt-4 text-gray-600 text-lg">
           Cast: {{ movie.actors }}
         </div>
 
-        <div class="mt-4 text-gray-600">
+        <div class="mt-4 text-gray-600 text-lg">
           Directed by {{ movie.director }}
         </div>
       </div>
