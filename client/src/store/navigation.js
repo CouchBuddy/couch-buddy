@@ -1,10 +1,10 @@
 export default {
   state: {
     menu: [
-      { to: 'home', icon: 'mdi-sofa', shortkey: [ 'ctrl', 'h' ], order: 0 },
-      { to: 'downloads', icon: 'mdi-download', shortkey: [ 'ctrl', 'd' ], order: 10 },
-      { to: 'search', icon: 'mdi-magnify', shortkey: [ 'ctrl', 'f' ], order: 20 },
-      { to: 'settings', icon: 'mdi-cog', order: 50 }
+      { to: 'home', name: 'Home', icon: 'mdi-sofa', shortkey: [ 'ctrl', 'h' ], order: 0 },
+      { to: 'downloads', name: 'Downloads', icon: 'mdi-download', shortkey: [ 'ctrl', 'd' ], order: 10 },
+      { to: 'search', name: 'Search', icon: 'mdi-magnify', shortkey: [ 'ctrl', 'f' ], order: 20 },
+      { to: 'settings', name: 'Settings', icon: 'mdi-cog', order: 50 }
     ],
     routes: []
   },
