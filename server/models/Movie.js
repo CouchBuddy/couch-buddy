@@ -10,6 +10,9 @@ module.exports = (sequelize) => {
     awards: {
       type: Sequelize.TEXT
     },
+    backdrop: {
+      type: Sequelize.TEXT
+    },
     country: {
       type: Sequelize.TEXT
     },

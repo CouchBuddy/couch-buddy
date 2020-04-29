@@ -4,8 +4,9 @@
       style="height: 33vh; margin: -5vh -5vw; margin-bottom: 0;"
     >
       <img
+        v-if="movie.backdrop"
         class="h-full w-full object-cover"
-        :src="movie.backdrop"
+        :src="`http://image.tmdb.org/t/p/original/${movie.backdrop}`"
       >
     </div>
 
