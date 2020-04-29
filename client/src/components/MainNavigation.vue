@@ -11,16 +11,16 @@
     >
       <nav
         v-show="open"
-        class="inline-flex flex-row md:flex-col h-full justify-evenly md:justify-center"
+        class="inline-flex flex-row md:flex-col h-full justify-evenly md:justify-center text-gray-500"
       >
         <router-link
           v-for="item in menu"
           :key="`menu-${item.to}`"
           v-shortkey="item.shortkey"
           :to="{ name: item.to }"
-          active-class="border-t-4 md:border-t-0 md:border-r-4"
+          active-class="text-white"
           exact
-          class="flex items-center justify-center md:justify-start md:my-4 text-4xl"
+          class="flex items-center justify-center md:justify-start md:my-4 text-3xl hover:text-white"
           @shortkey.native="goTo(item)"
         >
           <span
