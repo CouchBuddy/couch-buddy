@@ -1,14 +1,47 @@
 <template>
   <div>
-    <div class="flex flex-col md:flex-row">
-      <div class="w-full md:w-1/3">
+    <div
+      class="h-64"
+      style="margin: -5vh -5vw;margin-bottom: 0;"
+    >
+      <img
+        class="h-full w-full object-cover"
+        :src="movie.background"
+      >
+    </div>
+
+    <div class="flex flex-col md:flex-row md:px-24">
+      <div class="w-full md:w-1/3 -mt-16">
         <img
-          class="w-full"
+          class="w-2/3 md:w-full mx-auto"
           :src="movie.poster"
         >
       </div>
 
       <div class="w-full md:ml-8 md:w-2/3">
+        <div class="flex mt-4 mb-8 text-center">
+          <x-btn
+            :disabled="movie.type === 'series' && !nextEpisode"
+            :icon="isCastConnected ? 'mdi-cast' : 'mdi-play'"
+            bordered
+            class="mr-4"
+            @click="playMovie()"
+          >
+            Watch
+            <span v-if="nextEpisode">
+              S{{ nextEpisode.season }}E{{ nextEpisode.episode }}
+            </span>
+          </x-btn>
+
+          <x-btn
+            :to="{ name: 'movie-edit', params: { id: $route.params.id } }"
+            icon="mdi-pencil"
+            class="px-4 py-2"
+          >
+            Edit Info
+          </x-btn>
+        </div>
+
         <h2 class="text-4xl">
           {{ movie.title }}
         </h2>
@@ -25,28 +58,6 @@
 
         <div class="mt-4 text-gray-600">
           Directed by {{ movie.director }}
-        </div>
-
-        <div class="flex justify-evenly mt-8 text-center">
-          <x-btn
-            :disabled="movie.type === 'series' && !nextEpisode"
-            :icon="isCastConnected ? 'mdi-cast' : 'mdi-play'"
-            bordered
-            @click="playMovie()"
-          >
-            Watch
-            <span v-if="nextEpisode">
-              S{{ nextEpisode.season }}E{{ nextEpisode.episode }}
-            </span>
-          </x-btn>
-
-          <x-btn
-            :to="{ name: 'movie-edit', params: { id: $route.params.id } }"
-            icon="mdi-pencil"
-            class="px-4 py-2"
-          >
-            Edit Info
-          </x-btn>
         </div>
       </div>
     </div>
