@@ -3,7 +3,7 @@
     <main-navigation />
 
     <router-view
-      class="mb-16 md:ml-16"
+      class="mb-16 md:ml-16 overflow-hidden"
       style="padding: 5vh 5vw"
     />
 

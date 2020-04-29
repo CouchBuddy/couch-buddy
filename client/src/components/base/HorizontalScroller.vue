@@ -1,36 +1,41 @@
 <template>
   <div class="relative">
     <div
-      ref="scroller"
       class="horizontal-scroller"
     >
       <div
-        v-for="item in items"
-        :key="`hs-${item.id}`"
-        class="w-1/3 md:1/4 lg:w-1/5 xl:w-1/6"
+        ref="scroller"
+        class="horizontal-scroller__container"
+        :style="{ transform: `translateX(${currentScroll}px)` }"
       >
-        <slot
-          v-bind="item"
-          @click.stop
-        />
+        <div
+          v-for="item in items"
+          :key="`hs-${item.id}`"
+          class="w-1/3 md:1/4 lg:w-1/5 xl:w-1/6 px-1 horizontal-scroller__item"
+        >
+          <slot
+            v-bind="item"
+            @click.stop
+          />
+        </div>
       </div>
+
+      <button
+        v-if="items.length"
+        class="absolute hidden flex flex-col h-full top-0 left-0 justify-center text-5xl btn horizontal-scroller__handler"
+        @click="scrollBy(1)"
+      >
+        <span class="mdi mdi-chevron-left" />
+      </button>
+
+      <button
+        v-if="items.length"
+        class="absolute hidden flex-col h-full top-0 right-0 justify-center text-5xl btn horizontal-scroller__handler"
+        @click="scrollBy(-1)"
+      >
+        <span class="mdi mdi-chevron-right" />
+      </button>
     </div>
-
-    <button
-      v-if="items.length"
-      class="absolute hidden md:flex flex flex-col h-full top-0 left-0 justify-center text-5xl btn"
-      @click="scrollBy(-1)"
-    >
-      <span class="mdi mdi-chevron-left" />
-    </button>
-
-    <button
-      v-if="items.length"
-      class="absolute hidden md:flex flex-col h-full top-0 right-0 justify-center text-5xl btn"
-      @click="scrollBy(1)"
-    >
-      <span class="mdi mdi-chevron-right" />
-    </button>
   </div>
 </template>
 
@@ -47,12 +52,12 @@ export default {
     }
   },
   data: () => ({
+    currentScroll: 0,
+    maxScroll: Infinity,
     scrollDistance: 0
   }),
   mounted () {
-    if (!this.scrollDistance && this.$refs.scroller.firstElementChild) {
-      this.scrollDistance = this.$refs.scroller.firstElementChild.offsetWidth
-    }
+    this.setupScrolling()
 
     // set initial scroll position
     if (typeof this.centeredItemId === 'number' && isFinite(this.centeredItemId)) {
@@ -67,15 +72,26 @@ export default {
     }
   },
   methods: {
+    setupScrolling () {
+      if (!this.scrollDistance && this.$refs.scroller.firstElementChild) {
+        this.scrollDistance = this.$refs.scroller.firstElementChild.offsetWidth
+        this.maxScroll = this.$refs.scroller.offsetWidth -
+          this.$refs.scroller.firstElementChild.offsetWidth * this.$refs.scroller.childElementCount
+      }
+    },
     /**
      * Scroll by the width of 1 child
      */
     scrollBy (direction = 0) {
-      if (!this.scrollDistance && this.$refs.scroller.firstElementChild) {
-        this.scrollDistance = this.$refs.scroller.firstElementChild.offsetWidth
+      this.setupScrolling()
+
+      const shouldScrollTo = this.currentScroll + this.scrollDistance * direction
+
+      if (shouldScrollTo > 0 || shouldScrollTo < this.maxScroll) {
+        return
       }
 
-      this.$refs.scroller.scrollBy({ left: this.scrollDistance * direction, behavior: 'smooth' })
+      this.currentScroll += this.scrollDistance * direction
     }
   }
 }
@@ -83,18 +99,35 @@ export default {
 
 <style lang="scss">
 .horizontal-scroller {
-  overflow-x: scroll;
+  position: relative;
   margin: 0px -5vw;
   white-space: nowrap;
   padding: 0 5vw;
+  font-size: 0;
 
-  & > div {
+  &:hover .horizontal-scroller__handler {
+    display: flex;
+  }
+
+  .horizontal-scroller__container {
+    transition: all .3s;
+  }
+
+  &__item {
+    position: relative;
     display: inline-block;
-    margin-right: 1rem;
 
     &:last-child {
       margin-right: 0;
     }
+
+    &:focus,
+    &:hover {
+      transform: scale(1.2);
+      z-index: 1;
+    }
+
+    transition: all .3s;
   }
 
   &::-webkit-scrollbar {

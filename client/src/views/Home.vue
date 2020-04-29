@@ -23,7 +23,7 @@
 
           <small
             v-if="item.season && item.episode"
-            class="absolute top-0 right-0 m-4 rounded"
+            class="absolute top-0 right-0 m-4 rounded text-sm"
             style="padding: 1px 3px; background: rgba(40,40,40,.8)"
           >
             S{{ item.season }}E{{ item.episode }}
