@@ -1,5 +1,5 @@
 <template>
-  <aside class="fixed w-full md:w-16 h-16 md:h-screen bottom-0 z-30 md:top-0 bg-primary main-nav">
+  <aside class="fixed w-full md:w-16 h-16 md:h-screen bottom-0 z-30 md:top-0 bg-primary shadow-2xl main-nav">
     <nav class="flex flex-row md:flex-col justify-evenly md:justify-start">
       <router-link
         v-for="item in menu"
@@ -41,12 +41,12 @@ export default {
 
 <style>
 .main-nav {
-  box-shadow: 2px 0 10px black;
+  /* box-shadow: 2px 0 10px black; */
 }
 
 @media (max-width: 768px) {
   .main-nav {
-    box-shadow: 0 -2px 10px black;
+    /* box-shadow: 0 -2px 10px black; */
   }
 }
 </style>

@@ -4,7 +4,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: colors.red[700],
+        primary: colors.teal[700],
         success: colors.green[600],
         error: colors.red[600]
       }

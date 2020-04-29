@@ -45,10 +45,12 @@
             </div>
           </div>
 
-          <div
-            class="absolute bottom-0 h-1 bg-primary"
-            :style="{ width: `${item.watched || 0}%` }"
-          />
+          <div class="absolute bottom-0 w-full bg-grey-700">
+            <div
+              class="bg-white"
+              :style="{ width: `${item.watched || 0}%`, height: '3px' }"
+            />
+          </div>
 
           <div class="absolute flex flex-col justify-between items-center w-full h-full p-4 movie-card__details">
             <div />
