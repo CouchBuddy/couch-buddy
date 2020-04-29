@@ -58,7 +58,7 @@ export default new Vuex.Store({
         metadata.seriesTitle = movie.series ? movie.series.title : null
         metadata.originalAirdate = `${movie.year}`
         metadata.images = [
-          new chrome.cast.Image(movie.series.poster)
+          new chrome.cast.Image(movie.poster)
         ]
       }
 

@@ -9,7 +9,7 @@
     >
       <template v-if="mediaStatus">
         <img
-          :src="mediaStatus.media.metadata.images ? mediaStatus.media.metadata.images[0].url : null"
+          :src="(mediaStatus.media.metadata.images && mediaStatus.media.metadata.images.length) ? mediaStatus.media.metadata.images[0].url : null"
           class="h-16 w-16 object-cover"
         >
 
