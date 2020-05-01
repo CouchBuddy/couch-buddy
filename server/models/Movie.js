@@ -33,7 +33,16 @@ module.exports = (sequelize) => {
     },
     poster: {
       type: Sequelize.TEXT,
-      validate: { isUrl: true }
+      validate: { isUrl: true },
+      get () {
+        const rawValue = this.getDataValue('poster')
+
+        if (rawValue && !rawValue.startsWith('http')) {
+          return 'http://image.tmdb.org/t/p/w500' + rawValue
+        } else {
+          return rawValue
+        }
+      }
     },
     rated: {
       type: Sequelize.TEXT
@@ -83,7 +92,12 @@ module.exports = (sequelize) => {
     }
   }, {
     sequelize,
-    modelName: 'movie'
+    modelName: 'movie',
+    getterMethods: {
+      posterURL () {
+        return 'https://ciao.com/' + this.poster
+      }
+    }
   })
 
   return Movie

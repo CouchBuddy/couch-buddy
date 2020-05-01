@@ -25,7 +25,16 @@ module.exports = (sequelize) => {
     },
     poster: {
       type: Sequelize.TEXT,
-      validate: { isUrl: true }
+      validate: { isUrl: true },
+      get () {
+        const rawValue = this.getDataValue('poster')
+
+        if (rawValue && !rawValue.startsWith('http')) {
+          return 'http://image.tmdb.org/t/p/w500' + rawValue
+        } else {
+          return rawValue
+        }
+      }
     },
     ratingImdb: {
       type: Sequelize.FLOAT,
