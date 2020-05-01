@@ -38,13 +38,10 @@ async function addFileToLibrary (_fileName, force = false) {
     }
   }
 
-  // Parse filename to obtain basic info
-  const fileBaseName = path.basename(fileName)
-
   // Movie or Episode ID
   let mediaId
 
-  const item = searchShowInfo(fileBaseName)
+  const item = searchShowInfo(fileName)
   const isEpisode = item.type === 'episode'
 
   if (isEpisode) {
@@ -118,7 +115,8 @@ async function addFileToLibrary (_fileName, force = false) {
   return true
 }
 
-async function searchShowInfo (fileBaseName) {
+function parseFileName (fileName) {
+  const fileBaseName = path.basename(fileName)
   const basicInfo = ptt.parse(fileBaseName)
 
   // Worst case scenario: ptt can't even find a title, so try to clean the filename
@@ -136,9 +134,13 @@ async function searchShowInfo (fileBaseName) {
 
     // worst-worst case: filename cleaned too much, just remove the extension
     basicInfo.title = basicInfo.title || fileBaseName.replace(/\.[^/.]+$/, '')
-
-    console.log('PTT failed, obtained title from filename', basicInfo.title)
   }
+
+  return basicInfo
+}
+
+async function searchShowInfo (fileName) {
+  const basicInfo = parseFileName(fileName)
 
   const isEpisode = basicInfo.season && basicInfo.episode
 
@@ -197,7 +199,7 @@ function takeScreenshot (file) {
 
 module.exports = {
   addFileToLibrary,
-  parseTorrentTitle: ptt.parse,
+  parseFileName,
   searchShowInfo,
   searchVideoFiles,
   takeScreenshot
