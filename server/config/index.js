@@ -14,6 +14,7 @@ const config = {
   mediaDir: process.env.MEDIA_DIR,
   omdbApiKey: process.env.OMDB_API_KEY,
   openSubtitlesUa: process.env.OPEN_SUBTITLES_UA,
+  tmdbApiKey: process.env.TMDB_API_KEY,
 
   /**
    * Server port

@@ -6,7 +6,7 @@ const ptt = require('parse-torrent-title')
 
 const config = require('../config')
 const { Episode, MediaFile, Movie } = require('../models')
-const omdb = require('../services/omdb')
+const movieInfoProvider = require('../services/tmdb')
 
 // Add custom handler to PTT for parts and CD
 ptt.addHandler('part', /(?:Part|CD)[. ]?([0-9])/i, { type: 'integer' })
@@ -40,57 +40,29 @@ async function addFileToLibrary (_fileName, force = false) {
 
   // Parse filename to obtain basic info
   const fileBaseName = path.basename(fileName)
-  const basicInfo = ptt.parse(fileBaseName)
 
-  // Worst case scenario: ptt can't even find a title, so try to clean the filename
-  if (!basicInfo.title) {
-    basicInfo.title = fileBaseName
-      // remove extension
-      .replace(/\.[^/.]+$/, '')
-      // replace . and _ with whitespace
-      .replace(/[._]/, ' ')
-      // remove parenthesis and their content
-      .replace(/(\(.*\)|\[.*\])/, '')
-      // remove everything after a dash
-      .replace(/-.*$/, '')
-      .trim()
-
-    // worst-worst case: filename cleaned too much, just remove the extension
-    basicInfo.title = basicInfo.title || fileBaseName.replace(/\.[^/.]+$/, '')
-
-    console.log('PTT failed, obtained title from filename', basicInfo.title)
-  }
-
-  // Search movie info on OMDb
-  let item = await omdb(basicInfo)
-
-  // If we can't find anything on OMDb, at least we have basicInfo
-  if (!item) {
-    item = basicInfo
-  }
-
-  const isEpisode = !!item.season || !!item.episode || item.type === 'series' || item.type === 'episode'
-  item.type = isEpisode ? 'series' : 'movie'
-
+  // Movie or Episode ID
   let mediaId
 
+  const item = searchShowInfo(fileBaseName)
+  const isEpisode = item.type === 'episode'
+
   if (isEpisode) {
-    // Search if the parent series of this episode is already in the DB,
-    // if not, this is the first episode of the series encountered
-    // and we need to find the series info
+    // Search if the parent series of this episode is already in the DB
     const where = { type: 'series' }
 
-    if (item.seriesID) {
-      where.imdbId = item.seriesID
+    if (item.movie.imdb_id) {
+      where.imdbId = item.movie.imdb_id
     } else {
-      where.title = item.title
+      where.title = item.movie.title
     }
 
     let series = await Movie.findOne({ where })
 
+    // If not, this is the first episode of the series encountered
+    // and we need to find the series info
     if (!series) {
-      item = await omdb(where)
-      series = await Movie.create(item)
+      series = await Movie.create(item.movie)
     }
 
     const thumbnail = await takeScreenshot(config.mediaDir + fileName)
@@ -131,19 +103,64 @@ async function addFileToLibrary (_fileName, force = false) {
       mediaId,
       mediaType: isEpisode ? 'episode' : 'movie',
       mimeType,
-      part: basicInfo.part
+      part: item.part
     })
   } else {
     await MediaFile.update({
       mediaId,
       mediaType: isEpisode ? 'episode' : 'movie',
-      part: basicInfo.part
+      part: item.part
     }, {
       where: { id: existingFile.id }
     })
   }
 
   return true
+}
+
+async function searchShowInfo (fileBaseName) {
+  const basicInfo = ptt.parse(fileBaseName)
+
+  // Worst case scenario: ptt can't even find a title, so try to clean the filename
+  if (!basicInfo.title) {
+    basicInfo.title = fileBaseName
+      // remove extension
+      .replace(/\.[^/.]+$/, '')
+      // replace . and _ with whitespace
+      .replace(/[._]/, ' ')
+      // remove parenthesis and their content
+      .replace(/(\(.*\)|\[.*\])/, '')
+      // remove everything after a dash
+      .replace(/-.*$/, '')
+      .trim()
+
+    // worst-worst case: filename cleaned too much, just remove the extension
+    basicInfo.title = basicInfo.title || fileBaseName.replace(/\.[^/.]+$/, '')
+
+    console.log('PTT failed, obtained title from filename', basicInfo.title)
+  }
+
+  const isEpisode = basicInfo.season && basicInfo.episode
+
+  // Search video info, it could be a movie or a TV series episode
+  let item
+
+  if (isEpisode) {
+    item = await movieInfoProvider.searchEpisode(basicInfo.title, basicInfo.season, basicInfo.episode)
+  } else {
+    item = await movieInfoProvider.searchMovie(basicInfo.title, basicInfo.year)
+  }
+
+  // If we can't find anything, at least we have basicInfo
+  if (!item) {
+    item = basicInfo
+  }
+
+  // Ensure some properties are on the returned object
+  item.type = isEpisode ? 'episode' : 'movie'
+  item.part = basicInfo.part
+
+  return item
 }
 
 function searchVideoFiles (dir) {
@@ -181,6 +198,7 @@ function takeScreenshot (file) {
 module.exports = {
   addFileToLibrary,
   parseTorrentTitle: ptt.parse,
+  searchShowInfo,
   searchVideoFiles,
   takeScreenshot
 }
