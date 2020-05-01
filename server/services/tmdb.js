@@ -1,6 +1,6 @@
 const assert = require('assert')
+const TmdbApi = require('moviedb-promise')
 
-const TmdbApi = require('./tmdb-api')
 const config = require('../config')
 
 const client = new TmdbApi(config.tmdbApiKey)
@@ -11,7 +11,7 @@ const client = new TmdbApi(config.tmdbApiKey)
  */
 async function getSeriesById (id) {
   return toCBSeries(
-    await client.getTVShowDetails(id, { appendToResponse: 'external_ids' })
+    await client.tvInfo(id, { append_to_response: 'external_ids' })
   )
 }
 
@@ -24,12 +24,13 @@ async function getSeriesById (id) {
 async function searchMovie (title, year) {
   assert(!!title, 'title is required')
 
-  const response = await client.searchMovies(title, year)
+  const response = await client.searchMovie({ query: title, year })
+  console.log(response)
 
-  if (response.totalResults > 0) {
+  if (response.total_results > 0) {
     const mostPopular = response.results.sort(sortByPopularityDesc)[0]
 
-    return toCBMovie(await client.getMovieDetails(mostPopular.id))
+    return toCBMovie(await client.movieInfo(mostPopular.id))
   }
 }
 
@@ -41,13 +42,13 @@ async function searchMovie (title, year) {
 async function searchSeries (title) {
   assert(!!title, 'title is required')
 
-  const response = await client.searchTVShows(title)
+  const response = await client.searchTv({ query: title })
 
-  if (response.totalResults > 0) {
+  if (response.total_results > 0) {
     const mostPopular = response.results.sort(sortByPopularityDesc)[0]
 
     return toCBSeries({
-      ...await client.getTVShowExternalIds(mostPopular.id),
+      ...await client.tvExternalIds(mostPopular.id),
       ...mostPopular
     })
   }
@@ -69,10 +70,17 @@ async function searchEpisode (seriesTitle, season, episode) {
   const series = await searchSeries(seriesTitle)
 
   if (series && series.tmdbId) {
+    const episodeInfo = await client.tvEpisodeInfo({
+      id: series.tmdbId,
+      season_number: season,
+      episode_number: episode
+    },
+    {
+      appendToResponse: 'external_ids'
+    })
+
     return {
-      ...toCBEpisode(await client.getTVEpisodeDetails(series.tmdbId, season, episode, {
-        appendToResponse: 'external_ids'
-      })),
+      ...toCBEpisode(episodeInfo),
       movie: series
     }
   }
