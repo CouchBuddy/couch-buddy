@@ -9,6 +9,16 @@ const client = new TmdbApi(config.tmdbApiKey)
  * Get Series info by ID
  * @param {String|Number} id
  */
+async function getMovieById (id) {
+  return toCBMovie(
+    await client.movieInfo(id, { append_to_response: 'external_ids' })
+  )
+}
+
+/**
+ * Get Series info by ID
+ * @param {String|Number} id
+ */
 async function getSeriesById (id) {
   return toCBSeries(
     await client.tvInfo(id, { append_to_response: 'external_ids' })
@@ -167,6 +177,7 @@ function toCBEpisode (episode) {
 const sortByPopularityDesc = (a, b) => b.popularity - a.popularity
 
 module.exports = {
+  getMovieById,
   getSeriesById,
   searchEpisode,
   searchMovie,

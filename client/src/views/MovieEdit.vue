@@ -20,7 +20,7 @@
         v-model="query"
         placeholder="2001: A Space... or tt1234"
         class="flex-grow px-4 py-2 bg-gray-800"
-        @input="searchOmdb"
+        @input="searchMovieInfo"
       >
 
       <x-btn
@@ -90,7 +90,7 @@ export default {
     this.movie = (await client.get(`/api/library/${this.$route.params.id}`)).data
   },
   methods: {
-    searchOmdb: debounce(async function () {
+    searchMovieInfo: debounce(async function () {
       if (!this.query) { return }
 
       const params = {}

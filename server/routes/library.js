@@ -5,7 +5,7 @@ const config = require('../config')
 const { Episode, Movie, sequelize } = require('../models')
 const { getResource, updateResource } = require('./rest-endpoints')
 const { addFileToLibrary, searchVideoFiles } = require('../services/library')
-const omdb = require('../services/omdb')
+const movieInfoProvider = require('../services/tmdb')
 
 async function scanLibrary (ctx = {}) {
   // Scan directory to search video files
@@ -48,7 +48,12 @@ async function findMovieInfo (ctx) {
   ctx.assert(title || imdbId, 400, 'Param `title` or `imdbId` are required')
 
   ctx.status = 200
-  ctx.body = await omdb({ imdbId, title })
+
+  if (title) {
+    ctx.body = await movieInfoProvider.searchMovie(title)
+  } else if (imdbId) {
+    ctx.body = await movieInfoProvider.getMovieById(imdbId)
+  }
 }
 
 async function listEpisodes (ctx) {
