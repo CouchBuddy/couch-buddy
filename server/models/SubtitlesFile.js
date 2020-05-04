@@ -1,4 +1,5 @@
 const Sequelize = require('sequelize')
+const ISO6391 = require('iso-639-1')
 
 module.exports = (sequelize) => {
   class SubtitlesFile extends Sequelize.Model {}
@@ -11,6 +12,10 @@ module.exports = (sequelize) => {
     lang: {
       type: Sequelize.TEXT,
       allowNull: false
+    },
+    langName: {
+      type: Sequelize.VIRTUAL,
+      get () { return ISO6391.getName(this.lang) }
     },
     mediaId: {
       type: Sequelize.INTEGER,
