@@ -1,24 +1,39 @@
-const dgram = require('dgram')
+const mdns = require('multicast-dns')({ loopback: false })
+const hostname = require('os').hostname()
 
-const MULTICAST_ADDRESS = '224.0.0.234'
-const server = dgram.createSocket({ type: 'udp4', reuseAddr: true })
+const config = require('../config')
+const { getIpAddresses } = require('./system')
 
-server.on('error', (err) => {
-  console.error('Error starting UDP socket', err)
-  server.close()
+const COUCHBUDDY_HOSTNAME = '_couchbuddy._tcp.local'
+
+mdns.on('query', function(query) {
+	for (const question of query.questions) {
+		if (!question.name.endsWith(COUCHBUDDY_HOSTNAME)) { continue }
+
+		if (question.type === 'PTR') {
+			mdns.respond([{
+				name: COUCHBUDDY_HOSTNAME,
+				type: 'PTR',
+				data: `${hostname}.${COUCHBUDDY_HOSTNAME}`
+			}])
+		} else if (question.type === 'SRV') {
+			mdns.respond([{
+				name: `${hostname}.${COUCHBUDDY_HOSTNAME}`,
+				type: 'SRV',
+				data: {
+					port: config.port,
+					weight: 0,
+					priority: 10,
+					target: `${hostname}.${COUCHBUDDY_HOSTNAME}`
+				}
+			}])
+		} else if (question.type === 'A') {
+			mdns.respond([{
+				name: `${hostname}.${COUCHBUDDY_HOSTNAME}`,
+				type: 'A',
+				data: getIpAddresses()[0]
+			}])
+		}
+  }
 })
 
-server.on('message', (msg, rinfo) => {
-  const response = Buffer.from('CouchBuddy v1')
-
-  server.send(response, 0, response.length, rinfo.port, rinfo.address, (err) => {
-    if (err) console.error(err)
-  })
-})
-
-server.on('listening', () => {
-  server.addMembership(MULTICAST_ADDRESS)
-  server.setBroadcast(true)
-})
-
-server.bind(41234, MULTICAST_ADDRESS)
