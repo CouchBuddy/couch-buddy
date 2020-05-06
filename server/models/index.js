@@ -87,24 +87,27 @@ for (const file of modelFiles) {
 models.Episode.belongsTo(models.Movie, {
   foreignKey: 'movieId'
 })
+models.Movie.hasMany(models.Episode, {
+  foreignKey: 'movieId'
+})
 
 // Automatically populate Movie.mediaFiles[]
-models.Movie.hasMany(models.MediaFile, { foreignKey: 'mediaId' })
-models.Movie.addScope('defaultScope', {
-  include: {
-    model: models.MediaFile,
-    on: { mediaId: { [Sequelize.Op.eq]: sequelize.col('movie.id') }, mediaType: 'movie' }
-  }
-})
+// models.Movie.hasMany(models.MediaFile, { foreignKey: 'mediaId' })
+// models.Movie.addScope('defaultScope', {
+//   include: {
+//     model: models.MediaFile,
+//     on: { mediaId: { [Sequelize.Op.eq]: sequelize.col('movie.id') }, mediaType: 'movie' }
+//   }
+// })
 
 // Automatically populate Episode.mediaFiles[]
-models.Episode.hasMany(models.MediaFile, { foreignKey: 'mediaId' })
-models.Episode.addScope('defaultScope', {
-  include: {
-    model: models.MediaFile,
-    on: { mediaId: { [Sequelize.Op.eq]: sequelize.col('episode.id') }, mediaType: 'episode' }
-  }
-})
+// models.Episode.hasMany(models.MediaFile, { foreignKey: 'mediaId' })
+// models.Episode.addScope('defaultScope', {
+//   include: {
+//     model: models.MediaFile,
+//     on: { mediaId: { [Sequelize.Op.eq]: sequelize.col('episode.id') }, mediaType: 'episode' }
+//   }
+// })
 
 /**
  * In production environment, automatically create tables on
