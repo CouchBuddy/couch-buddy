@@ -3,7 +3,7 @@ const fs = require('fs')
 const fsPromises = fs.promises
 
 const config = require('../config')
-const { version } = require('../package.json')
+const { version } = require('../../package.json')
 const { getIpAddresses } = require('../services/system')
 
 async function getSystemInfo (ctx) {

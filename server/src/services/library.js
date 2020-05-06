@@ -8,7 +8,7 @@ const srt2vtt = require('srt-to-vtt')
 
 const config = require('../config')
 const { Episode, MediaFile, Movie, SubtitlesFile, sequelize } = require('../models')
-const movieInfoProvider = require('../services/tmdb')
+const movieInfoProvider = require('./tmdb')
 const { removeFileExtension } = require('../utils')
 
 // Define files extensions by content type
