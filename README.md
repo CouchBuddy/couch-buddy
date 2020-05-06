@@ -60,7 +60,8 @@ cp server/.env.sample server/.env
 |-------------------|:-:|-------|-----------|
 |DB_SQLITE_PATH     | Y ||SQLite DB file path, ex: `db.sqlite`|
 |MEDIA_BASE_DIR     | Y ||Directoty with your video files, ex: `/media/luca/MyHDD/videos/`|
-|OMDB_KEY           | N ||OMDb API key, needed for getting movies info. Register and get your key at http://www.omdbapi.com/apikey.aspx|
+|OMDB_KEY           | N ||(*Deprecated*: please use TMDB) OMDb API key, needed for getting movies info. Register and get your key at http://www.omdbapi.com/apikey.aspx|
+|TMDB_API_KEY       | N ||The Movie Db API key, needed for getting movies info. Register and get your key at https://developers.themoviedb.org/3/getting-started
 |OPENSUBTITLES_UA   | N ||Open Subtitles UserAgent, needed for downloading movies subs. Request a UserAgent at https://trac.opensubtitles.org/projects/opensubtitles/wiki/DevReadFirst|
 |PORT               | Y |3000|Port where the server listens|
 
