@@ -2,7 +2,7 @@ const ArgumentParser = require('argparse').ArgumentParser
 const assert = require('assert')
 
 require('./boot')
-const { addFileToLibrary, scanLibrary } = require('../services/library')
+const { addFileToLibrary, scanDirectory } = require('../services/library')
 
 const parser = new ArgumentParser({
   addHelp: true,
@@ -36,7 +36,7 @@ switch (args.cmd) {
     break
 
   case 'scan':
-    scanLibrary()
+    scanDirectory(args.file)
     break
 
   default:

@@ -35,7 +35,6 @@ async function searchMovie (title, year) {
   assert(!!title, 'title is required')
 
   const response = await client.searchMovie({ query: title, year })
-  console.log(response)
 
   if (response.total_results > 0) {
     const mostPopular = response.results.sort(sortByPopularityDesc)[0]
