@@ -33,7 +33,6 @@ module.exports = (sequelize) => {
     },
     poster: {
       type: Sequelize.TEXT,
-      validate: { isUrl: true },
       get () {
         const rawValue = this.getDataValue('poster')
 
