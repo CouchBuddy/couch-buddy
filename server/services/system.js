@@ -27,7 +27,5 @@ function getIpAddresses () {
 }
 
 module.exports = {
-	getIpAddresses
+  getIpAddresses
 }
-
-

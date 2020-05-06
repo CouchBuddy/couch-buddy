@@ -8,6 +8,7 @@ module.exports = {
   extends: [
     'standard'
   ],
+  ignorePatterns: [ 'node_modules/', 'public/' ],
   globals: {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly'

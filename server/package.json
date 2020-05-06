@@ -4,7 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "nodemon app.js",
+    "lint": "eslint .",
+    "start": "node app.js",
     "test": "mocha"
+  },
+  "engine": {
+    "node": ">=7.6.0"
   },
   "dependencies": {
     "@koa/cors": "^3.0.0",
