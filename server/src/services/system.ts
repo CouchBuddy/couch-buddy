@@ -1,7 +1,8 @@
-function getIpAddresses () {
-  const os = require('os')
-  const ifaces = os.networkInterfaces()
-  const ips = []
+import { networkInterfaces } from 'os'
+
+function getIpAddresses (): string[] {
+  const ifaces = networkInterfaces()
+  const ips: string[] = []
 
   Object.keys(ifaces).forEach(function (ifname) {
     let alias = 0

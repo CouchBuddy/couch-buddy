@@ -1,24 +1,14 @@
-const debounce = require('debounce')
-const WebTorrent = require('webtorrent')
+import debounce from 'debounce'
+import WebTorrent, { Torrent } from 'webtorrent'
 
-const config = require('../config')
+import config from '../config'
 const { Download } = require('../models')
 const { addFileToLibrary, parseTorrentTitle } = require('./library')
-const io = require('./socket-io').of('/downloads')
+import io from './socket-io'
+
+io.of('/downloads')
 
 const client = new WebTorrent()
-
-// handle torrents completion
-client.on('torrent', (torrent) => {
-  torrent.on('done', onTorrentDone)
-  torrent.on('download', debounce(onTorrentDownload))
-})
-
-io.on('connection', (socket) => {
-  socket.emit('torrent:all', client.torrents.map(serializeTorrent))
-})
-
-restoreTorrents()
 
 async function restoreTorrents () {
   const downloads = await Download.findAll({
@@ -43,11 +33,7 @@ async function onTorrentDone () {
   }
 }
 
-function onTorrentDownload () {
-  io.emit('torrent:download', serializeTorrent(this))
-}
-
-function serializeTorrent (t) {
+function serializeTorrent (t: Torrent) {
   return {
     infoHash: t.infoHash,
     name: t.name,
@@ -63,6 +49,22 @@ function serializeTorrent (t) {
     numPeers: t.numPeers
   }
 }
+
+function onTorrentDownload () {
+  io.emit('torrent:download', serializeTorrent(this))
+}
+
+// handle torrents completion
+client.on('torrent', (torrent: Torrent) => {
+  torrent.on('done', onTorrentDone)
+  torrent.on('download', debounce(onTorrentDownload))
+})
+
+io.on('connection', (socket) => {
+  socket.emit('torrent:all', client.torrents.map(serializeTorrent))
+})
+
+restoreTorrents()
 
 module.exports = {
   client,
