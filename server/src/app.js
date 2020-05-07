@@ -3,6 +3,7 @@ const koaBody = require('koa-body')
 const koaMount = require('koa-mount')
 const koaStatic = require('koa-static')
 const koaCors = require('@koa/cors')
+import 'reflect-metadata'
 
 // Initialize config
 const config = require('./config')

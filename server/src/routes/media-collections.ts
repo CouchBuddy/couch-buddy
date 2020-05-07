@@ -1,7 +1,8 @@
 import { Context } from 'koa'
-import { Op } from 'sequelize'
+import { LessThan, Between } from 'typeorm'
 
-const { Episode, Movie } = require('../models')
+import Movie from '../models/Movie'
+const { Episode } = require('../models')
 
 async function continueWatching (ctx: Context) {
   // Find series where at least 1 episode has been watched
@@ -26,8 +27,8 @@ async function continueWatching (ctx: Context) {
     include: 'movie'
   })
 
-  const pendingMovies = await Movie.findAll({
-    where: { watched: { [Op.gt]: 0, [Op.lt]: 95 } }
+  const pendingMovies = await Movie.find({
+    where: { watched: Between(0.1, 94.9) }
   })
 
   ctx.body = [
@@ -44,14 +45,14 @@ async function recentlyAdded (ctx: Context) {
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
 
   ctx.body = [
-    ...await Movie.findAll({
+    ...await Movie.find({
       where: {
         type: 'movie',
-        createdAt: { [Op.gt]: oneWeekAgo },
-        watched: { [Op.lt]: 95 }
+        createdAt: LessThan(oneWeekAgo),
+        watched: LessThan(95)
       },
-      order: [[ 'createdAt', 'DESC' ]],
-      limit: 10
+      order: { 'createdAt': 'DESC' },
+      take: 10
     }),
 
     ...await Episode.findAll({

@@ -20,6 +20,8 @@ module.exports = {
       objectsInArrays: false,
       arraysInArrays: false
     }],
+    "quotes": [ "error", "single" ],
+    "semi": [ "error", "never" ],
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/no-explicit-any": 1,
     "@typescript-eslint/no-inferrable-types": [
