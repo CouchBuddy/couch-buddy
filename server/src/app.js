@@ -5,12 +5,12 @@ const koaStatic = require('koa-static')
 const koaCors = require('@koa/cors')
 
 // Initialize config
-const config = require('./src/config')
+const config = require('./config')
 // Initialize DB
-require('./src/models')
+require('./models')
 // Initialize services
-require('./src/services')
-const server = require('./src/services/server')
+require('./services')
+const server = require('./services/server')
 
 const app = new Koa()
 
@@ -29,10 +29,10 @@ app.use(koaStatic('public'))
 if (config.isProduction) {
   // In production, Vue SPA client is served by the server,
   // so all URLs but /api and static files are rewritten to / and handled by the SPA
-  app.use(require('./src/middlewares/spa-rewrite')('api', '/'))
+  app.use(require('./middlewares/spa-rewrite')('api', '/'))
 }
 
-const router = require('./src/routes')
+const router = require('./routes')
 app.use(koaMount('/api', router.routes()))
 app.use(koaMount('/api', router.allowedMethods()))
 

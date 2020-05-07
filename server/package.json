@@ -3,10 +3,11 @@
   "description": "Couch Buddy Koa server",
   "private": true,
   "scripts": {
-    "dev": "nodemon app.js",
+    "dev": "nodemon dist/app.js",
     "lint": "eslint .",
     "start": "node app.js",
-    "test": "mocha"
+    "test": "mocha",
+    "watch-ts": "tsc -w"
   },
   "engine": {
     "node": ">=10.0.0"
@@ -20,6 +21,7 @@
     "check-disk-space": "^2.1.0",
     "cli-progress": "^3.6.1",
     "debounce": "^1.2.0",
+    "dns-packet": "^5.2.1",
     "dotenv": "^8.2.0",
     "fluent-ffmpeg": "^2.1.2",
     "glob": "^7.1.6",
@@ -42,6 +44,10 @@
     "webtorrent": "^0.108.1"
   },
   "devDependencies": {
+    "@types/bluebird": "^3.5.30",
+    "@types/koa": "^2.11.3",
+    "@types/node": "^13.13.5",
+    "@types/validator": "^13.0.0",
     "chai": "^4.2.0",
     "chai-subset": "^1.6.0",
     "eslint": "^6.8.0",
@@ -51,6 +57,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "mocha": "^7.1.2",
-    "nodemon": "^2.0.2"
+    "nodemon": "^2.0.2",
+    "typescript": "^3.8.3"
   }
 }
