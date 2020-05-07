@@ -124,11 +124,9 @@ const SUPPORTED_LANGS = [
 /**
  * Find a Subtitles Language ID based on a 2 chars lang code
  *
- * @param {*} lang a ISO639-1 2 chars language code
+ * @param lang a ISO639-1 2 chars language code
  * @returns a ISO639-2 3 chars language code
  */
-function getSubLangID (lang) {
+export default function getSubLangID (lang: string): string {
   return (SUPPORTED_LANGS.find(x => x.ISO639 === lang) || {}).SubLanguageID
 }
-
-module.exports = getSubLangID

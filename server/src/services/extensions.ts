@@ -1,6 +1,6 @@
 const { Extension } = require('../models')
 
-const allExtensions = []
+const allExtensions: Extension[] = []
 
 async function init () {
   const extensions = await Extension.findAll({ where: { enabled: true } })
@@ -11,6 +11,11 @@ async function init () {
       search: require(ext.path).search
     })
   }
+}
+
+interface Extension {
+  name: string;
+  search(query: string): any[];
 }
 
 module.exports = {

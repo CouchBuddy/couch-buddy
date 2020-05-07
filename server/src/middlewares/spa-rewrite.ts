@@ -1,6 +1,8 @@
-module.exports = function spaRewrite (apiPathPrefix, rewritePath) {
+import { Context, Next } from 'koa'
+
+export default function spaRewrite (apiPathPrefix: string, rewritePath: string) {
   const apiPathPrefixRegEx = new RegExp(`${apiPathPrefix}.+/?`)
-  return async (ctx, next) => {
+  return async (ctx: Context, next: Next) => {
     if (
       // Not an API request
       !apiPathPrefixRegEx.test(ctx.url) &&

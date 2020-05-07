@@ -7,7 +7,7 @@ const srt2vtt = require('srt-to-vtt')
 
 const config = require('../config')
 const { Episode, MediaFile, Movie, SubtitlesFile } = require('../models')
-const getSubLangID = require('../utils/openSubtitlesLangs')
+const getSubLangID = require('../utils/open-subtitles-langs')
 
 let OpenSubtitles = null
 
