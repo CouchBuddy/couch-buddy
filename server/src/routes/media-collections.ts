@@ -1,7 +1,9 @@
-const { Op } = require('sequelize')
+import { Context } from 'koa'
+import { Op } from 'sequelize'
+
 const { Episode, Movie } = require('../models')
 
-async function continueWatching (ctx) {
+async function continueWatching (ctx: Context) {
   // Find series where at least 1 episode has been watched
   const seriesWatched = await Episode.findAll({
     where: { watched: { [Op.gte]: 95 } },
@@ -13,7 +15,7 @@ async function continueWatching (ctx) {
     where: {
       [Op.or]: [
         {
-          movieId: { [Op.in]: seriesWatched.map(e => e.movieId) },
+          movieId: { [Op.in]: seriesWatched.map((e: { movieId: number }) => e.movieId) },
           watched: { [Op.or]: [{ [Op.lt]: 95 }, null ] }
         },
         { watched: { [Op.gt]: 0, [Op.lt]: 95 } }
@@ -37,7 +39,7 @@ async function continueWatching (ctx) {
 /**
  * Movies and Series Episodes added this week and not watched yet
  */
-async function recentlyAdded (ctx) {
+async function recentlyAdded (ctx: Context) {
   const oneWeekAgo = new Date()
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
 
