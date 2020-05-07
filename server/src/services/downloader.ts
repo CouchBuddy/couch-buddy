@@ -4,11 +4,11 @@ import WebTorrent, { Torrent } from 'webtorrent'
 import config from '../config'
 const { Download } = require('../models')
 const { addFileToLibrary, parseTorrentTitle } = require('./library')
-import io from './socket-io'
+import ioServer from './socket-io'
 
-io.of('/downloads')
+const downloadsNs = ioServer.of('/downloads')
 
-const client = new WebTorrent()
+export const client = new WebTorrent()
 
 async function restoreTorrents () {
   const downloads = await Download.findAll({
@@ -33,7 +33,7 @@ async function onTorrentDone () {
   }
 }
 
-function serializeTorrent (t: Torrent) {
+export function serializeTorrent (t: Torrent) {
   return {
     infoHash: t.infoHash,
     name: t.name,
@@ -51,7 +51,7 @@ function serializeTorrent (t: Torrent) {
 }
 
 function onTorrentDownload () {
-  io.emit('torrent:download', serializeTorrent(this))
+  downloadsNs.emit('torrent:download', serializeTorrent(this))
 }
 
 // handle torrents completion
@@ -60,13 +60,8 @@ client.on('torrent', (torrent: Torrent) => {
   torrent.on('download', debounce(onTorrentDownload))
 })
 
-io.on('connection', (socket) => {
+downloadsNs.on('connection', (socket) => {
   socket.emit('torrent:all', client.torrents.map(serializeTorrent))
 })
 
 restoreTorrents()
-
-module.exports = {
-  client,
-  serializeTorrent
-}

@@ -1,6 +1,6 @@
 import { networkInterfaces } from 'os'
 
-function getIpAddresses (): string[] {
+export function getIpAddresses (): string[] {
   const ifaces = networkInterfaces()
   const ips: string[] = []
 
@@ -25,8 +25,4 @@ function getIpAddresses (): string[] {
   })
 
   return ips
-}
-
-module.exports = {
-  getIpAddresses
 }

@@ -10,6 +10,7 @@
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "outDir": "dist",
+    "resolveJsonModule": true,
     "sourceMap": true,
     "target": "es6"
   },
