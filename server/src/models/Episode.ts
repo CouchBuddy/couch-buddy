@@ -4,9 +4,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
+
+import Movie from './Movie'
 
 @Entity()
 export default class Episode extends BaseEntity {
@@ -28,7 +31,8 @@ export default class Episode extends BaseEntity {
   imdbId: string;
 
   @Column()
-  movieId: number;
+  @ManyToOne(() => Movie, (series) => series.episodes)
+  movie: Movie;
 
   @Column()
   plot: string;

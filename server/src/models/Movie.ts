@@ -4,9 +4,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
+
+import Episode from './Episode'
 
 export enum MovieType {
   Movie = 'movie',
@@ -26,6 +29,9 @@ export default class Movie extends BaseEntity {
 
   @Column()
   director: string;
+
+  @OneToMany(() => Episode, episode => episode.movie)
+  episodes: Episode[];
 
   @Column()
   genre: string;

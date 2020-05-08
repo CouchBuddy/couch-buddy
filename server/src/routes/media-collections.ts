@@ -1,73 +1,73 @@
 import { Context } from 'koa'
-import { LessThan, Between } from 'typeorm'
+import { LessThan, getRepository, Brackets } from 'typeorm'
 
+import Episode from '../models/Episode'
 import Movie from '../models/Movie'
-const { Episode } = require('../models')
 
-async function continueWatching (ctx: Context) {
+export async function continueWatching (ctx: Context) {
   // Find series where at least 1 episode has been watched
-  const seriesWatched = await Episode.findAll({
-    where: { watched: { [Op.gte]: 95 } },
-    group: [ 'movieId' ]
-  })
+  const seriesWatched = await getRepository(Episode)
+    .createQueryBuilder('episode')
+    .where('watched >= 95')
+    .groupBy('movieId')
+    .getMany()
 
   // now find the next episodes (if any) of the watched series
-  const nextEpisodes = await Episode.findAll({
-    where: {
-      [Op.or]: [
-        {
-          movieId: { [Op.in]: seriesWatched.map((e: { movieId: number }) => e.movieId) },
-          watched: { [Op.or]: [{ [Op.lt]: 95 }, null ] }
-        },
-        { watched: { [Op.gt]: 0, [Op.lt]: 95 } }
-      ]
-    },
-    order: [[ 'season', 'ASC' ], [ 'episode', 'ASC' ]],
-    group: [ 'movieId' ],
-    include: 'movie'
-  })
+  const nextEpisodes = await getRepository(Episode)
+    .createQueryBuilder('episode')
+    .where(new Brackets(qb => {
+      qb.whereInIds(seriesWatched.map(e => e.movie.id))
+      qb.andWhere('watched < 95')
+      return qb
+    }))
+    .orWhere(new Brackets(qb => qb.where('watched > 0 AND watched < 95')))
+    .orderBy({ season: 'ASC', episode: 'ASC' })
+    .groupBy('movieId')
+    .leftJoinAndSelect('episode.movie', 'movie')
+    .getMany()
 
-  const pendingMovies = await Movie.find({
-    where: { watched: Between(0.1, 94.9) }
-  })
+  const pendingMovies = await getRepository(Movie)
+    .createQueryBuilder('Movie')
+    .where('watched > 0')
+    .andWhere('watched < 95')
+    .getMany()
 
-  ctx.body = [
+  const continueWatching: (Movie | Episode)[] = [
     ...nextEpisodes,
     ...pendingMovies
-  ].sort((a, b) => b.updatedAt - a.updatedAt)
+  ]
+
+  ctx.body = continueWatching.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
 }
 
 /**
  * Movies and Series Episodes added this week and not watched yet
  */
-async function recentlyAdded (ctx: Context) {
+export async function recentlyAdded (ctx: Context) {
   const oneWeekAgo = new Date()
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
 
-  ctx.body = [
+  const recentlyAdded: (Movie | Episode)[] = [
     ...await Movie.find({
       where: {
         type: 'movie',
         createdAt: LessThan(oneWeekAgo),
         watched: LessThan(95)
       },
-      order: { 'createdAt': 'DESC' },
+      order: { createdAt: 'DESC' },
       take: 10
     }),
 
-    ...await Episode.findAll({
+    ...await Episode.find({
       where: {
-        createdAt: { [Op.gt]: oneWeekAgo },
-        watched: { [Op.lt]: 95 }
+        createdAt: LessThan(oneWeekAgo),
+        watched: LessThan(95)
       },
-      order: [[ 'createdAt', 'DESC' ]],
-      limit: 10,
-      include: 'movie'
+      order: { createdAt: 'DESC' },
+      take: 10,
+      relations: [ 'movie' ]
     })
-  ].sort((a, b) => b.createdAt - a.createdAt)
-}
+  ]
 
-module.exports = {
-  continueWatching,
-  recentlyAdded
+  ctx.body = recentlyAdded.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
 }
