@@ -1,18 +1,21 @@
-const sendFile = require('koa-send')
-const { QueryTypes } = require('sequelize')
+import { Context } from 'koa'
+import sendFile from 'koa-send'
+// const { QueryTypes } = require('sequelize')
 
-const config = require('../config')
-const { Episode, Movie, sequelize } = require('../models')
+import config from '../config'
+const { sequelize } = require('../models')
+import Episode from '../models/Episode'
+import Movie from '../models/Movie'
 const { getResource, updateResource } = require('./rest-endpoints')
 const { addFileToLibrary, searchVideoFiles } = require('../services/library')
-const movieInfoProvider = require('../services/tmdb')
+import { getMovieById, searchMovie } from '../services/tmdb'
 
-async function scanLibrary (ctx = {}) {
+export async function scanLibrary (ctx: Context) {
   // Scan directory to search video files
   const videos = await searchVideoFiles(config.mediaDir)
   console.log(`Found ${videos.length} video files in ${config.mediaDir}`)
 
-  const added = []
+  const added: string[] = []
 
   for (const fileName of videos) {
     if (await addFileToLibrary(fileName)) {
@@ -23,7 +26,7 @@ async function scanLibrary (ctx = {}) {
   ctx.body = added
 }
 
-async function listLibrary (ctx) {
+export async function listLibrary (ctx: Context) {
   if (ctx.request.query.search) {
     // Search movies with SQLite FTS5 MATCH operator
     const query = `SELECT movies.* FROM movies_fts
@@ -34,61 +37,51 @@ async function listLibrary (ctx) {
 
     ctx.body = await sequelize.query(query, { type: QueryTypes.SELECT })
   } else {
-    ctx.body = await Movie.findAll({ order: [[ 'title', 'ASC' ]] })
+    ctx.body = await Movie.find({
+      order: { title: 'ASC' },
+      take: 30
+    })
   }
 }
 
-const getLibrary = getResource(Movie)
-const updateLibrary = updateResource(Movie)
+export const getLibrary = getResource(Movie)
+export const updateLibrary = updateResource(Movie)
 
-async function findMovieInfo (ctx) {
-  const title = ctx.request.query.title
-  const imdbId = ctx.request.query.imdbId
+export async function findMovieInfo (ctx: Context) {
+  const title: string = ctx.request.query.title
+  const imdbId: string = ctx.request.query.imdbId
 
   ctx.assert(title || imdbId, 400, 'Param `title` or `imdbId` are required')
 
   ctx.status = 200
 
   if (title) {
-    ctx.body = await movieInfoProvider.searchMovie(title)
+    ctx.body = await searchMovie(title)
   } else if (imdbId) {
-    ctx.body = await movieInfoProvider.getMovieById(imdbId)
+    ctx.body = await getMovieById(imdbId)
   }
 }
 
-async function listEpisodes (ctx) {
+export async function listEpisodes (ctx: Context) {
   const movieId = parseInt(ctx.params.id)
   ctx.assert(movieId, 404, 'Please provide an ID in the URL')
 
-  const episodes = await Episode.findAll({
+  const episodes = await Episode.find({
     where: { movieId },
-    order: [[ 'season', 'ASC' ], [ 'episode', 'ASC' ]]
+    order: { season: 'ASC', episode: 'ASC' }
   })
 
   ctx.body = episodes
 }
 
-const getEpisode = getResource(Episode, { include: 'movie' })
-const updateEpisode = updateResource(Episode)
+export const getEpisode = getResource(Episode, { include: 'movie' })
+export const updateEpisode = updateResource(Episode)
 
-async function getEpisodeThumbnail (ctx) {
+export async function getEpisodeThumbnail (ctx: Context) {
   const episodeId = parseInt(ctx.params.id)
-  const episode = await Episode.findByPk(episodeId)
+  const episode = await Episode.findOne(episodeId)
 
   ctx.assert(episode, 404)
 
   await sendFile(ctx, episode.thumbnail, { root: config.mediaDir })
-}
-
-module.exports = {
-  findMovieInfo,
-  getLibrary,
-  listLibrary,
-  scanLibrary,
-  updateLibrary,
-
-  listEpisodes,
-  getEpisode,
-  getEpisodeThumbnail,
-  updateEpisode
 }
