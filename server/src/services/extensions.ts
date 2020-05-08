@@ -1,9 +1,9 @@
-const { Extension } = require('../models')
+import Extension from '../models/Extension'
 
-const allExtensions: Extension[] = []
+export const allExtensions: ExtensionModule[] = []
 
-async function init () {
-  const extensions = await Extension.findAll({ where: { enabled: true } })
+export async function init () {
+  const extensions = await Extension.find({ where: { enabled: true } })
 
   for (const ext of extensions) {
     allExtensions.push({
@@ -13,12 +13,7 @@ async function init () {
   }
 }
 
-interface Extension {
+interface ExtensionModule {
   name: string;
   search(query: string): any[];
-}
-
-module.exports = {
-  allExtensions,
-  init
 }
