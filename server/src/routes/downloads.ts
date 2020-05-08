@@ -3,7 +3,7 @@ import { Torrent } from 'webtorrent'
 
 import config from '../config'
 import { client, serializeTorrent } from '../services/downloader'
-const { Download } = require('../models')
+import Download from '../models/Download'
 
 async function addTorrent (ctx: Context) {
   const magnetURI: string = ctx.request.body.magnetURI
@@ -24,7 +24,7 @@ async function addTorrent (ctx: Context) {
 
   const t = await new Promise<Torrent>((resolve) => {
     client.add(torrentId, opts, async (torrent) => {
-      await Download.create(torrent)
+      Download.create(torrent)
       resolve(torrent)
     })
   })

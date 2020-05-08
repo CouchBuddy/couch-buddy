@@ -2,7 +2,7 @@ import debounce from 'debounce'
 import WebTorrent, { Torrent } from 'webtorrent'
 
 import config from '../config'
-const { Download } = require('../models')
+import Download from '../models/Download'
 const { addFileToLibrary, parseTorrentTitle } = require('./library')
 import ioServer from './socket-io'
 
@@ -11,7 +11,7 @@ const downloadsNs = ioServer.of('/downloads')
 export const client = new WebTorrent()
 
 async function restoreTorrents () {
-  const downloads = await Download.findAll({
+  const downloads = await Download.find({
     where: { done: false }
   })
 
@@ -25,7 +25,7 @@ async function restoreTorrents () {
 async function onTorrentDone () {
   // this = torrent
   await Download.update({ done: true }, {
-    where: { infoHash: this.infoHash }
+    infoHash: this.infoHash
   })
 
   for (const file of this.files) {
