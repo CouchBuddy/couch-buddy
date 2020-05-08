@@ -1,4 +1,4 @@
-import { IsEnum, Min, Max } from 'class-validator'
+import { Min, Max } from 'class-validator'
 import {
   BaseEntity,
   Column,
@@ -8,51 +8,42 @@ import {
   UpdateDateColumn
 } from 'typeorm'
 
-export enum MovieType {
-  Movie = 'movie',
-  Series = 'series'
-}
-
 @Entity()
-export default class Movie extends BaseEntity {
+export default class Episode extends BaseEntity {
+
   @Column()
   actors: string;
-
-  @Column()
-  backdrop: string;
-
-  @Column()
-  country: string;
 
   @Column()
   director: string;
 
   @Column()
-  genre: string;
+  @Min(1)
+  episode: number;
+
+  @Column()
+  firstAired: string;
 
   @Column()
   imdbId: string;
 
   @Column()
-  language: string;
+  movieId: number;
 
   @Column()
   plot: string;
 
   @Column()
   poster: string;
-      // get () {
-      //   const rawValue = this.getDataValue('poster')
+    // get () {
+    //   const rawValue = this.getDataValue('poster')
 
-      //   if (rawValue && !rawValue.startsWith('http')) {
-      //     return 'http://image.tmdb.org/t/p/w500' + rawValue
-      //   } else {
-      //     return rawValue
-      //   }
-      // }
-
-  @Column()
-  rated: string;
+    //   if (rawValue && !rawValue.startsWith('http')) {
+    //     return 'http://image.tmdb.org/t/p/w500' + rawValue
+    //   } else {
+    //     return rawValue
+    //   }
+    // }
 
   @Column({
     type: 'float'
@@ -70,13 +61,16 @@ export default class Movie extends BaseEntity {
   runtime: number;
 
   @Column()
-  title: string;
+  @Min(1)
+  season: number;
+
+  @Column()
+  thumbnail: string;
 
   @Column({
     nullable: false
   })
-  @IsEnum(MovieType)
-  type: string;
+  title: string;
 
   @Column({
     default: 0,
