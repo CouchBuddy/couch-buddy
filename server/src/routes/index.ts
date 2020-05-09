@@ -1,15 +1,18 @@
-const router = require('@koa/router')()
+import KoaRouter from '@koa/router'
 
-const downloads = require('./downloads')
-const explore = require('./explore')
-const extensions = require('./extensions')
-const library = require('./library')
-const collections = require('./media-collections')
-const streaming = require('./streaming')
-const subtitles = require('./subtitles')
-const system = require('./system')
+import * as downloads from './downloads'
+import * as explore from './explore'
+import * as extensions from './extensions'
+import * as library from './library'
+import * as collections from './media-collections'
+import * as streaming from './streaming'
+import * as subtitles from './subtitles'
+import * as system from './system'
+
+const router = new KoaRouter()
 
 router.get('/system', system.getSystemInfo)
+
 router.get('/extensions', extensions.listExtensions)
 router.get('/extensions/:id/load', extensions.loadExtension)
 
@@ -38,4 +41,4 @@ router.get('/downloads', downloads.listTorrents)
 
 router.get('/explore', explore.searchMovies)
 
-module.exports = router
+export default router

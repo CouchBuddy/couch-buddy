@@ -15,7 +15,7 @@ import getSubLangID from '../utils/open-subtitles-langs'
 
 let osClient: OpenSubtitles = null
 
-async function listSubtitles (ctx: Context) {
+export async function listSubtitles (ctx: Context) {
   ctx.assert(/^(e|m)\d+$/.test(ctx.params.wid), 400, 'Invalid ID format')
 
   const mediaId = parseInt(ctx.params.wid.slice(1))
@@ -31,7 +31,7 @@ async function listSubtitles (ctx: Context) {
   ctx.body = subtitles
 }
 
-async function getSubtitles (ctx: Context) {
+export async function getSubtitles (ctx: Context) {
   const id = parseInt(ctx.params.id)
   ctx.assert(id >= 1, 400, 'Invalid ID')
 
@@ -42,7 +42,7 @@ async function getSubtitles (ctx: Context) {
   await sendFile(ctx, subtitles.fileName, { root: config.mediaDir })
 }
 
-async function downloadSubtitles (ctx: Context) {
+export async function downloadSubtitles (ctx: Context) {
   ctx.assert(/^(e|m)\d+$/.test(ctx.params.wid), 400, 'Invalid ID format')
 
   const mediaId = parseInt(ctx.params.wid.slice(1))
@@ -145,10 +145,4 @@ async function downloadSubtitles (ctx: Context) {
     mediaId,
     mediaType
   })
-}
-
-module.exports = {
-  downloadSubtitles,
-  getSubtitles,
-  listSubtitles
 }

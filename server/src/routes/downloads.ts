@@ -5,7 +5,7 @@ import config from '../config'
 import { client, serializeTorrent } from '../services/downloader'
 import Download from '../models/Download'
 
-async function addTorrent (ctx: Context) {
+export async function addTorrent (ctx: Context) {
   const magnetURI: string = ctx.request.body.magnetURI
   const torrentFile = ctx.request.files ? ctx.request.files.torrents : null
 
@@ -32,11 +32,6 @@ async function addTorrent (ctx: Context) {
   ctx.body = serializeTorrent(t)
 }
 
-async function listTorrents (ctx: Context) {
+export async function listTorrents (ctx: Context) {
   ctx.body = client.torrents.map(serializeTorrent)
-}
-
-module.exports = {
-  addTorrent,
-  listTorrents
 }

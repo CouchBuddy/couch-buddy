@@ -6,7 +6,7 @@ import config from '../config'
 import packageJson from '../../package.json'
 import { getIpAddresses } from '../services/system'
 
-async function getSystemInfo (ctx: Context) {
+export async function getSystemInfo (ctx: Context) {
   let mediaDirAvailable = false
 
   try {
@@ -21,8 +21,4 @@ async function getSystemInfo (ctx: Context) {
     mediaDirPath: config.mediaDir,
     version: packageJson.version
   }
-}
-
-module.exports = {
-  getSystemInfo
 }
