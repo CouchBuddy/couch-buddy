@@ -13,9 +13,17 @@ import Movie from './Movie'
 
 @Entity()
 export default class Episode extends BaseEntity {
+  private _backdrop: string;
+  private _poster: string;
 
   @Column()
   actors: string;
+
+  @Column()
+  get backdrop(): string {
+    return this._backdrop ? 'http://image.tmdb.org/t/p/w500' + this._backdrop : null
+  }
+  set backdrop(b: string) { this._backdrop = b }
 
   @Column()
   director: string;
@@ -38,16 +46,10 @@ export default class Episode extends BaseEntity {
   plot: string;
 
   @Column()
-  poster: string;
-    // get () {
-    //   const rawValue = this.getDataValue('poster')
-
-    //   if (rawValue && !rawValue.startsWith('http')) {
-    //     return 'http://image.tmdb.org/t/p/w500' + rawValue
-    //   } else {
-    //     return rawValue
-    //   }
-    // }
+  get poster (): string {
+    return this._poster ? 'http://image.tmdb.org/t/p/w500' + this._poster : null
+  }
+  set poster (p: string) { this._poster = p }
 
   @Column({
     type: 'float'
