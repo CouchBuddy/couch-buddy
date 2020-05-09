@@ -1,23 +1,27 @@
-const axios = require('axios')
-const fs = require('fs')
-const sendFile = require('koa-send')
-const OS = require('opensubtitles-api')
-const path = require('path')
-const srt2vtt = require('srt-to-vtt')
+import axios from 'axios'
+import fs from 'fs'
+import { Context } from 'koa'
+import sendFile from 'koa-send'
+import OpenSubtitles from 'opensubtitles-api'
+import path from 'path'
+import srt2vtt from 'srt-to-vtt'
 
-const config = require('../config')
-const { Episode, MediaFile, Movie, SubtitlesFile } = require('../models')
-const getSubLangID = require('../utils/open-subtitles-langs')
+import config from '../config'
+import Episode from '../models/Episode'
+import MediaFile from '../models/MediaFile'
+import Movie from '../models/Movie'
+import SubtitlesFile from '../models/SubtitlesFile'
+import getSubLangID from '../utils/open-subtitles-langs'
 
-let OpenSubtitles = null
+let osClient: OpenSubtitles = null
 
-async function listSubtitles (ctx) {
+async function listSubtitles (ctx: Context) {
   ctx.assert(/^(e|m)\d+$/.test(ctx.params.wid), 400, 'Invalid ID format')
 
   const mediaId = parseInt(ctx.params.wid.slice(1))
   const mediaType = ctx.params.wid[0] === 'm' ? 'movie' : 'episode'
 
-  const subtitles = await SubtitlesFile.findAll({
+  const subtitles = await SubtitlesFile.find({
     where: {
       mediaId,
       mediaType
@@ -27,30 +31,31 @@ async function listSubtitles (ctx) {
   ctx.body = subtitles
 }
 
-async function getSubtitles (ctx) {
+async function getSubtitles (ctx: Context) {
   const id = parseInt(ctx.params.id)
   ctx.assert(id >= 1, 400, 'Invalid ID')
 
-  const subtitles = await SubtitlesFile.findByPk(id)
+  const subtitles = await SubtitlesFile.findOne(id)
 
   ctx.assert(subtitles, 404)
 
   await sendFile(ctx, subtitles.fileName, { root: config.mediaDir })
 }
 
-async function downloadSubtitles (ctx) {
+async function downloadSubtitles (ctx: Context) {
   ctx.assert(/^(e|m)\d+$/.test(ctx.params.wid), 400, 'Invalid ID format')
 
   const mediaId = parseInt(ctx.params.wid.slice(1))
   const mediaType = ctx.params.wid[0] === 'm' ? 'movie' : 'episode'
-  const lang = ctx.request.body.lang
+  const lang: string = ctx.request.body.lang
   const sublanguageId = getSubLangID(lang)
 
-  let media
+  let media: Movie | Episode
+
   if (mediaType === 'movie') {
-    media = await Movie.findByPk(mediaId)
+    media = await Movie.findOne(mediaId)
   } else {
-    media = await Episode.findByPk(mediaId)
+    media = await Episode.findOne(mediaId)
   }
 
   const mediaFile = await MediaFile.findOne({
@@ -62,21 +67,21 @@ async function downloadSubtitles (ctx) {
 
   ctx.assert(mediaFile, 404, 'Media not found')
 
-  if (!OpenSubtitles) {
-    OpenSubtitles = new OS(config.openSubtitlesUa)
+  if (!osClient) {
+    osClient = new OpenSubtitles(config.openSubtitlesUa)
   }
 
   // Search subtitles using movie hash
-  let result = await OpenSubtitles.search({
+  let result = await osClient.search({
     sublanguageid: sublanguageId,
     path: config.mediaDir + mediaFile.fileName
   })
 
   // Search again using only IMDB ID
   if (!result[lang]) {
-    result = await OpenSubtitles.search({
+    result = await osClient.search({
       sublanguageid: sublanguageId,
-      imdbid: media.imdbid
+      imdbid: media.imdbId
     })
   }
 
