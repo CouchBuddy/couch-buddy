@@ -13,11 +13,11 @@ import Movie from './Movie'
 
 @Entity()
 export default class Episode extends BaseEntity {
-  private _backdrop: string;
-  private _poster: string;
+  private _backdrop?: string;
+  private _poster?: string;
 
   @Column()
-  actors: string;
+  actors?: string;
 
   @Column()
   get backdrop(): string {
@@ -26,24 +26,26 @@ export default class Episode extends BaseEntity {
   set backdrop(b: string) { this._backdrop = b }
 
   @Column()
-  director: string;
+  director?: string;
 
-  @Column()
+  @Column({
+    nullable: false
+  })
   @Min(1)
   episode: number;
 
   @Column()
-  firstAired: string;
+  firstAired?: string;
 
   @Column()
-  imdbId: string;
+  imdbId?: string;
 
   @Column()
   @ManyToOne(() => Movie, (series) => series.episodes)
-  movie: Movie;
+  movie?: Movie;
 
   @Column()
-  plot: string;
+  plot?: string;
 
   @Column()
   get poster (): string {
@@ -56,22 +58,24 @@ export default class Episode extends BaseEntity {
   })
   @Min(0)
   @Max(10)
-  rating: number;
+  rating?: number;
 
   @Column()
   @Min(0)
-  resolution: number;
+  resolution?: number;
 
   @Column()
   @Min(0)
-  runtime: number;
+  runtime?: number;
 
-  @Column()
+  @Column({
+    nullable: false
+  })
   @Min(1)
   season: number;
 
   @Column()
-  thumbnail: string;
+  thumbnail?: string;
 
   @Column({
     nullable: false
@@ -84,22 +88,22 @@ export default class Episode extends BaseEntity {
   })
   @Min(0)
   @Max(100)
-  watched: number;
+  watched?: number;
 
   @Column()
-  writer: string;
+  writer?: string;
 
   @Column()
   @Min(1900)
-  year: number;
+  year?: number;
 
 
   @PrimaryGeneratedColumn()
-  id: number;
+  id?: number;
 
   @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
+  createdAt?: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt: Date;
+  updatedAt?: Date;
 }

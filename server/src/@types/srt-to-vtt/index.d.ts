@@ -5,5 +5,7 @@
 /// <reference types="node" />
 
 declare module 'srt-to-vtt' {
-  export default function (): void
+  import Pumpify from 'pumpify'
+
+  export default function (): Pumpify
 }
