@@ -15,6 +15,8 @@ import Movie from './Movie'
 export default class Episode extends BaseEntity {
   private _backdrop?: string;
   private _poster?: string;
+  // Workaround to pass `part` during lib scan
+  part: number;
 
   @Column()
   actors?: string;
