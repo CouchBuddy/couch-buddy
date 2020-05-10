@@ -375,7 +375,7 @@ export async function scanDirectory (dir: string) {
   console.log('matched', coupledSubs, allSubs)
 }
 
-export function searchVideoFiles (dir: string) {
+export function searchVideoFiles (dir: string): Promise<string[]> {
   return new Promise((resolve, reject) => {
     const options = {
       cwd: dir,

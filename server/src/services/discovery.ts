@@ -2,8 +2,8 @@ import { Packet } from 'dns-packet'
 import MulticastDns from 'multicast-dns'
 import { hostname } from 'os'
 
-const config = require('../config')
-const { getIpAddresses } = require('./system')
+import config from '../config'
+import { getIpAddresses } from './system'
 
 const COUCHBUDDY_HOSTNAME = '_couchbuddy._tcp.local'
 

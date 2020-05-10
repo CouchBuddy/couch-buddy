@@ -2,11 +2,12 @@ import ffmpeg from 'fluent-ffmpeg'
 import fs from 'fs'
 import { Context } from 'koa'
 import mime from 'mime-types'
+import { PassThrough } from 'stream'
+import { Torrent } from 'webtorrent'
 
 import config from '../config'
 import MediaFile from '../models/MediaFile'
 import { client as torrentClient } from '../services/downloader'
-import { Torrent } from 'webtorrent'
 
 type SupportedCodecs = {
   [ codecType: string ]: string[];
@@ -101,7 +102,7 @@ export async function watch (ctx: Context) {
     mimeType = 'video/mp4'
     range = null
 
-    videoStream = require('stream').PassThrough()
+    videoStream = new PassThrough()
 
     ffmpeg(path)
       .withVideoCodec(isSupported.video ? 'copy' : 'libx264')

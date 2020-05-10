@@ -3,7 +3,7 @@ import WebTorrent, { Torrent } from 'webtorrent'
 
 import config from '../config'
 import Download from '../models/Download'
-const { addFileToLibrary, parseTorrentTitle } = require('./library')
+import { addFileToLibrary, parseFileName } from './library'
 import ioServer from './socket-io'
 
 const downloadsNs = ioServer.of('/downloads')
@@ -37,7 +37,7 @@ export function serializeTorrent (t: Torrent) {
   return {
     infoHash: t.infoHash,
     name: t.name,
-    info: parseTorrentTitle(t.name),
+    info: parseFileName(t.name),
     timeRemaining: t.timeRemaining,
     progress: t.progress,
     downloadSpeed: t.downloadSpeed,

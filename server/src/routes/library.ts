@@ -1,13 +1,11 @@
 import { Context } from 'koa'
 import sendFile from 'koa-send'
-// const { QueryTypes } = require('sequelize')
 
 import config from '../config'
-const { sequelize } = require('../models')
 import Episode from '../models/Episode'
 import Movie from '../models/Movie'
-const { getResource, updateResource } = require('./rest-endpoints')
-const { addFileToLibrary, searchVideoFiles } = require('../services/library')
+import { getResource, updateResource } from './rest-endpoints'
+import { addFileToLibrary, searchVideoFiles } from '../services/library'
 import { getMovieById, searchMovie } from '../services/tmdb'
 
 export async function scanLibrary (ctx: Context) {
