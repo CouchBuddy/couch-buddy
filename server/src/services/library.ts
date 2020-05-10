@@ -66,7 +66,7 @@ interface DirectoryContent {
  * @param extensions an array of file extensions to fiter the directory content,
  *   i.e.: `[ 'mp4', 'srt' ]`
  */
-async function getDirectoryContent (dir: string, extensions?: string[]) {
+export async function getDirectoryContent (dir: string, extensions?: string[]) {
   const directories: { [dir: string]: DirectoryContent } = {}
 
   const walkDir = async function (dir: string, extensions?: string[]) {
@@ -101,7 +101,7 @@ async function getDirectoryContent (dir: string, extensions?: string[]) {
   return directories
 }
 
-function takeScreenshot (file: string): Promise<string> {
+export function takeScreenshot (file: string): Promise<string> {
   const folder = path.dirname(file)
   const folderRelative = path.relative(config.mediaDir, folder)
 
@@ -114,7 +114,7 @@ function takeScreenshot (file: string): Promise<string> {
   })
 }
 
-function parseFileName (fileName: string): ParserResult {
+export function parseFileName (fileName: string): ParserResult {
   const fileBaseName = path.basename(fileName)
   const basicInfo = ptt.parse(fileBaseName) as ParserResult
 
@@ -138,7 +138,7 @@ function parseFileName (fileName: string): ParserResult {
   return basicInfo
 }
 
-async function searchShowInfo (fileName: string): Promise<Movie | Episode> {
+export async function searchShowInfo (fileName: string): Promise<Movie | Episode> {
   const basicInfo = parseFileName(fileName)
 
   const isEpisode = basicInfo.season && basicInfo.episode
@@ -185,7 +185,7 @@ async function searchShowInfo (fileName: string): Promise<Movie | Episode> {
  *   is invalid or it already exists in the library (and `force` is false) no DB operations are done and
  *   the return value is null.
  */
-async function addFileToLibrary (_fileName: string, force = false): Promise<[number, string]> {
+export async function addFileToLibrary (_fileName: string, force = false): Promise<[number, string]> {
   if (!_fileName) {
     console.error('fileName is null')
     return null
@@ -289,7 +289,7 @@ async function addFileToLibrary (_fileName: string, force = false): Promise<[num
   })
 }
 
-async function scanDirectory (dir: string) {
+export async function scanDirectory (dir: string) {
   const directories = await getDirectoryContent(dir)
 
   let allSubs = 0
@@ -375,7 +375,7 @@ async function scanDirectory (dir: string) {
   console.log('matched', coupledSubs, allSubs)
 }
 
-function searchVideoFiles (dir: string) {
+export function searchVideoFiles (dir: string) {
   return new Promise((resolve, reject) => {
     const options = {
       cwd: dir,
@@ -392,14 +392,4 @@ function searchVideoFiles (dir: string) {
       resolve(files)
     })
   })
-}
-
-module.exports = {
-  addFileToLibrary,
-  getDirectoryContent,
-  parseFileName,
-  scanDirectory,
-  searchShowInfo,
-  searchVideoFiles,
-  takeScreenshot
 }
