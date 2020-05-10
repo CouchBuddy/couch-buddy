@@ -1,5 +1,11 @@
 import { IsMagnetURI } from 'class-validator'
-import {BaseEntity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm'
+import {
+  BaseEntity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn
+} from 'typeorm'
 
 export default class Download extends BaseEntity {
   @Column({
@@ -18,7 +24,6 @@ export default class Download extends BaseEntity {
 
   @Column()
   done: boolean;
-
 
   @PrimaryGeneratedColumn()
   id: number;

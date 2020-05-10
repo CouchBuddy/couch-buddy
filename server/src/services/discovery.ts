@@ -19,7 +19,7 @@ mdns.on('query', function (query: Packet) {
     }
 
     if (question.type === 'PTR') {
-       responsePacket.answers.push({
+      responsePacket.answers.push({
         name: COUCHBUDDY_HOSTNAME,
         type: 'PTR',
         data: `${hostname()}.${COUCHBUDDY_HOSTNAME}`

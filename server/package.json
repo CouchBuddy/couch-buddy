@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "nodemon dist/app.js",
-    "lint": "eslint ./src/**/*.{js,ts}",
+    "lint": "eslint ./src/**/*.{js,ts} --ignore-pattern *.d.ts",
     "start": "node app.js",
     "test": "mocha",
     "watch-ts": "tsc -w"

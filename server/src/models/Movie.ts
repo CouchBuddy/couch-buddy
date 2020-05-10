@@ -27,10 +27,11 @@ export default class Movie extends BaseEntity {
   actors: string;
 
   @Column()
-  get backdrop(): string {
+  get backdrop (): string {
     return this._backdrop ? 'http://image.tmdb.org/t/p/w500' + this._backdrop : null
   }
-  set backdrop(b: string) { this._backdrop = b }
+
+  set backdrop (b: string) { this._backdrop = b }
 
   @Column()
   country: string;
@@ -57,6 +58,7 @@ export default class Movie extends BaseEntity {
   get poster (): string {
     return this._poster ? 'http://image.tmdb.org/t/p/w500' + this._poster : null
   }
+
   set poster (p: string) { this._poster = p }
 
   @Column()
@@ -100,7 +102,6 @@ export default class Movie extends BaseEntity {
   @Column()
   @Min(1900)
   year: number;
-
 
   @PrimaryGeneratedColumn()
   id: number;

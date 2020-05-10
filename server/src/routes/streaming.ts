@@ -85,7 +85,7 @@ export async function watch (ctx: Context) {
   const isSupported: { [codecType: string]: boolean } = {}
 
   for (const stream of metadata.streams) {
-    if (SUPPORTED_CODECS['chrome'][stream.codec_type]) {
+    if (SUPPORTED_CODECS.chrome[stream.codec_type]) {
       isSupported[stream.codec_type] =
         SUPPORTED_CODECS.chrome[stream.codec_type].includes(stream.codec_name)
     } else {

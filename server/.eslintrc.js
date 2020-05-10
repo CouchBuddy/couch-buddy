@@ -3,7 +3,8 @@ module.exports = {
     mocha: true
   },
   extends: [
-    "plugin:@typescript-eslint/recommended"
+    'standard',
+    'plugin:@typescript-eslint/recommended'
   ],
   ignorePatterns: [ 'dist/', 'node_modules/', 'public/', 'scripts/', 'test/' ],
   globals: {
@@ -21,15 +22,15 @@ module.exports = {
       arraysInArrays: false
     }],
     'eol-last': [ 'error', 'always' ],
-    "quotes": [ "error", "single" ],
-    "semi": [ "error", "never" ],
-    "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/no-explicit-any": 1,
-    "@typescript-eslint/no-inferrable-types": [
-      "warn", {
-        "ignoreParameters": true
+    'quotes': [ 'error', 'single' ],
+    'semi': [ 'error', 'never' ],
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/no-explicit-any': 1,
+    '@typescript-eslint/no-inferrable-types': [
+      'warn', {
+        'ignoreParameters': true
       }
     ],
-    "@typescript-eslint/no-unused-vars": "warn"
+    '@typescript-eslint/no-unused-vars': 'warn'
   }
 }

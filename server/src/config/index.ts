@@ -7,7 +7,7 @@ dotenv.config()
 const config: AppConfig = {
   nodeEnv: process.env.NODE_ENV || 'development',
 
-  get isProduction() { return this.nodeEnv === 'production' },
+  get isProduction () { return this.nodeEnv === 'production' },
 
   dbSqlitePath: process.env.DB_SQLITE_PATH,
 

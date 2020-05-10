@@ -11,7 +11,6 @@ import {
 
 @Entity()
 export default class SubtitlesFile extends BaseEntity {
-
   @Column({
     nullable: false
   })
@@ -37,7 +36,6 @@ export default class SubtitlesFile extends BaseEntity {
   })
   @IsIn([ 'episode', 'movie' ])
   mediaType: string;
-
 
   @PrimaryGeneratedColumn()
   id: number;

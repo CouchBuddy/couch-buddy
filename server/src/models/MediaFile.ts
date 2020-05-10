@@ -10,7 +10,6 @@ import {
 
 @Entity()
 export default class MediaFile extends BaseEntity {
-
   @Column({
     nullable: false
   })
@@ -36,7 +35,6 @@ export default class MediaFile extends BaseEntity {
   @Column()
   @Min(1)
   part: number;
-
 
   @PrimaryGeneratedColumn()
   id: number;

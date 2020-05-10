@@ -24,7 +24,6 @@ export default class Extension extends BaseEntity {
   })
   path: string;
 
-
   @PrimaryGeneratedColumn()
   id: number;
 
