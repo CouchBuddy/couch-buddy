@@ -1,21 +1,28 @@
-const Koa = require('koa')
-const koaBody = require('koa-body')
-const koaMount = require('koa-mount')
-const koaStatic = require('koa-static')
-const koaCors = require('@koa/cors')
+import Koa from 'koa'
+import koaBody from 'koa-body'
+import koaCors from '@koa/cors'
+import koaLogger from 'koa-logger'
+import koaMount from 'koa-mount'
+import koaStatic from 'koa-static'
 import 'reflect-metadata'
 
 // Initialize config
-const config = require('./config')
+import config from './config'
+
 // Initialize DB
-require('./models')
+import './models'
+
+import router from './routes'
+
 // Initialize services
-require('./services')
-const server = require('./services/server')
+import './services'
+import server from './services/server'
+
+import spaRewrite from './middlewares/spa-rewrite'
 
 const app = new Koa()
 
-app.use(require('koa-logger')())
+app.use(koaLogger())
 
 app.proxy = true
 app.use(koaCors({ credentials: true }))
@@ -30,10 +37,9 @@ app.use(koaStatic('public'))
 if (config.isProduction) {
   // In production, Vue SPA client is served by the server,
   // so all URLs but /api and static files are rewritten to / and handled by the SPA
-  app.use(require('./middlewares/spa-rewrite')('api', '/'))
+  app.use(spaRewrite('api', '/'))
 }
 
-const router = require('./routes')
 app.use(koaMount('/api', router.routes()))
 app.use(koaMount('/api', router.allowedMethods()))
 
