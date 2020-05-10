@@ -5,10 +5,10 @@
 /// <reference types="node" />
 
 declare module 'multicast-dns' {
-  import { AddressInfo } from 'net';
-  import * as packet from 'dns-packet';
+  import { AddressInfo } from 'net'
+  import * as packet from 'dns-packet'
 
-  type Callback = (err: Error) => any;
+  type Callback = (err: Error) => void
 
   interface MulticastDnsOptions {
       /**
@@ -50,8 +50,8 @@ declare module 'multicast-dns' {
 
   interface MulticastDns extends NodeJS.EventEmitter {
 
-      on(event: 'response', cb: (response: packet.Packet) => any): this;
-      on(event: 'query', cb: (query: packet.Packet) => any): this;
+      on(event: 'response', cb: (response: packet.Packet) => void): this;
+      on(event: 'query', cb: (query: packet.Packet) => void): this;
 
       send(value: packet.Packet, cb?: Callback): void;
       send(value: packet.Packet, rinfo: AddressInfo, cb?: Callback): void;
@@ -70,5 +70,5 @@ declare module 'multicast-dns' {
       destroy(cb?: Callback): void;
   }
 
-  export default function (opts?: MulticastDnsOptions): MulticastDns;
+  export default function (opts?: MulticastDnsOptions): MulticastDns
 }

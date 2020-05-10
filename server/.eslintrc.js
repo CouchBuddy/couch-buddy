@@ -5,7 +5,7 @@ module.exports = {
   extends: [
     "plugin:@typescript-eslint/recommended"
   ],
-  ignorePatterns: [ 'dist/', 'node_modules/', 'public/' ],
+  ignorePatterns: [ 'dist/', 'node_modules/', 'public/', 'scripts/', 'test/' ],
   globals: {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly'
@@ -20,6 +20,7 @@ module.exports = {
       objectsInArrays: false,
       arraysInArrays: false
     }],
+    'eol-last': [ 'error', 'always' ],
     "quotes": [ "error", "single" ],
     "semi": [ "error", "never" ],
     "@typescript-eslint/explicit-function-return-type": "off",

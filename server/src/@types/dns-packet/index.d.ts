@@ -164,14 +164,14 @@ export interface Packet {
     authorities?: Answer[];
 }
 
-export const AUTHORITATIVE_ANSWER: number;
-export const TRUNCATED_RESPONSE: number;
-export const RECURSION_DESIRED: number;
-export const RECURSION_AVAILABLE: number;
-export const AUTHENTIC_DATA: number;
-export const CHECKING_DISABLED: number;
+export const AUTHORITATIVE_ANSWER: number
+export const TRUNCATED_RESPONSE: number
+export const RECURSION_DESIRED: number
+export const RECURSION_AVAILABLE: number
+export const AUTHENTIC_DATA: number
+export const CHECKING_DISABLED: number
 
-export function encode(package: Packet, buf?: Buffer, offset?: number): Buffer;
-export function decode(buf: Buffer, offset?: number): Packet;
-export function encodingLength(packet: Packet): number;
+export function encode(package: Packet, buf?: Buffer, offset?: number): Buffer
+export function decode(buf: Buffer, offset?: number): Packet
+export function encodingLength(packet: Packet): number
 }
