@@ -27,13 +27,21 @@ export async function scanLibrary (ctx: Context) {
 export async function listLibrary (ctx: Context) {
   if (ctx.request.query.search) {
     // Search movies with SQLite FTS5 MATCH operator
-    const query = `SELECT movies.* FROM movies_fts
-    INNER JOIN movies ON movies_fts.ID = movies.ID
-    WHERE movies_fts
-    MATCH '-ID:${ctx.request.query.search}'
-    ORDER BY rank`
+    // const query = `SELECT movies.* FROM movies_fts
+    // INNER JOIN movies ON movies_fts.ID = movies.ID
+    // WHERE movies_fts
+    // MATCH '-ID:${ctx.request.query.search}'
+    // ORDER BY rank`
 
-    ctx.body = await sequelize.query(query, { type: QueryTypes.SELECT })
+    const results: Movie[] = await Movie.getRepository()
+      .createQueryBuilder()
+      .from<Movie>('movie_fts', 'movie_fts')
+      .innerJoin('movies', 'movies', 'movies_fts.ID = movies.ID')
+      .where(`movies_fts MATCH '-ID:${ctx.request.query.search}'`)
+      .orderBy('rank')
+      .getMany()
+
+    ctx.body = results
   } else {
     ctx.body = await Movie.find({
       order: { title: 'ASC' },
