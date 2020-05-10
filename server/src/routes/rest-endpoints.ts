@@ -1,49 +1,48 @@
-import { Context } from 'koa'
-import { getRepository, EntitySchema } from 'typeorm'
+import { Context, Middleware } from 'koa'
+import { Repository } from 'typeorm'
 
 /**
- * @param model
+ * Get a resource by its ID
+ *
+ * @param repository Get the entity repository calling `.getRepository()` on the class
  */
-export const getResource = <T extends EntitySchema>(model: T) =>
+export const getResource = <T>(repository: Repository<T>): Middleware =>
   async function (ctx: Context) {
     const id = parseInt(ctx.params.id)
     ctx.assert(id > 0 || ctx.params.id === 'random', 404, 'Resource ID must be an integer > 0')
 
-    const resource = await getRepository(model)
-      .createQueryBuilder(model.options.name)
-      .where('id = :id', { id })
-      .getOne()
+    const resource = await repository
+      .findOne(id)
 
     ctx.assert(resource, 404)
 
     ctx.body = resource
   }
 
-export const listResource = <T extends EntitySchema>(model: T) =>
+/**
+ * List resources
+ *
+ * @param repository Get the entity repository calling `.getRepository()` on the class
+ */
+export const listResource = <T>(repository: Repository<T>): Middleware =>
   async function (ctx: Context) {
-    const resources = await getRepository(model)
-      .createQueryBuilder(model.options.name)
-      .take(30)
-      .getMany()
-
-    ctx.body = resources
+    ctx.body = await repository.find({
+      take: 30
+    })
   }
 
 /**
- * @param model
+ * Update a resource by its ID
+ *
+ * @param repository Get the entity repository calling `.getRepository()` on the class
  */
-export const updateResource = <T extends EntitySchema>(model: T) =>
+export const updateResource = <T>(repository: Repository<T>): Middleware =>
   async function (ctx: Context) {
     const id = parseInt(ctx.params.id)
     ctx.assert(id > 0, 404, 'Resource ID must be an integer > 0')
 
     try {
-      const result = await getRepository(model)
-        .createQueryBuilder(model.options.name)
-        .update()
-        .set(ctx.request.body)
-        .where({ id })
-        .execute()
+      const result = await repository.update(id, ctx.request.body)
 
       ctx.status = result.affected === 1 ? 204 : 400
     } catch (e) {
