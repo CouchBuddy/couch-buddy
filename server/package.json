@@ -4,7 +4,7 @@
   "version": "v0.4.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon dist/app.js",
+    "dev": "nodemon dist/src/app.js",
     "lint": "eslint ./src/**/*.{js,ts} --ignore-pattern *.d.ts",
     "start": "node app.js",
     "test": "mocha",
@@ -37,6 +37,7 @@
     "mime-types": "^2.1.26",
     "moviedb-promise": "^2.2.0",
     "multicast-dns": "^7.2.2",
+    "npm": "^6.14.5",
     "opensubtitles-api": "^5.1.0",
     "parse-torrent-title": "^1.2.0",
     "reflect-metadata": "^0.1.13",
