@@ -10,7 +10,7 @@ const downloadsNs = ioServer.of('/downloads')
 
 export const client = new WebTorrent()
 
-async function restoreTorrents () {
+export async function init () {
   const downloads = await Download.find({
     where: { done: false }
   })
@@ -63,5 +63,3 @@ client.on('torrent', (torrent: Torrent) => {
 downloadsNs.on('connection', (socket) => {
   socket.emit('torrent:all', client.torrents.map(serializeTorrent))
 })
-
-restoreTorrents()

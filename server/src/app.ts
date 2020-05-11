@@ -10,12 +10,12 @@ import 'reflect-metadata'
 import config from './config'
 
 // Initialize DB
-import './models'
+import { init as initDB } from './models'
 
 import router from './routes'
 
 // Initialize services
-import './services'
+import { init as initServices } from './services'
 import server from './services/server'
 
 import spaRewrite from './middlewares/spa-rewrite'
@@ -39,6 +39,10 @@ if (config.isProduction) {
   // so all URLs but /api and static files are rewritten to / and handled by the SPA
   app.use(spaRewrite('api', '/'))
 }
+
+initDB().then(() => {
+  initServices()
+})
 
 app.use(koaMount('/api', router.routes()))
 app.use(koaMount('/api', router.allowedMethods()))
