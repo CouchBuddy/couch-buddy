@@ -104,9 +104,9 @@ export default class Episode extends BaseEntity {
   @PrimaryGeneratedColumn()
   id?: number;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn()
   createdAt?: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn()
   updatedAt?: Date;
 }
