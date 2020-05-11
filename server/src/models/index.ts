@@ -1,14 +1,24 @@
-import path from 'path'
 import { createConnection } from 'typeorm'
 
 import config from '../config'
+import Download from './Download'
+import Episode from './Episode'
+import Extention from './Extension'
+import MediaFile from './MediaFile'
+import Movie from './Movie'
+import Subtitles from './SubtitlesFile'
 
-export async function init (synchronize: boolean) {
+export async function init (synchronize: boolean = false) {
   await createConnection({
     type: 'sqlite',
     database: config.dbSqlitePath,
     entities: [
-      path.join(__dirname, 'models', '*.ts')
+      Download,
+      Episode,
+      Extention,
+      MediaFile,
+      Movie,
+      Subtitles
     ],
     synchronize,
     logging: false

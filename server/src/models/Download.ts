@@ -2,11 +2,13 @@ import { IsMagnetURI } from 'class-validator'
 import {
   BaseEntity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
 
+@Entity()
 export default class Download extends BaseEntity {
   @Column({
     nullable: false
