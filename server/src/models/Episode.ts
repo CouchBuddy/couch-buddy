@@ -43,7 +43,6 @@ export default class Episode extends BaseEntity {
   @Column()
   imdbId?: string;
 
-  @Column()
   @ManyToOne(() => Movie, (series) => series.episodes)
   movie?: Movie;
 
