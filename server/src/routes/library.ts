@@ -50,8 +50,8 @@ export async function listLibrary (ctx: Context) {
   }
 }
 
-export const getLibrary = getResource(Movie.getRepository())
-export const updateLibrary = updateResource(Movie.getRepository())
+export const getLibrary = getResource(Movie)
+export const updateLibrary = updateResource(Movie)
 
 export async function findMovieInfo (ctx: Context) {
   const title: string = ctx.request.query.title
@@ -80,8 +80,8 @@ export async function listEpisodes (ctx: Context) {
   ctx.body = episodes
 }
 
-export const getEpisode = getResource(Episode.getRepository())
-export const updateEpisode = updateResource(Episode.getRepository())
+export const getEpisode = getResource(Episode)
+export const updateEpisode = updateResource(Episode)
 
 export async function getEpisodeThumbnail (ctx: Context) {
   const episodeId = parseInt(ctx.params.id)

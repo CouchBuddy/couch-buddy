@@ -6,12 +6,12 @@ import { Repository } from 'typeorm'
  *
  * @param repository Get the entity repository calling `.getRepository()` on the class
  */
-export const getResource = <T>(repository: Repository<T>): Middleware =>
+export const getResource = <T>(entity: { getRepository(): Repository<T> }): Middleware =>
   async function (ctx: Context) {
     const id = parseInt(ctx.params.id)
     ctx.assert(id > 0 || ctx.params.id === 'random', 404, 'Resource ID must be an integer > 0')
 
-    const resource = await repository
+    const resource = await entity.getRepository()
       .findOne(id)
 
     ctx.assert(resource, 404)
@@ -24,9 +24,9 @@ export const getResource = <T>(repository: Repository<T>): Middleware =>
  *
  * @param repository Get the entity repository calling `.getRepository()` on the class
  */
-export const listResource = <T>(repository: Repository<T>): Middleware =>
+export const listResource = <T>(entity: { getRepository(): Repository<T> }): Middleware =>
   async function (ctx: Context) {
-    ctx.body = await repository.find({
+    ctx.body = await entity.getRepository().find({
       take: 30
     })
   }
@@ -36,13 +36,13 @@ export const listResource = <T>(repository: Repository<T>): Middleware =>
  *
  * @param repository Get the entity repository calling `.getRepository()` on the class
  */
-export const updateResource = <T>(repository: Repository<T>): Middleware =>
+export const updateResource = <T>(entity: { getRepository(): Repository<T> }): Middleware =>
   async function (ctx: Context) {
     const id = parseInt(ctx.params.id)
     ctx.assert(id > 0, 404, 'Resource ID must be an integer > 0')
 
     try {
-      const result = await repository.update(id, ctx.request.body)
+      const result = await entity.getRepository().update(id, ctx.request.body)
 
       ctx.status = result.affected === 1 ? 204 : 400
     } catch (e) {

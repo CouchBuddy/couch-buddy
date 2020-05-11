@@ -5,7 +5,7 @@ import path from 'path'
 import Extension from '../models/Extension'
 import { listResource } from './rest-endpoints'
 
-export const listExtensions = listResource(Extension.getRepository())
+export const listExtensions = listResource(Extension)
 
 export const loadExtension = async (ctx: Context) => {
   const id = parseInt(ctx.params.id)
