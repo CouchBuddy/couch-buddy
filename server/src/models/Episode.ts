@@ -11,7 +11,7 @@ import {
 
 import Movie from './Movie'
 
-@Entity()
+@Entity('episodes')
 export default class Episode extends BaseEntity {
   private _backdrop?: string;
   private _poster?: string;

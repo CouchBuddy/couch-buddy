@@ -7,7 +7,7 @@ import {
   UpdateDateColumn
 } from 'typeorm'
 
-@Entity()
+@Entity('extensions')
 export default class Extension extends BaseEntity {
   @Column({
     default: false

@@ -8,7 +8,7 @@ import {
   UpdateDateColumn
 } from 'typeorm'
 
-@Entity()
+@Entity('downloads')
 export default class Download extends BaseEntity {
   @Column({
     nullable: false

@@ -16,7 +16,7 @@ export enum MovieType {
   Series = 'series'
 }
 
-@Entity()
+@Entity('movies')
 export default class Movie extends BaseEntity {
   private _backdrop: string;
   private _poster: string;

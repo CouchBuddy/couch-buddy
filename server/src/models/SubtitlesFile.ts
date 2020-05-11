@@ -9,7 +9,7 @@ import {
   UpdateDateColumn
 } from 'typeorm'
 
-@Entity()
+@Entity('subtitlesFiles')
 export default class SubtitlesFile extends BaseEntity {
   @Column({
     nullable: false
