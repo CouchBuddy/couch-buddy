@@ -17,7 +17,7 @@ require('dotenv').config({
 })
 
 // Initialize DB
-require('../models')
+require('../src/models').init()
 
 module.exports = {
   bar: new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic)
