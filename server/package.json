@@ -1,7 +1,7 @@
 {
   "name": "couch-buddy-server",
   "description": "Couch Buddy server",
-  "version": "v0.4.0",
+  "version": "v0.4.1",
   "private": true,
   "scripts": {
     "build": "tsc --build --clean && tsc",
