@@ -1,25 +1,36 @@
 module.exports = {
   env: {
-    commonjs: true,
-    es6: true,
-    node: true,
     mocha: true
   },
   extends: [
-    'standard'
+    'standard',
+    'plugin:@typescript-eslint/recommended'
   ],
-  ignorePatterns: [ 'node_modules/', 'public/' ],
+  ignorePatterns: [ 'dist/', 'node_modules/', 'public/', 'scripts/', 'test/' ],
   globals: {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly'
   },
+  parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: 2018
+    ecmaVersion: 2018,
+    sourceType: 'module'
   },
   rules: {
     'array-bracket-spacing': [ 2, 'always', {
-        objectsInArrays: false,
-        arraysInArrays: false
-    }]
+      objectsInArrays: false,
+      arraysInArrays: false
+    }],
+    'eol-last': [ 'error', 'always' ],
+    'quotes': [ 'error', 'single' ],
+    'semi': [ 'error', 'never' ],
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/no-explicit-any': 1,
+    '@typescript-eslint/no-inferrable-types': [
+      'warn', {
+        'ignoreParameters': true
+      }
+    ],
+    '@typescript-eslint/no-unused-vars': 'warn'
   }
 }
