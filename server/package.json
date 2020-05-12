@@ -35,7 +35,7 @@
     "koa-send": "^5.0.0",
     "koa-static": "^5.0.0",
     "mime-types": "^2.1.26",
-    "moviedb-promise": "^2.2.0",
+    "moviedb-promise": "^3.0.0",
     "multicast-dns": "^7.2.2",
     "npm": "^6.14.5",
     "opensubtitles-api": "^5.1.0",

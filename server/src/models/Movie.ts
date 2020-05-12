@@ -18,13 +18,13 @@ export enum MovieType {
 
 @Entity('movies')
 export default class Movie extends BaseEntity {
-  private _backdrop: string;
-  private _poster: string;
+  private _backdrop?: string;
+  private _poster?: string;
   // Workaround to pass `part` during lib scan
-  part: number;
+  part?: number;
 
   @Column()
-  actors: string;
+  actors?: string;
 
   @Column()
   get backdrop (): string {
@@ -34,25 +34,25 @@ export default class Movie extends BaseEntity {
   set backdrop (b: string) { this._backdrop = b }
 
   @Column()
-  country: string;
+  country?: string;
 
   @Column()
-  director: string;
+  director?: string;
 
   @OneToMany(() => Episode, episode => episode.movie)
-  episodes: Episode[];
+  episodes?: Episode[];
 
   @Column()
-  genre: string;
+  genre?: string;
 
   @Column()
-  imdbId: string;
+  imdbId?: string;
 
   @Column()
-  language: string;
+  language?: string;
 
   @Column()
-  plot: string;
+  plot?: string;
 
   @Column()
   get poster (): string {
@@ -62,22 +62,22 @@ export default class Movie extends BaseEntity {
   set poster (p: string) { this._poster = p }
 
   @Column()
-  rated: string;
+  rated?: string;
 
   @Column({
     type: 'float'
   })
   @Min(0)
   @Max(10)
-  rating: number;
+  rating?: number;
 
   @Column()
   @Min(0)
-  resolution: number;
+  resolution?: number;
 
   @Column()
   @Min(0)
-  runtime: number;
+  runtime?: number;
 
   @Column()
   title: string;
@@ -94,21 +94,21 @@ export default class Movie extends BaseEntity {
   })
   @Min(0)
   @Max(100)
-  watched: number;
+  watched?: number;
 
   @Column()
-  writer: string;
+  writer?: string;
 
   @Column()
   @Min(1900)
-  year: number;
+  year?: number;
 
   @PrimaryGeneratedColumn()
-  id: number;
+  id?: number;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt?: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt?: Date;
 }
