@@ -9,7 +9,7 @@ const config: AppConfig = {
 
   get isProduction () { return this.nodeEnv === 'production' },
 
-  dbSqlitePath: process.env.DB_SQLITE_PATH,
+  dbSqlitePath: process.env.DB_SQLITE_PATH || 'db.sqlite',
 
   mediaDir: process.env.MEDIA_DIR,
 

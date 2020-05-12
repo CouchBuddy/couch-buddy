@@ -1,5 +1,9 @@
 # Couch Buddy
 
+> From 12 May 2020, Couch Buddy versions have been moved to packages.
+
+> The server (from v0.4.0) has been ported to TypeScript and the DB model slightly changed (to use an existing DB, see [DB Migration](#DB%20Migration)).
+
 Couch Buddy is a free and open-source Media Center for managing your digital media collection. It runs on standard PC, servers and smartphones and supports streaming to ChromeCast.
 
 ![All movies](https://raw.githubusercontent.com/lucafaggianelli/couch-buddy/master/docs/screenshots/all-movies.png)
@@ -30,7 +34,7 @@ npm run install
 npm run dev
 ```
 
-Be sure to configure the server, see [#Configuration].
+Be sure to configure the server, see [Configuration](#Configuration).
 
 The first time you run the server, you must also initialize the DB (that is, creating the tables), just run this script:
 
@@ -54,16 +58,30 @@ cp server/.env.sample server/.env
 # edit server/.env
 ```
 
-### All configurations
+### Server configuration
+
+The only mandatory config is `MEDIA_DIR`, which is the directory where your media files are stored. The rest is optional, but you need `TMDB_API_KEY` to be able to scan the media directory and add files to your library.
 
 |Name               |Required|Default|Description|
 |-------------------|:-:|-------|-----------|
-|DB_SQLITE_PATH     | Y ||SQLite DB file path, ex: `db.sqlite`|
-|MEDIA_BASE_DIR     | Y ||Directoty with your video files, ex: `/media/luca/MyHDD/videos/`|
-|OMDB_KEY           | N ||(*Deprecated*: please use TMDB) OMDb API key, needed for getting movies info. Register and get your key at http://www.omdbapi.com/apikey.aspx|
+|DB_SQLITE_PATH     | N | db.sqlite |SQLite DB file path, ex: `db.sqlite`|
+|MEDIA_DIR     | Y ||Directoty with your video files, ex: `/media/luca/MyHDD/videos/`|
+|OMDB_API_KEY           | N ||(*Deprecated*: please use TMDB) OMDb API key, needed for getting movies info. Register and get your key at http://www.omdbapi.com/apikey.aspx|
 |TMDB_API_KEY       | N ||The Movie Db API key, needed for getting movies info. Register and get your key at https://developers.themoviedb.org/3/getting-started
-|OPENSUBTITLES_UA   | N ||Open Subtitles UserAgent, needed for downloading movies subs. Request a UserAgent at https://trac.opensubtitles.org/projects/opensubtitles/wiki/DevReadFirst|
-|PORT               | Y |3000|Port where the server listens|
+|OPEN_SUBTITLES_UA   | N ||Open Subtitles UserAgent, needed for downloading movies subs. Request a UserAgent at https://trac.opensubtitles.org/projects/opensubtitles/wiki/DevReadFirst|
+|PORT               | N |3000|Port where the server listens|
+
+## DB Migration
+
+If you want to use a DB generated before v0.4.0, you just need to rename the tables to use snake_case instead of camaelCase and to add few columns.
+
+**Rename tables**
+* *mediaFiles* to *media_files*
+* *subtitlesFiles* to *subtitles_files*
+
+**Add Columns**
+* In *movies* and *episodes* tables, add `TEXT backdrop` column
+* In *movies* and *episodes* tables, rename *ratingImdb* to *vote*
 
 ## Development
 
