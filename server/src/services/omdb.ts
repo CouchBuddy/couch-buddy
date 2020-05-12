@@ -50,6 +50,18 @@ interface OmdbQueryParams {
   y?: number;
 }
 
+function getProperty (data: { [key: string]: string }, key: string): string {
+  return data[key] !== 'N/A' ? data[key] : null
+}
+
+function getFloatProperty (data: { [key: string]: string }, key: string): number {
+  return parseFloat(data[key])
+}
+
+function getIntProperty (data: { [key: string]: string }, key: string): number {
+  return parseInt(data[key])
+}
+
 /**
  * Search a movie, episode or show on OMDb. The query accepts multiple parameters,
  * but if IMDB ID is provided (`imdbId` field), the other search params are ignored.
@@ -86,13 +98,16 @@ export default async function searchOmdb (search: SearchParams) {
       result = response.data.type === 'movie' ? new Movie() : new Episode()
 
       // Found info on OMDb, refactor object to match Movie/Episode model
-      for (const k in response.data) {
-        result[k[0].toLowerCase() + k.slice(1)] = response.data[k] !== 'N/A'
-          ? response.data[k] : null
-      }
-
-      result.imdbId = response.data.imdbID
-      result.rating = response.data.imdbRating ? parseFloat(response.data.imdbRating) : null
+      result.actors = getProperty(response.data, 'Actors')
+      result.director = getProperty(response.data, 'Director')
+      result.imdbId = getProperty(response.data, 'ImdbID')
+      result.plot = getProperty(response.data, 'Plot')
+      result.poster = getProperty(response.data, 'Poster')
+      result.rating = getFloatProperty(response.data, 'ImdbRating')
+      result.runtime = getIntProperty(response.data, 'Runtime')
+      result.title = getProperty(response.data, 'Title')
+      result.writer = getProperty(response.data, 'Writer')
+      result.year = getIntProperty(response.data, 'Year')
     } else {
       // Not found on OMDb
       console.warn('OMDb:', response.data.Error, search.title)
