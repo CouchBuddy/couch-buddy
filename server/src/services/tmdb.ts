@@ -156,7 +156,7 @@ export async function searchSeries (title: string) {
  * @param season
  * @param episode
  */
-export async function searchEpisode (seriesTitle: string, seasonNumber: number, episodeNumber: number): Promise<Episode> {
+export async function searchEpisode (seriesTitle: string, seasonNumber: number, episodeNumber: number): Promise<EpisodeModel> {
   assert(!!seriesTitle, 'seriesTitle is required')
   assert(seasonNumber > 0, 'season must be > 0')
   assert(episodeNumber > 0, 'episode must be > 0')
