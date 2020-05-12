@@ -8,7 +8,7 @@ import {
   UpdateDateColumn
 } from 'typeorm'
 
-@Entity('mediaFiles')
+@Entity('media_files')
 export default class MediaFile extends BaseEntity {
   @Column({
     nullable: false
