@@ -4,17 +4,27 @@
 
 > The server (from v0.4.0) has been ported to TypeScript and the DB model slightly changed (to use an existing DB, see [DB Migration](#DB%20Migration)).
 
-Couch Buddy is a free and open-source Media Center for managing your digital media collection. It runs on standard PC, servers and smartphones and supports streaming to ChromeCast.
+Couch Buddy is a free and open-source Media Center
+for managing your digital media collection.
+
+You can install it on PCs, servers, RaspberryPi and anywhere NodeJS can run,
+you can access it from any browser or from Couch Buddy mobile app
+and you can stream content to ChromeCast devices!
 
 ![All movies](https://raw.githubusercontent.com/lucafaggianelli/couch-buddy/master/docs/screenshots/all-movies.png)
+
+This repository includes the **Media Server** and the **Web Client**.
+Here the [mobile app repository](https://github.com/CouchBuddy/couch-buddy-mobile).
 
 Typical usage of Couch Buddy is to install it on a laptop, a NAS, a Raspberry PI and then casting content to a smart TV or to a ChromeCast, Couch Buddy doesn't need to run on hardware attached to the TV HDMI.
 
 ## Features
 
 * Organize your media files into an easy to use app
-* Find movie and TV series info automatically from [Open Movie Db](http://omdbapi.com/)
+* Find movies and TV series info automatically from [The Movie DB](https://www.themoviedb.org/)
+* Watch any content in the browser or in the mobile app
 * Stream any content to ChromeCast
+  (unsupported video files are converted on-the-fly)
 * Handle TV series with seasons and episodes
 
 ![TV series](https://raw.githubusercontent.com/lucafaggianelli/couch-buddy/master/docs/screenshots/series.png)
@@ -25,13 +35,19 @@ Typical usage of Couch Buddy is to install it on a laptop, a NAS, a Raspberry PI
 
 ## Get started
 
-Currently, there isn't a packaged option for Couch Buddy, so you need to install it and running it as a Node JS project.
+Currently, there isn't a packaged option for Couch Buddy,
+so you need to install and run it as a Node JS project.
 
-Install and start both server and client
+Install and build both the server and the client:
+
+> Note: if you don't care about the web client
+  (maybe because you use the mobile app), you can run the
+  below commands from the `server/` dir.
 
 ```sh
+# Run from main couch-buddy/ dir
 npm run install
-npm run dev
+npm run build
 ```
 
 Be sure to configure the server, see [Configuration](#Configuration).
@@ -41,9 +57,15 @@ The first time you run the server, you must also initialize the DB (that is, cre
 ```sh
 cd server
 npm run db:sync
+cd ..
 ```
 
-Now open the client at: http://localhost:8080
+Finally run the server:
+```sh
+npm run start
+```
+
+Now open http://localhost:3000 in your browser
 
 ## Configuration
 
@@ -86,9 +108,13 @@ If you want to use a DB generated before v0.4.0, you just need to rename the tab
 
 ## Development
 
-Couch Buddy is a web application fully developed in JavaScript, the backend uses NodeJS and Koa2 framework and exposes only an HTTP REST API, while the frontend is a Vue Single Page App with Tailwind CSS for the UI.
+Couch Buddy is a web application developed in JavaScript and TypeScript,
+the backend is fully written in TS and uses NodeJS + Koa and exposes only an HTTP REST API,
+while the frontend is a Vue Single Page App + Tailwind CSS for the UI.
 
-This Git repository is organized in a multi-package, as it includes both the server and client with their respective NPM `package.json` files, thus you can individually interact with them, for the server:
+This Git repository is organized in a multi-package, as it includes
+both the server and client with their respective NPM `package.json` files,
+thus you can individually interact with them, for the server:
 
 ```sh
 cd server
@@ -97,10 +123,12 @@ npm run dev
 ```
 
 and for the client:
+
 ```sh
 cd client
 npm i
 npm run serve
 ```
 
-The top-level `package.json` just includes useful NPM scripts for running all the lower packages together (thanks to `npm-run-all`).
+The top-level `package.json` just includes useful NPM scripts
+for running all the lower packages together (thanks to `npm-run-all`).

@@ -4,11 +4,13 @@
   "version": "v0.4.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon dist/src/app.js",
+    "build": "tsc --build --clean && tsc",
+    "dev": "npm-run-all --parallel dev:js dev:ts",
+    "dev:js": "nodemon dist/src/app.js",
+    "dev:ts": "tsc -w",
     "lint": "eslint ./src/**/*.{js,ts} --ignore-pattern *.d.ts",
-    "start": "node app.js",
+    "start": "node dist/src/app.js",
     "test": "mocha",
-    "watch-ts": "tsc -w",
     "db:sync": "ts-node src/scripts/sync-db.ts"
   },
   "engine": {
@@ -82,6 +84,7 @@
     "eslint-plugin-standard": "^4.0.1",
     "mocha": "^7.1.2",
     "nodemon": "^2.0.2",
+    "npm-run-all": "^4.1.5",
     "pumpify": "^2.0.1",
     "ts-node": "^8.10.1",
     "typescript": "^3.8.3"
