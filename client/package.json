@@ -1,6 +1,7 @@
 {
   "name": "couch-buddy-client",
-  "description": "Couch Buddy Vue SPA client",
+  "description": "Couch Buddy web client",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
