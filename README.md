@@ -2,7 +2,7 @@
 
 > From 12 May 2020, Couch Buddy versions have been moved to packages.
 
-> The server (from v0.4.0) has been ported to TypeScript and the DB model slightly changed (to use an existing DB, see [DB Migration](#DB%20Migration)).
+> The server (from v0.4.0) has been ported to TypeScript and the DB model slightly changed (to use an existing DB, see [DB Migration](#db-migration)).
 
 Couch Buddy is a free and open-source Media Center
 for managing your digital media collection.
@@ -50,7 +50,7 @@ npm run install
 npm run build
 ```
 
-Be sure to configure the server, see [Configuration](#Configuration).
+Be sure to configure the server, see [Configuration](#configuration).
 
 The first time you run the server, you must also initialize the DB (that is, creating the tables), just run this script:
 
