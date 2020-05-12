@@ -1,8 +1,8 @@
 import socketIo from 'socket.io'
 
-import config from '../config'
+import server from './server'
 
-const io = socketIo(config.wsPort)
+const io = socketIo(server)
 
 io.on('connection', client => {
   client.on('event', () => { /* … */ })
