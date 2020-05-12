@@ -1,6 +1,6 @@
-const expect = require('chai').expect
+import { expect } from 'chai'
 
-const { removeFileExtension } = require('../utils')
+import { removeFileExtension } from '../src/utils'
 
 describe('Utils lib', function () {
   it('shouldn\'t remove extension to hidden files without extension', function () {

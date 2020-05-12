@@ -48,3 +48,5 @@ app.use(koaMount('/api', router.routes()))
 app.use(koaMount('/api', router.allowedMethods()))
 
 server.on('request', app.callback())
+
+export default app

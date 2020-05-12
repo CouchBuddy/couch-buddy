@@ -1,12 +1,13 @@
 module.exports = {
   env: {
-    mocha: true
+    es6: true,
+    node: true
   },
   extends: [
     'standard',
     'plugin:@typescript-eslint/recommended'
   ],
-  ignorePatterns: [ 'dist/', 'node_modules/', 'public/', 'scripts/', 'test/' ],
+  ignorePatterns: [ 'dist/', 'node_modules/', 'public/' ],
   globals: {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly'
