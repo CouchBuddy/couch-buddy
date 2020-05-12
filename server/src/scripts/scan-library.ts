@@ -1,6 +1,8 @@
+#!/usr/bin/env ts-node
+
 import { ArgumentParser } from 'argparse'
 import assert from 'assert'
-import { SingleBar, Bar } from 'cli-progress'
+import { SingleBar } from 'cli-progress'
 
 import boot from './boot'
 import { addFileToLibrary, scanDirectory } from '../services/library'

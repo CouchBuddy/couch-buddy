@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+
+require('ts-node').register()
+
+console.log('CLI is work in progress')
+
+// require('../scan-library')
