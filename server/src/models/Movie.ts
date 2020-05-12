@@ -64,13 +64,6 @@ export default class Movie extends BaseEntity {
   @Column()
   rated?: string;
 
-  @Column({
-    type: 'float'
-  })
-  @Min(0)
-  @Max(10)
-  rating?: number;
-
   @Column()
   @Min(0)
   resolution?: number;
@@ -87,6 +80,13 @@ export default class Movie extends BaseEntity {
   })
   @IsEnum(MovieType)
   type: string;
+
+  @Column({
+    type: 'float'
+  })
+  @Min(0)
+  @Max(10)
+  vote?: number;
 
   @Column({
     default: 0,

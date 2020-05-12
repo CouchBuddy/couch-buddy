@@ -103,9 +103,9 @@ export default async function searchOmdb (search: SearchParams) {
       result.imdbId = getProperty(response.data, 'ImdbID')
       result.plot = getProperty(response.data, 'Plot')
       result.poster = getProperty(response.data, 'Poster')
-      result.rating = getFloatProperty(response.data, 'ImdbRating')
       result.runtime = getIntProperty(response.data, 'Runtime')
       result.title = getProperty(response.data, 'Title')
+      result.vote = getFloatProperty(response.data, 'ImdbRating')
       result.writer = getProperty(response.data, 'Writer')
       result.year = getIntProperty(response.data, 'Year')
     } else {

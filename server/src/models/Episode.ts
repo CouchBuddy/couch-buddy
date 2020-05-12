@@ -56,13 +56,6 @@ export default class Episode extends BaseEntity {
 
   set poster (p: string) { this._poster = p }
 
-  @Column({
-    type: 'float'
-  })
-  @Min(0)
-  @Max(10)
-  rating?: number;
-
   @Column()
   @Min(0)
   resolution?: number;
@@ -84,6 +77,13 @@ export default class Episode extends BaseEntity {
     nullable: false
   })
   title: string;
+
+  @Column({
+    type: 'float'
+  })
+  @Min(0)
+  @Max(10)
+  vote?: number;
 
   @Column({
     default: 0,

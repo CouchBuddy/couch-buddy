@@ -36,10 +36,10 @@ function toCBMovie (movie: MovieResponse): Movie {
   cbModel.language = movie.original_language
   cbModel.plot = movie.overview
   cbModel.poster = movie.poster_path
-  cbModel.rating = movie.vote_average
   cbModel.runtime = movie.runtime
   cbModel.title = movie.title
   cbModel.type = 'movie'
+  cbModel.vote = movie.vote_average
   cbModel.writer = null
   cbModel.year = movie.release_date ? parseInt(movie.release_date.slice(0, 4)) : null
 
@@ -56,9 +56,9 @@ function toCBSeries (series: ShowResponse): Movie {
   cbModel.language = series.original_language
   cbModel.plot = series.overview
   cbModel.poster = series.poster_path
-  cbModel.rating = series.vote_average
   cbModel.title = series.name
   cbModel.type = 'series'
+  cbModel.vote = series.vote_average
   cbModel.year = series.first_air_date ? parseInt(series.first_air_date.slice(0, 4)) : null
 
   return cbModel
@@ -72,9 +72,9 @@ function toCBEpisode (episode: EpisodeWithExternalIds): EpisodeModel {
   cbModel.imdbId = episode.external_ids ? episode.external_ids.imdb_id : null
   cbModel.plot = episode.overview
   cbModel.poster = null
-  cbModel.rating = episode.vote_average
   cbModel.season = episode.season_number
   cbModel.title = episode.name
+  cbModel.vote = episode.vote_average
   cbModel.year = episode.air_date ? parseInt(episode.air_date.slice(0, 4)) : null
 
   return cbModel
