@@ -7,4 +7,7 @@ module.exports = {
     'ts-node/register',
     'test/mocha.env'
   ],
+  extension: [
+    'ts'
+  ]
 }

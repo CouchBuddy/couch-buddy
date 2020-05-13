@@ -50,12 +50,11 @@ server.on('request', app.callback())
 async function init () {
   await initDB()
   await initServices()
-
-  if (require.main === module) {
-    await startServer()
-  }
+  await startServer()
 }
 
-init()
+if (require.main === module) {
+  init()
+}
 
 export default server

@@ -1,19 +1,15 @@
-import path from 'path'
 import { getConnection } from 'typeorm'
 
-import { destroy } from '../src/services'
+import { init as initServices, destroy } from '../src/services'
+import { init as initDB } from '../src/models'
 
-before('Initialize environment', function () {
-  // load env vars from .env file
-  require('dotenv').config({
-    path: path.resolve(__dirname, '..', '.env')
-  })
-
-  // Initialize DB
-  require('../models')
+before('Initialize env', async function () {
+  // Sync DB
+  await initDB(true)
+  await initServices()
 })
 
-after(async function () {
+after('Teardown env', async function () {
   await getConnection().close()
 
   await destroy()
