@@ -9,7 +9,7 @@ import { Repository } from 'typeorm'
 export const getResource = <T>(entity: { getRepository(): Repository<T> }): Middleware =>
   async function (ctx: Context) {
     const id = parseInt(ctx.params.id)
-    ctx.assert(id > 0 || ctx.params.id === 'random', 404, 'Resource ID must be an integer > 0')
+    ctx.assert(id > 0 || ctx.params.id === 'random', 400, 'Resource ID must be an integer > 0')
 
     const resource = await entity.getRepository()
       .findOne(id)
@@ -39,7 +39,7 @@ export const listResource = <T>(entity: { getRepository(): Repository<T> }): Mid
 export const updateResource = <T>(entity: { getRepository(): Repository<T> }): Middleware =>
   async function (ctx: Context) {
     const id = parseInt(ctx.params.id)
-    ctx.assert(id > 0, 404, 'Resource ID must be an integer > 0')
+    ctx.assert(id > 0, 400, 'Resource ID must be an integer > 0')
 
     try {
       const result = await entity.getRepository().update(id, ctx.request.body)
