@@ -1,13 +1,22 @@
 import AppConfig from './AppConfig'
 import dotenv from 'dotenv'
+import fs from 'fs'
 
-// load env vars from .env file
+// Load default env vars from .env file
 dotenv.config()
+
+// Load environment-specific config from .env.<environment> file
+const envConfigFile = `.env.${process.env.NODE_ENV}`
+
+if (fs.existsSync(envConfigFile)) {
+  const envConfig = dotenv.parse(fs.readFileSync(envConfigFile))
+  Object.assign(process.env, envConfig)
+}
 
 const config = new class Config extends AppConfig {
   nodeEnv = process.env.NODE_ENV || 'development'
 
-  dbSqlitePath = process.env.DB_SQLITE_PATH || 'db.sqlite'
+  dbSqlitePath = process.env.DB_SQLITE_PATH
 
   mediaDir = process.env.MEDIA_DIR
 
