@@ -10,7 +10,7 @@
     "dev:ts": "tsc -w",
     "lint": "eslint ./src/**/*.{js,ts} --ignore-pattern *.d.ts",
     "start": "node dist/src/app.js",
-    "test": "mocha -r ts-node/register",
+    "test": "mocha",
     "db:sync": "ts-node src/scripts/sync-db.ts"
   },
   "engine": {

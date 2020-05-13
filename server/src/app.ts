@@ -22,7 +22,9 @@ import spaRewrite from './middlewares/spa-rewrite'
 
 const app = new Koa()
 
-app.use(koaLogger())
+if (!config.isTest) {
+  app.use(koaLogger())
+}
 
 app.proxy = true
 app.use(koaCors({ credentials: true }))

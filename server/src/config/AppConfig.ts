@@ -1,6 +1,9 @@
-export default interface AppConfig {
+export default class AppConfig {
   readonly nodeEnv: string;
-  readonly isProduction: boolean;
+
+  get isDevelopment () { return this.nodeEnv === 'production' }
+  get isProduction () { return this.nodeEnv === 'production' }
+  get isTest () { return this.nodeEnv === 'test' }
 
   readonly dbSqlitePath: string;
 
