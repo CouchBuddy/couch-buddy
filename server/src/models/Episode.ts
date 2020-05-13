@@ -18,17 +18,23 @@ export default class Episode extends BaseEntity {
   // Workaround to pass `part` during lib scan
   part: number;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   actors?: string;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   get backdrop (): string {
     return this._backdrop ? 'http://image.tmdb.org/t/p/w500' + this._backdrop : null
   }
 
   set backdrop (b: string) { this._backdrop = b }
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   director?: string;
 
   @Column({
@@ -37,30 +43,42 @@ export default class Episode extends BaseEntity {
   @Min(1)
   episode: number;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   firstAired?: string;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   imdbId?: string;
 
   @ManyToOne(() => Movie, (series) => series.episodes)
   movie?: Movie;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   plot?: string;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   get poster (): string {
     return this._poster ? 'http://image.tmdb.org/t/p/w500' + this._poster : null
   }
 
   set poster (p: string) { this._poster = p }
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   @Min(0)
   resolution?: number;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   @Min(0)
   runtime?: number;
 
@@ -70,7 +88,9 @@ export default class Episode extends BaseEntity {
   @Min(1)
   season: number;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   thumbnail?: string;
 
   @Column({
@@ -79,6 +99,7 @@ export default class Episode extends BaseEntity {
   title: string;
 
   @Column({
+    nullable: true,
     type: 'float'
   })
   @Min(0)
@@ -86,6 +107,7 @@ export default class Episode extends BaseEntity {
   vote?: number;
 
   @Column({
+    nullable: true,
     default: 0,
     type: 'float'
   })
@@ -93,10 +115,14 @@ export default class Episode extends BaseEntity {
   @Max(100)
   watched?: number;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   writer?: string;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   @Min(1900)
   year?: number;
 

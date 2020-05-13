@@ -15,7 +15,9 @@ export default class Download extends BaseEntity {
   })
   infoHash: string;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   @IsMagnetURI()
   magnetURI: string;
 
@@ -24,7 +26,9 @@ export default class Download extends BaseEntity {
   })
   name: string;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   done: boolean;
 
   @PrimaryGeneratedColumn()

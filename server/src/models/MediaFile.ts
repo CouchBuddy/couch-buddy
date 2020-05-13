@@ -32,7 +32,9 @@ export default class MediaFile extends BaseEntity {
   @IsMimeType()
   mimeType: string;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   @Min(1)
   part: number;
 

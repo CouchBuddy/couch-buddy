@@ -10,6 +10,7 @@ import {
 @Entity('extensions')
 export default class Extension extends BaseEntity {
   @Column({
+    nullable: true,
     default: false
   })
   enabled: boolean;
