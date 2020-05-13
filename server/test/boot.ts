@@ -1,4 +1,7 @@
 import path from 'path'
+import { getConnection } from 'typeorm'
+
+import { destroy } from '../src/services'
 
 before('Initialize environment', function () {
   // load env vars from .env file
@@ -8,4 +11,10 @@ before('Initialize environment', function () {
 
   // Initialize DB
   require('../models')
+})
+
+after(async function () {
+  await getConnection().close()
+
+  await destroy()
 })
