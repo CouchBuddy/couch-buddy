@@ -1,37 +1,13 @@
 import debounce from 'debounce'
+import { Namespace, Server } from 'socket.io'
+import { inject, singleton } from 'tsyringe'
 import WebTorrent, { Torrent } from 'webtorrent'
 
 import config from '../config'
 import Download from '../models/Download'
 import { addFileToLibrary, parseFileName } from './library'
-import ioServer from './socket-io'
-
-const downloadsNs = ioServer.of('/downloads')
-
-export const client = new WebTorrent()
-
-export async function init () {
-  const downloads = await Download.find({
-    where: { done: false }
-  })
-
-  const opts = { path: config.mediaDir }
-
-  for (const download of downloads) {
-    client.add(download.magnetURI, opts)
-  }
-}
-
-async function onTorrentDone () {
-  // this = torrent
-  await Download.update({ done: true }, {
-    infoHash: this.infoHash
-  })
-
-  for (const file of this.files) {
-    addFileToLibrary(file.path)
-  }
-}
+import Service from './Service'
+import SocketIoService from './socket-io'
 
 export function serializeTorrent (t: Torrent) {
   return {
@@ -50,16 +26,69 @@ export function serializeTorrent (t: Torrent) {
   }
 }
 
-function onTorrentDownload () {
-  downloadsNs.emit('torrent:download', serializeTorrent(this))
+@singleton()
+export default class Downloader extends Service {
+  client: WebTorrent.Instance;
+  downloadsNs: Namespace;
+  socketIo: SocketIoService;
+
+  constructor (@inject(SocketIoService) socketIoService: SocketIoService) {
+    super()
+    this.downloadsNs = socketIoService.io.of('/downloads')
+  }
+
+  async init () {
+    this.client = new WebTorrent()
+
+    const downloads = await Download.find({
+      where: { done: false }
+    })
+
+    const opts = { path: config.mediaDir }
+
+    for (const download of downloads) {
+      this.client.add(download.magnetURI, opts)
+    }
+
+    // handle torrents completion
+    this.client.on('torrent', (torrent: Torrent) => {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
+      const that = this
+
+      torrent.on('done', function () {
+        that.onTorrentDone(this)
+      })
+      torrent.on('download', debounce(function () {
+        that.onTorrentDownload(this)
+      }))
+    })
+
+    this.downloadsNs.on('connection', (socket) => {
+      socket.emit('torrent:all', this.client.torrents.map(serializeTorrent))
+    })
+  }
+
+  destroy (): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.client.destroy((err) => {
+        if (err) { return reject(err) }
+        resolve()
+      })
+    })
+  }
+
+  onTorrentDownload (torrent: Torrent) {
+    this.downloadsNs.emit('torrent:download', serializeTorrent(torrent))
+  }
+
+  async onTorrentDone (torrent: Torrent) {
+    // this = torrent
+    await Download.update({ done: true }, {
+      infoHash: torrent.infoHash
+    })
+
+    for (const file of torrent.files) {
+      addFileToLibrary(file.path)
+    }
+  }
 }
-
-// handle torrents completion
-client.on('torrent', (torrent: Torrent) => {
-  torrent.on('done', onTorrentDone)
-  torrent.on('download', debounce(onTorrentDownload))
-})
-
-downloadsNs.on('connection', (socket) => {
-  socket.emit('torrent:all', client.torrents.map(serializeTorrent))
-})

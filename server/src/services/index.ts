@@ -1,10 +1,26 @@
-// Import all services that require initialization
-import './discovery'
-import { init as initDownloader } from './downloader'
-import { init as initExt } from './extensions'
-import './socket-io'
+import { container } from 'tsyringe'
+
+import Discovery from './discovery'
+import Downloader from './downloader'
+import Extensions from './extensions'
+import SocketIo from './socket-io'
+import Service from './Service'
+
+const allServices: Service[] = [
+  container.resolve(Discovery),
+  container.resolve(Downloader),
+  container.resolve(Extensions),
+  container.resolve(SocketIo)
+]
 
 export async function init () {
-  await initDownloader()
-  await initExt()
+  for (const service of allServices) {
+    await service.init()
+  }
+}
+
+export async function destroy () {
+  for (const service of allServices) {
+    await service.destroy()
+  }
 }

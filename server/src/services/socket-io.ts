@@ -1,12 +1,28 @@
 import socketIo from 'socket.io'
+import { singleton } from 'tsyringe'
 
 import server from './server'
+import Service from './Service'
 
-const io = socketIo(server)
+@singleton()
+export default class SocketIo extends Service {
+  io: SocketIO.Server
 
-io.on('connection', client => {
-  client.on('event', () => { /* … */ })
-  client.on('disconnect', () => { /* … */ })
-})
+  constructor () {
+    super()
+    this.io = socketIo()
+  }
 
-export default io
+  async init (): Promise<void> {
+    this.io.attach(server)
+
+    this.io.on('connection', client => {
+      client.on('event', () => { /* … */ })
+      client.on('disconnect', () => { /* … */ })
+    })
+  }
+
+  async destroy (): Promise<void> {
+    this.io.close()
+  }
+}

@@ -1,9 +1,12 @@
 import { Context } from 'koa'
+import { container } from 'tsyringe'
 import { Torrent } from 'webtorrent'
 
 import config from '../config'
-import { client, serializeTorrent } from '../services/downloader'
+import Downloader, { serializeTorrent } from '../services/downloader'
 import Download from '../models/Download'
+
+const downloader = container.resolve(Downloader)
 
 export async function addTorrent (ctx: Context) {
   const magnetURI: string = ctx.request.body.magnetURI
@@ -23,7 +26,7 @@ export async function addTorrent (ctx: Context) {
   }
 
   const t = await new Promise<Torrent>((resolve) => {
-    client.add(torrentId, opts, async (torrent) => {
+    downloader.client.add(torrentId, opts, async (torrent) => {
       Download.create(torrent)
       resolve(torrent)
     })
@@ -33,5 +36,5 @@ export async function addTorrent (ctx: Context) {
 }
 
 export async function listTorrents (ctx: Context) {
-  ctx.body = client.torrents.map(serializeTorrent)
+  ctx.body = downloader.client.torrents.map(serializeTorrent)
 }

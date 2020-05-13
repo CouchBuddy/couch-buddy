@@ -16,7 +16,7 @@ import router from './routes'
 
 // Initialize services
 import { init as initServices } from './services'
-import server from './services/server'
+import server, { init as startServer } from './services/server'
 
 import spaRewrite from './middlewares/spa-rewrite'
 
@@ -40,13 +40,20 @@ if (config.isProduction) {
   app.use(spaRewrite('api', '/'))
 }
 
-initDB().then(() => {
-  initServices()
-})
-
 app.use(koaMount('/api', router.routes()))
 app.use(koaMount('/api', router.allowedMethods()))
 
 server.on('request', app.callback())
 
-export default app
+async function init () {
+  await initDB()
+  await initServices()
+
+  if (require.main === module) {
+    await startServer()
+  }
+}
+
+init()
+
+export default server

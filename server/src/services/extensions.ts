@@ -3,29 +3,36 @@ import path from 'path'
 
 import Extension from '../models/Extension'
 import * as npm from './npm'
+import Service from './Service'
 
 export const allExtensions: CouchBuddyExtension[] = []
 
-function loadExtension (path: string): void {
-  allExtensions.push(require(path) as CouchBuddyExtension)
-}
+export default class Extensions extends Service {
+  async init () {
+    const extensions = await Extension.find({ where: { enabled: true } })
 
-export async function init () {
-  const extensions = await Extension.find({ where: { enabled: true } })
-
-  for (const ext of extensions) {
-    loadExtension(ext.path)
+    for (const ext of extensions) {
+      this.loadExtension(ext.path)
+    }
   }
-}
 
-export async function install (extensionName: string): Promise<void> {
-  await npm.install(extensionName)
+  async destroy (): Promise<void> {
+    return null
+  }
 
-  const savedExtension = Extension.create({
-    enabled: true,
-    name: extensionName,
-    path: path.join('node_modules', extensionName)
-  })
+  loadExtension (path: string): void {
+    allExtensions.push(require(path) as CouchBuddyExtension)
+  }
 
-  loadExtension(savedExtension.path)
+  async install (extensionName: string): Promise<void> {
+    await npm.install(extensionName)
+
+    const savedExtension = Extension.create({
+      enabled: true,
+      name: extensionName,
+      path: path.join('node_modules', extensionName)
+    })
+
+    this.loadExtension(savedExtension.path)
+  }
 }

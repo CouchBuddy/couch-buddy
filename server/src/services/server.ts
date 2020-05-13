@@ -4,8 +4,17 @@ import config from '../config'
 
 const server = http.createServer()
 
-server.listen(config.port, () => {
-  console.log(`Server listening on http://localhost:${config.port}`)
-})
+export function init (): Promise<void> {
+  return new Promise((resolve, reject) => {
+    server.listen(config.port, () => {
+      console.log(`Server listening on http://localhost:${config.port}`)
+      server.off('error', reject)
+
+      resolve()
+    })
+
+    server.on('error', reject)
+  })
+}
 
 export default server

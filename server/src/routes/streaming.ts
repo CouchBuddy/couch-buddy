@@ -3,11 +3,12 @@ import fs from 'fs'
 import { Context } from 'koa'
 import mime from 'mime-types'
 import { PassThrough } from 'stream'
+import { container } from 'tsyringe'
 import { Torrent } from 'webtorrent'
 
 import config from '../config'
 import MediaFile from '../models/MediaFile'
-import { client as torrentClient } from '../services/downloader'
+import Downloader from '../services/downloader'
 
 type SupportedCodecs = {
   [ codecType: string ]: string[];
@@ -24,6 +25,8 @@ const SUPPORTED_CODECS: { [userAgent: string]: SupportedCodecs } = {
     video: [ 'h264', 'vp8' ]
   }
 }
+
+const downloader = container.resolve(Downloader)
 
 function ffprobe (path: string): Promise<ffmpeg.FfprobeData> {
   return new Promise((resolve, reject) => {
@@ -44,7 +47,7 @@ export async function watch (ctx: Context) {
   let torrentFile
 
   if (isTorrent) {
-    const torrent: Torrent = torrentClient.get(ctx.params.id.slice(1)) || null
+    const torrent: Torrent = downloader.client.get(ctx.params.id.slice(1)) || null
     ctx.assert(torrent, 404, 'Torrent not found')
 
     // Find the first playable file
@@ -166,7 +169,7 @@ async function getVideoFilePath (ctx: Context): Promise<string> {
   const isTorrent = ctx.params.id[0] === 't'
 
   if (isTorrent) {
-    const torrent = torrentClient.get(ctx.params.id.slice(1)) || null
+    const torrent = downloader.client.get(ctx.params.id.slice(1)) || null
     ctx.assert(torrent, 404, 'Media not found')
 
     // Find the first playable file
