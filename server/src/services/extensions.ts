@@ -27,11 +27,11 @@ export default class Extensions extends Service {
   async install (extensionName: string): Promise<void> {
     await npm.install(extensionName)
 
-    const savedExtension = Extension.create({
+    const savedExtension = await Extension.create({
       enabled: true,
       name: extensionName,
       path: path.join('node_modules', extensionName)
-    })
+    }).save()
 
     this.loadExtension(savedExtension.path)
   }

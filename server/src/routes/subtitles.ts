@@ -144,5 +144,5 @@ export async function downloadSubtitles (ctx: Context) {
     lang,
     mediaId,
     mediaType
-  })
+  }).save()
 }

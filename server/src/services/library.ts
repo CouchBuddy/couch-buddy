@@ -257,13 +257,13 @@ export async function addFileToLibrary (_fileName: string, force = false): Promi
     }
 
     if (!existingFile) {
-      transaction.create(MediaFile, {
+      await transaction.save(MediaFile.create({
         fileName,
         mediaId,
         mediaType: isEpisode ? 'episode' : 'movie',
         mimeType,
         part: item.part
-      })
+      }))
     } else {
       await transaction.save(existingFile)
     }

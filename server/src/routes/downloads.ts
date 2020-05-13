@@ -27,7 +27,7 @@ export async function addTorrent (ctx: Context) {
 
   const t = await new Promise<Torrent>((resolve) => {
     downloader.client.add(torrentId, opts, async (torrent) => {
-      Download.create(torrent)
+      await Download.create(torrent).save()
       resolve(torrent)
     })
   })
