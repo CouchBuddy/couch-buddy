@@ -8,7 +8,7 @@ import MediaFile from './MediaFile'
 import Movie from './Movie'
 import Subtitles from './SubtitlesFile'
 
-export async function init (synchronize: boolean = false) {
+export async function init () {
   await createConnection({
     type: 'sqlite',
     database: config.dbSqlitePath,
@@ -20,7 +20,6 @@ export async function init (synchronize: boolean = false) {
       Movie,
       Subtitles
     ],
-    synchronize,
     logging: false
   })
 }

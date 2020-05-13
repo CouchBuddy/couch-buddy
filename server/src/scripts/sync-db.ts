@@ -1,7 +1,13 @@
-import dotenv from 'dotenv'
+import boot from './boot'
+import { getConnection } from 'typeorm'
 
-import { init } from '../models'
+async function main (bar: any) {
+  getConnection().synchronize(false)
+}
 
-dotenv.config()
-
-init(true)
+if (require.main === module) {
+  (async function () {
+    await main(await boot())
+    process.exit(0)
+  })()
+}
