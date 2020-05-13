@@ -3,7 +3,7 @@ import fs from 'fs'
 import glob from 'glob'
 import mime from 'mime-types'
 import path from 'path'
-import ptt from 'parse-torrent-title'
+import { Parser, DefaultParserResult, addDefaults } from 'parse-torrent-title'
 import srt2vtt from 'srt-to-vtt'
 import { FindConditions, getConnection } from 'typeorm'
 
@@ -15,35 +15,7 @@ import SubtitlesFile from '../models/SubtitlesFile'
 import * as movieInfoProvider from './tmdb'
 import { removeFileExtension } from '../utils'
 
-// Define files extensions by content type
-const EXTENSIONS_SUBTITLES = [ 'srt', 'vtt' ]
-const EXTENSIONS_VIDEOS = [ 'mp4', 'mkv', 'avi' ]
-
-// Add custom handler to PTT for parts and CD
-ptt.addHandler('part', /(?:Part|CD)[. ]?([0-9])/i, { type: 'integer' })
-ptt.addHandler('language', /\.([a-z]{2})\.[a-z]{3,4}$/i)
-
-interface ParserResult {
-  title: string;
-  year?: number;
-  resolution?: string;
-  extended?: boolean;
-  unrated?: boolean;
-  proper?: boolean;
-  repack?: boolean;
-  convert?: boolean;
-  hardcoded?: boolean;
-  retail?: boolean;
-  remastered?: boolean;
-  region?: string;
-  container?: string;
-  source?: string;
-  codec?: string;
-  audio?: string;
-  group?: string;
-  season?: number;
-  episode?: number;
-  language?: string;
+interface ParserResult extends DefaultParserResult {
   part?: number;
 }
 
@@ -51,6 +23,17 @@ interface DirectoryContent {
   subtitles: string[];
   videos: string[];
 }
+
+// Define files extensions by content type
+const EXTENSIONS_SUBTITLES = [ 'srt', 'vtt' ]
+const EXTENSIONS_VIDEOS = [ 'mp4', 'mkv', 'avi' ]
+
+const ptt = new Parser<ParserResult>()
+addDefaults(ptt)
+
+// Add custom handler to PTT for parts and CD
+ptt.addHandler('part', /(?:Part|CD)[. ]?([0-9])/i, { type: 'integer' })
+ptt.addHandler('language', /\.([a-z]{2})\.[a-z]{3,4}$/i)
 
 /**
  * Read a directory and its subdirectories and returns a
@@ -116,7 +99,7 @@ export function takeScreenshot (file: string): Promise<string> {
 
 export function parseFileName (fileName: string): ParserResult {
   const fileBaseName = path.basename(fileName)
-  const basicInfo = ptt.parse(fileBaseName) as ParserResult
+  const basicInfo = ptt.parse(fileBaseName)
 
   // Worst case scenario: ptt can't even find a title, so try to clean the filename
   if (!basicInfo.title) {
