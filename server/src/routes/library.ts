@@ -4,7 +4,7 @@ import sendFile from 'koa-send'
 import config from '../config'
 import Episode from '../models/Episode'
 import Movie from '../models/Movie'
-import { getResource, updateResource } from './rest-endpoints'
+import { getResource, listResource, updateResource } from './rest-endpoints'
 import { addFileToLibrary, searchVideoFiles } from '../services/library'
 import { getMovieById, searchMovie } from '../services/tmdb'
 
@@ -24,32 +24,28 @@ export async function scanLibrary (ctx: Context) {
   ctx.body = added
 }
 
-export async function listLibrary (ctx: Context) {
-  if (ctx.request.query.search) {
-    // Search movies with SQLite FTS5 MATCH operator
-    // const query = `SELECT movies.* FROM movies_fts
-    // INNER JOIN movies ON movies_fts.ID = movies.ID
-    // WHERE movies_fts
-    // MATCH '-ID:${ctx.request.query.search}'
-    // ORDER BY rank`
+export async function search (ctx: Context) {
+  ctx.assert(ctx.request.query.search, 400, 'search cannot be empty')
 
-    const results: Movie[] = await Movie.getRepository()
-      .createQueryBuilder()
-      .from<Movie>('movie_fts', 'movie_fts')
-      .innerJoin('movies', 'movies', 'movies_fts.ID = movies.ID')
-      .where(`movies_fts MATCH '-ID:${ctx.request.query.search}'`)
-      .orderBy('rank')
-      .getMany()
+  // Search movies with SQLite FTS5 MATCH operator
+  // const query = `SELECT movies.* FROM movies_fts
+  // INNER JOIN movies ON movies_fts.ID = movies.ID
+  // WHERE movies_fts
+  // MATCH '-ID:${ctx.request.query.search}'
+  // ORDER BY rank`
 
-    ctx.body = results
-  } else {
-    ctx.body = await Movie.find({
-      order: { title: 'ASC' },
-      take: 30
-    })
-  }
+  const results: Movie[] = await Movie.getRepository()
+    .createQueryBuilder()
+    .from<Movie>('movie_fts', 'movie_fts')
+    .innerJoin('movies', 'movies', 'movies_fts.ID = movies.ID')
+    .where(`movies_fts MATCH '-ID:${ctx.request.query.search}'`)
+    .orderBy('rank')
+    .getMany()
+
+  ctx.body = results
 }
 
+export const listLibrary = listResource(Movie)
 export const getLibrary = getResource(Movie)
 export const updateLibrary = updateResource(Movie)
 

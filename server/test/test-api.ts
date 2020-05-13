@@ -1,7 +1,9 @@
 import chai from 'chai'
 import chaiHttp from 'chai-http'
+import faker from 'faker'
 
 import server from '../src/app'
+import Movie from '../src/models/Movie'
 
 chai.use(chaiHttp)
 const expect = chai.expect
@@ -9,8 +11,15 @@ const expect = chai.expect
 describe('REST API', function () {
   let client: ChaiHttp.Agent
 
-  before(function () {
+  before(async function () {
     client = chai.request(server).keepOpen()
+
+    for (let i = 0; i < 50; i++) {
+      await Movie.create({
+        title: faker.commerce.productName(),
+        type: 'movie'
+      }).save()
+    }
   })
 
   after(function (done) {
@@ -24,6 +33,17 @@ describe('REST API', function () {
       expect(res).to.have.status(200)
       expect(res).to.be.json
       expect(res.body).to.be.an('array')
+      expect(res.body).to.have.lengthOf(30)
+    })
+
+    it('should page results', async function () {
+      const res = await client.get('/api/library')
+        .query({ page: 2 })
+
+      expect(res).to.have.status(200)
+      expect(res).to.be.json
+      expect(res.body).to.be.an('array')
+      expect(res.body).to.have.property('length', 20)
     })
   })
 

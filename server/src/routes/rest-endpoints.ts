@@ -8,11 +8,21 @@ import { Repository } from 'typeorm'
  */
 export const getResource = <T>(entity: { getRepository(): Repository<T> }): Middleware =>
   async function (ctx: Context) {
-    const id = parseInt(ctx.params.id)
+    const id: number | 'random' = parseInt(ctx.params.id) || ctx.params.id
+
     ctx.assert(id > 0 || ctx.params.id === 'random', 400, 'Resource ID must be an integer > 0')
 
-    const resource = await entity.getRepository()
-      .findOne(id)
+    let resource: T
+    if (id === 'random') {
+      resource = await entity.getRepository()
+        .createQueryBuilder()
+        .orderBy('RANDOM()')
+        .limit(1)
+        .getOne()
+    } else {
+      resource = await entity.getRepository()
+        .findOne(id)
+    }
 
     ctx.assert(resource, 404)
 
@@ -26,8 +36,14 @@ export const getResource = <T>(entity: { getRepository(): Repository<T> }): Midd
  */
 export const listResource = <T>(entity: { getRepository(): Repository<T> }): Middleware =>
   async function (ctx: Context) {
+    const pageSize = 30
+    const page = ctx.query.page ?? 1
+
+    ctx.assert(page >= 1, 400, 'page argument must be >= 1')
+
     ctx.body = await entity.getRepository().find({
-      take: 30
+      skip: (page - 1) * pageSize,
+      take: pageSize
     })
   }
 
@@ -50,7 +66,3 @@ export const updateResource = <T>(entity: { getRepository(): Repository<T> }): M
       ctx.body = e.message
     }
   }
-
-function pick (o: Map<string, any>, ...props: string[]) {
-  return Object.assign({}, ...props.map(prop => ({ [prop]: o.get(prop) })))
-}
