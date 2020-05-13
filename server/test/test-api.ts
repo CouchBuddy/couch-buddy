@@ -72,4 +72,18 @@ describe('REST API', function () {
       expect(await client.get('/api/library/ciao')).to.have.status(400)
     })
   })
+
+  describe('PATCH /library/<id>', function () {
+    it('should update a movie', async function () {
+      const newTitle = 'La grande bellezza'
+
+      const res = await client.patch('/api/library/3')
+        .send({ title: newTitle })
+
+      expect(res, res.error.message).to.have.status(204)
+      expect(res.body).to.be.empty
+
+      expect(await Movie.findOne(3)).to.have.property('title', newTitle)
+    })
+  })
 })

@@ -58,9 +58,9 @@ export const updateResource = <T>(entity: { getRepository(): Repository<T> }): M
     ctx.assert(id > 0, 400, 'Resource ID must be an integer > 0')
 
     try {
-      const result = await entity.getRepository().update(id, ctx.request.body)
+      await entity.getRepository().update(id, ctx.request.body)
 
-      ctx.status = result.affected === 1 ? 204 : 400
+      ctx.status = 204
     } catch (e) {
       ctx.status = 400
       ctx.body = e.message
