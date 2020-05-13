@@ -1,10 +1,9 @@
 import cliProgress from 'cli-progress'
-import dotenv from 'dotenv'
 
+import '../config'
 import { init } from '../models'
 
 export default async function boot () {
-  dotenv.config()
   await init()
 
   return new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic)
@@ -12,9 +11,16 @@ export default async function boot () {
 
 /**
  * Create a script like this:
+ *
+import boot from './boot'
+
+async function main (bar: any) {
+
+}
+
 if (require.main === module) {
   (async function () {
-    await main(await require('./boot'))
+    await main(await boot())
     process.exit(0)
   })()
 }
