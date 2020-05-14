@@ -7,10 +7,10 @@ before('Initialize env', async function () {
   this.timeout(10000)
 
   await initDB()
-  await initServices()
-
   // Drop the tables and sync the db
   await getConnection().synchronize(true)
+
+  await initServices()
 })
 
 after('Teardown env', async function () {

@@ -132,3 +132,28 @@ npm run serve
 
 The top-level `package.json` just includes useful NPM scripts
 for running all the lower packages together (thanks to `npm-run-all`).
+
+## Test
+
+Run the full test suite:
+
+```sh
+npm test
+# or
+npx mocha
+```
+
+You can also run partial tests using *Mocha grep* feature, for example:
+
+```sh
+# Run all tests about /downloads REST API endpoints
+npx mocha -g "REST .* \\/downloads"
+```
+
+Some test suites can also be run by file, i.e.:
+
+```sh
+npm test test/test-utils.ts
+```
+
+Though, complex tests like the API and the library ones (and any test involving DB and services access), cannot be run in that way, as the initialization procedures are not included, those tests must be always run with `mocha --grep`
