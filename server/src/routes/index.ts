@@ -14,7 +14,6 @@ const router = new KoaRouter()
 router.get('/system', system.getSystemInfo)
 
 router.get('/extensions', extensions.listExtensions)
-router.get('/extensions/:id/load', extensions.loadExtension)
 
 router.get('/library/find-info', library.findMovieInfo)
 router.get('/library', library.listLibrary)
