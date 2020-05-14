@@ -1,39 +1,47 @@
 import { Context } from 'koa'
-import { LessThan, getRepository, Brackets } from 'typeorm'
+import { Brackets, LessThan, MoreThan } from 'typeorm'
 
 import Episode from '../models/Episode'
 import Movie from '../models/Movie'
 
 export async function continueWatching (ctx: Context) {
   // Find series where at least 1 episode has been watched
-  const seriesWatched = await getRepository(Episode)
-    .createQueryBuilder('episode')
+  const seriesWatched = await Episode.createQueryBuilder()
     .where('watched >= 95')
     .groupBy('movieId')
+    // include movieId column as .movie
+    .loadAllRelationIds()
     .getMany()
 
   // now find the next episodes (if any) of the watched series
-  const nextEpisodes = await getRepository(Episode)
-    .createQueryBuilder('episode')
-    .where(new Brackets(qb => {
-      qb.whereInIds(seriesWatched.map(e => e.movie.id))
-      qb.andWhere('watched < 95')
-      return qb
-    }))
-    .orWhere(new Brackets(qb => qb.where('watched > 0 AND watched < 95')))
+  let nextEpisodes: Episode[] = []
+
+  if (seriesWatched.length) {
+    nextEpisodes = await Episode.createQueryBuilder('episodes')
+      .where(new Brackets(qb => qb
+        .whereInIds(seriesWatched.map(e => e.movie))
+        .andWhere('watched < 95')
+      ))
+      .orderBy({ season: 'ASC', episode: 'ASC' })
+      .groupBy('movieId')
+      .leftJoinAndSelect('episodes.movie', 'movie')
+      .getMany()
+  }
+
+  const pendingEpisodes: Episode[] = await Episode.createQueryBuilder('episodes')
+    .where('episodes.watched > 0 AND episodes.watched < 95')
     .orderBy({ season: 'ASC', episode: 'ASC' })
-    .groupBy('movieId')
-    .leftJoinAndSelect('episode.movie', 'movie')
+    .leftJoinAndSelect('episodes.movie', 'movie')
     .getMany()
 
-  const pendingMovies = await getRepository(Movie)
-    .createQueryBuilder('Movie')
+  const pendingMovies = await Movie.createQueryBuilder()
     .where('watched > 0')
     .andWhere('watched < 95')
     .getMany()
 
   const continueWatching: (Movie | Episode)[] = [
     ...nextEpisodes,
+    ...pendingEpisodes,
     ...pendingMovies
   ]
 
@@ -51,7 +59,7 @@ export async function recentlyAdded (ctx: Context) {
     ...await Movie.find({
       where: {
         type: 'movie',
-        createdAt: LessThan(oneWeekAgo),
+        createdAt: MoreThan(oneWeekAgo),
         watched: LessThan(95)
       },
       order: { createdAt: 'DESC' },
@@ -60,7 +68,7 @@ export async function recentlyAdded (ctx: Context) {
 
     ...await Episode.find({
       where: {
-        createdAt: LessThan(oneWeekAgo),
+        createdAt: MoreThan(oneWeekAgo),
         watched: LessThan(95)
       },
       order: { createdAt: 'DESC' },

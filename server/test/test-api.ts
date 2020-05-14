@@ -6,20 +6,6 @@ import server from '../src/app'
 import Episode from '../src/models/Episode'
 import Movie, { MovieType } from '../src/models/Movie'
 
-/**
- *
-router.get('/library/find-info', library.findMovieInfo)
-OK router.get('/library', library.listLibrary)
-OK router.get('/library/:id', library.getLibrary)
-OK router.patch('/library/:id', library.updateLibrary)
-OK router.get('/library/:id/episodes', library.listEpisodes)
-OK router.get('/episodes/:id', library.getEpisode)
-router.get('/episodes/:id/thumbnail', library.getEpisodeThumbnail)
-OK router.patch('/episodes/:id', library.updateEpisode)
-router.post('/library/scan', library.scanLibrary)
-router.get('/search', library.search)
- */
-
 chai.use(chaiHttp)
 const expect = chai.expect
 
@@ -180,6 +166,29 @@ describe('REST API', function () {
       const updatedEpisode = await Episode.findOne(3)
       expect(updatedEpisode).to.have.property('title', newTitle)
       expect(updatedEpisode).to.have.property('episode', newEpisodeNumber)
+    })
+  })
+
+  describe('GET /collections/recently-added', function () {
+    it('should list the latest 10 movies added', async function () {
+      const res = await client.get('/api/collections/recently-added')
+
+      expect(res).to.have.status(200)
+      expect(res.body).to.be.an('array')
+      expect(res.body).to.have.lengthOf(20)
+    })
+  })
+
+  describe('GET /collections/continue-watching', function () {
+    it('should list movies the user didn\'t fully watch', async function () {
+      const res = await client.get('/api/collections/continue-watching')
+
+      expect(res).to.have.status(200)
+      expect(res.body).to.be.an('array')
+      expect(res.body).to.have.lengthOf(10)
+      for (const movieOrEpisode of res.body) {
+        expect(movieOrEpisode.watched).to.be.within(0.1, 94.9)
+      }
     })
   })
 })
