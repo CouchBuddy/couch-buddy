@@ -5,4 +5,4 @@ export default axios.create({
   baseURL: `${location.protocol}//${location.hostname}:3000`
 })
 
-export const socket = io(`${location.protocol}//${location.hostname}:3001`)
+export const socket = io(`${location.protocol}//${location.hostname}:3000`)
