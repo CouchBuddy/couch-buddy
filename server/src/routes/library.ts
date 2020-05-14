@@ -66,10 +66,10 @@ export async function findMovieInfo (ctx: Context) {
 
 export async function listEpisodes (ctx: Context) {
   const movieId = parseInt(ctx.params.id)
-  ctx.assert(movieId, 404, 'Please provide an ID in the URL')
+  ctx.assert(movieId >= 1, 400, 'Series id is not valid, it must be a positive integer')
 
   const episodes = await Episode.find({
-    where: { movieId },
+    where: { movie: movieId },
     order: { season: 'ASC', episode: 'ASC' }
   })
 

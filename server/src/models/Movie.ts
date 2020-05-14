@@ -47,7 +47,7 @@ export default class Movie extends BaseEntity {
   })
   director?: string;
 
-  @OneToMany(() => Episode, episode => episode.movie)
+  @OneToMany(() => Episode, episode => episode.movie, { cascade: true })
   episodes?: Episode[];
 
   @Column({
