@@ -1,6 +1,6 @@
 import { Context } from 'koa'
 import { container } from 'tsyringe'
-import { Torrent } from 'webtorrent'
+import { Torrent, TorrentOptions } from 'webtorrent'
 
 import config from '../config'
 import Downloader, { serializeTorrent } from '../services/downloader'
@@ -14,7 +14,7 @@ export async function addTorrent (ctx: Context) {
 
   ctx.assert(magnetURI || torrentFile, 400, 'You must provide the magnetURI field or upload a file')
 
-  const opts = { path: config.mediaDir }
+  const opts: TorrentOptions = { path: config.mediaDir }
 
   // Torrent file has priority over magnetURI if both are present
   let torrentId: string
