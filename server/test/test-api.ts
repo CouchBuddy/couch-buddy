@@ -17,6 +17,8 @@ describe('REST API', function () {
   let client: ChaiHttp.Agent
 
   before(async function () {
+    this.timeout(10000)
+
     client = chai.request(server).keepOpen()
 
     /**

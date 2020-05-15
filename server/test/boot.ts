@@ -7,8 +7,11 @@ before('Initialize env', async function () {
   this.timeout(10000)
 
   await initDB()
-  // Drop the tables and sync the db
-  await getConnection().synchronize(true)
+
+  try {
+    // Drop the tables and sync the db
+    await getConnection().synchronize(true)
+  } catch (e) {}
 
   await initServices()
 })
