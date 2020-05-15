@@ -7,7 +7,7 @@ import Service from './Service'
 
 export const allExtensions: CouchBuddyExtension[] = []
 
-export default class Extensions extends Service {
+export default class ExtensionsService extends Service {
   async init () {
     const extensions = await Extension.find({ where: { enabled: true } })
 
@@ -20,7 +20,7 @@ export default class Extensions extends Service {
     return null
   }
 
-  loadExtension (path: string): void {
+  private loadExtension (path: string): void {
     allExtensions.push(require(path) as CouchBuddyExtension)
   }
 
