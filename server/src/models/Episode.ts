@@ -1,4 +1,5 @@
 import { Min, Max } from 'class-validator'
+import { Exclude, Expose, classToPlain } from 'class-transformer'
 import {
   BaseEntity,
   Column,
@@ -10,12 +11,18 @@ import {
 } from 'typeorm'
 
 import Movie from './Movie'
+import { getTmdbImageUrl } from '../utils'
 
 @Entity('episodes')
 export default class Episode extends BaseEntity {
+  @Exclude()
   private _backdrop?: string;
+
+  @Exclude()
   private _poster?: string;
+
   // Workaround to pass `part` during lib scan
+  @Exclude()
   part: number;
 
   @Column({
@@ -26,8 +33,10 @@ export default class Episode extends BaseEntity {
   @Column({
     nullable: true
   })
+  @Expose()
   get backdrop (): string {
-    return this._backdrop ? 'http://image.tmdb.org/t/p/w500' + this._backdrop : null
+    return (this._backdrop && !this._backdrop.startsWith('http'))
+      ? getTmdbImageUrl(this._backdrop) : this._backdrop
   }
 
   set backdrop (b: string) { this._backdrop = b }
@@ -64,8 +73,10 @@ export default class Episode extends BaseEntity {
   @Column({
     nullable: true
   })
+  @Expose()
   get poster (): string {
-    return this._poster ? 'http://image.tmdb.org/t/p/w500' + this._poster : null
+    return (this._poster && !this._poster.startsWith('http'))
+      ? getTmdbImageUrl(this._poster) : this._poster
   }
 
   set poster (p: string) { this._poster = p }
@@ -134,4 +145,8 @@ export default class Episode extends BaseEntity {
 
   @UpdateDateColumn()
   updatedAt?: Date;
+
+  toJSON () {
+    return classToPlain(this)
+  }
 }
