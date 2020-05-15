@@ -6,7 +6,7 @@
       <img
         v-if="movie.backdrop"
         class="h-full w-full object-cover"
-        :src="`http://image.tmdb.org/t/p/original/${movie.backdrop}`"
+        :src="movie.backdrop"
       >
     </div>
 
