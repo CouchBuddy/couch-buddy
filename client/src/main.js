@@ -7,23 +7,15 @@ import store from './store'
 import './plugins'
 // Import and automatically register base components
 import './components/base'
-import extensionsManager from './extensions'
-// Router is loaded last, so extensions can register routes
+// Router is loaded last
 import createRouter from './router'
 
 Vue.config.productionTip = false
 
 Vue.use(VueSK)
 
-async function init () {
-  await extensionsManager.loadExtensions()
-  const router = createRouter()
-
-  new Vue({
-    router,
-    store,
-    render: h => h(App)
-  }).$mount('#app')
-}
-
-init()
+new Vue({
+  router: createRouter(),
+  store,
+  render: h => h(App)
+}).$mount('#app')
