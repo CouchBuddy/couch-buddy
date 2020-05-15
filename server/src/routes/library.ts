@@ -35,9 +35,8 @@ export async function search (ctx: Context) {
   // ORDER BY rank`
 
   const results: Movie[] = await Movie.getRepository()
-    .createQueryBuilder()
-    .from<Movie>('movie_fts', 'movie_fts')
-    .innerJoin('movies', 'movies', 'movies_fts.ID = movies.ID')
+    .createQueryBuilder('movies')
+    .innerJoin('movies_fts', 'movies_fts', 'movies_fts.ID = movies.ID')
     .where(`movies_fts MATCH '-ID:${ctx.request.query.search}'`)
     .orderBy('rank')
     .getMany()

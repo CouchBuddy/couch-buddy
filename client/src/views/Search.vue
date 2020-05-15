@@ -63,7 +63,7 @@ export default {
 
       try {
         this.loading = true
-        this.results = (await client.get('/api/library', {
+        this.results = (await client.get('/api/search', {
           params: { search: this.query }
         })).data
       } catch (e) {

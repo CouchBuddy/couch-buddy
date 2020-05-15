@@ -173,6 +173,16 @@ describe('REST API', function () {
     })
   })
 
+  describe('GET /search', function () {
+    it('should search movies based on free text', async function () {
+      const res = await client.get('/api/search')
+        .query({ search: 'ciao' })
+
+      expect(res).to.have.status(200)
+      expect(res.body).to.be.an('array')
+    })
+  })
+
   describe('GET /collections/recently-added', function () {
     it('should list the latest 10 movies added', async function () {
       const res = await client.get('/api/collections/recently-added')
