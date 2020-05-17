@@ -1,5 +1,4 @@
 import { CouchBuddyExtension } from 'couch-buddy-extensions'
-import path from 'path'
 
 import Extension from '../models/Extension'
 import * as npm from './npm'
@@ -20,19 +19,30 @@ export default class ExtensionsService extends Service {
     return null
   }
 
-  private loadExtension (path: string): void {
-    allExtensions.push(require(path) as CouchBuddyExtension)
+  private loadExtension (path: string): boolean {
+    try {
+      allExtensions.push(require(path) as CouchBuddyExtension)
+      return true
+    } catch (e) {
+      console.log('Error loading extension', e)
+      return false
+    }
   }
 
-  async install (extensionName: string): Promise<void> {
-    await npm.install(extensionName)
+  /**
+   * Install an extension
+   *
+   * @param packageName any package name supported by npm CLI,
+   *   as in `npm install <name_here>`
+   */
+  async install (packageName: string): Promise<Extension> {
+    const extension = await npm.install(packageName)
 
-    const savedExtension = await Extension.create({
-      enabled: true,
-      name: extensionName,
-      path: path.join('node_modules', extensionName)
-    }).save()
+    // Load the package and enable it only if the loading is successful
+    extension.enabled = this.loadExtension(extension.path)
 
-    this.loadExtension(savedExtension.path)
+    await extension.save()
+
+    return extension
   }
 }

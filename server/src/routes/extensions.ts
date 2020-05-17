@@ -15,8 +15,10 @@ export async function install (ctx: Context) {
   ctx.assert(name && name.length, 400, 'name is a required body param')
 
   try {
-    await extensionsService.install(name)
-    ctx.status = 204
+    const installedExtension = await extensionsService.install(name)
+
+    ctx.status = 200
+    ctx.body = installedExtension
   } catch (e) {
     ctx.status = 400
     ctx.body = e.message

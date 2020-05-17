@@ -7,7 +7,7 @@
     "build": "tsc --build --clean && tsc",
     "dev": "npm-run-all --parallel dev:js dev:ts",
     "dev:js": "nodemon dist/src/app.js",
-    "dev:ts": "tsc -w",
+    "dev:ts": "tsc --watch --preserveWatchOutput",
     "lint": "eslint ./src/**/*.{js,ts} --ignore-pattern *.d.ts",
     "start": "node dist/src/app.js",
     "test": "mocha",

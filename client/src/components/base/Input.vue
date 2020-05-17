@@ -1,18 +1,29 @@
 <template>
-  <div class="flex items-center mb-8 bg-gray-800">
-    <input
-      ref="input"
-      v-model="currentValue"
-      v-bind="$attrs"
-      class="flex-grow px-4 py-2 bg-transparent border-0"
-      @input="onInput"
-    >
+  <div class="items-center mb-8">
+    <div class="flex bg-gray-800">
+      <input
+        ref="input"
+        class="flex-grow px-4 py-2 bg-transparent border-0"
+        v-bind="$attrs"
+        :value="value"
+        v-on="inputListeners"
+      >
+    </div>
+
+    <div class="px-4 pt-1 text-sm text-error">
+      {{ errors[0] }}
+    </div>
   </div>
 </template>
 
 <script>
 export default {
+  inheritAttrs: false,
   props: {
+    errors: {
+      type: Array,
+      default: () => []
+    },
     value: {
       type: [ String, Number ],
       default: null
@@ -20,13 +31,26 @@ export default {
   },
   data () {
     return {
-      currentValue: this.value,
-      valueWhenFocus: null
     }
   },
-  methods: {
-    onInput (val) {
-      this.$emit('input', this.currentValue)
+  computed: {
+    // From Vue docs:
+    //   https://vuejs.org/v2/guide/components-custom-events.html#Binding-Native-Events-to-Components
+    inputListeners: function () {
+      var vm = this
+      // `Object.assign` merges objects together to form a new object
+      return Object.assign({},
+        // We add all the listeners from the parent
+        this.$listeners,
+        // Then we can add custom listeners or override the
+        // behavior of some listeners.
+        {
+          // This ensures that the component works with v-model
+          input: function (event) {
+            vm.$emit('input', event.target.value)
+          }
+        }
+      )
     }
   }
 }

@@ -43,6 +43,27 @@
         {{ scanningLibrary ? 'Scanning...' : 'Scan Library' }}
       </x-btn>
     </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl mb-4">
+        Extensions
+      </h2>
+
+      <x-input
+        v-model.trim="extensionName"
+        :errors="[ extensionError ]"
+        placeholder="Install an extension"
+        :disabled="extensionInstalling"
+        @keypress.enter="installExtension"
+      />
+
+      <div
+        v-for="ext in extensions"
+        :key="ext.id"
+      >
+        {{ ext.name }}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -53,10 +74,17 @@ import client from '@/client'
 
 export default {
   data: () => ({
+    extensionError: null,
+    extensionInstalling: false,
+    extensionName: null,
+    extensions: [],
     scanningLibrary: false
   }),
   computed: {
     ...mapState([ 'systemInfo' ])
+  },
+  async mounted () {
+    this.extensions = (await client.get('/api/extensions')).data
   },
   methods: {
     async scanLibrary () {
@@ -65,6 +93,22 @@ export default {
         await client.post('/api/library/scan')
       } finally {
         this.scanningLibrary = false
+      }
+    },
+    async installExtension () {
+      if (this.extensionInstalling) { return }
+
+      this.extensionInstalling = true
+      this.extensionError = null
+
+      try {
+        await client.post('/api/extensions', {
+          name: this.extensionName
+        })
+      } catch (e) {
+        this.extensionError = e.toString()
+      } finally {
+        this.extensionInstalling = false
       }
     }
   }
