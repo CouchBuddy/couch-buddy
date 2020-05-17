@@ -38,6 +38,11 @@ const getRoutes = () => [
         component: () => import(/* webpackChunkName: "search" */ '@/views/Search.vue')
       },
       {
+        path: '/explore',
+        name: 'explore',
+        component: () => import(/* webpackChunkName: "explore" */ '@/views/Explore.vue')
+      },
+      {
         path: '/settings',
         name: 'settings',
         component: () => import(/* webpackChunkName: "settings" */ '@/views/Settings.vue')

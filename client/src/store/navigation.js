@@ -2,8 +2,9 @@ export default {
   state: {
     menu: [
       { to: 'home', name: 'Home', icon: 'mdi-sofa', shortkey: [ 'ctrl', 'h' ], order: 0 },
-      { to: 'downloads', name: 'Downloads', icon: 'mdi-download', shortkey: [ 'ctrl', 'd' ], order: 10 },
-      { to: 'search', name: 'Search', icon: 'mdi-magnify', shortkey: [ 'ctrl', 'f' ], order: 20 },
+      { to: 'search', name: 'Search', icon: 'mdi-magnify', shortkey: [ 'ctrl', 'f' ], order: 10 },
+      { to: 'explore', name: 'Explore', icon: 'mdi-compass', shortkey: [ 'ctrl', 'e' ], order: 20 },
+      { to: 'downloads', name: 'Downloads', icon: 'mdi-download', shortkey: [ 'ctrl', 'd' ], order: 30 },
       { to: 'settings', name: 'Settings', icon: 'mdi-cog', order: 50 }
     ],
     routes: []

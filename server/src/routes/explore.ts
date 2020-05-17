@@ -11,5 +11,9 @@ export async function searchMovies (ctx: Context) {
     return
   }
 
-  ctx.body = allExtensions[0].explore(search)
+  try {
+    ctx.body = await allExtensions[0].explore(search)
+  } catch (e) {
+    console.log('error in explore', e)
+  }
 }

@@ -20,6 +20,10 @@
 export default {
   inheritAttrs: false,
   props: {
+    autofocus: {
+      type: Boolean,
+      default: false
+    },
     errors: {
       type: Array,
       default: () => []
@@ -51,6 +55,11 @@ export default {
           }
         }
       )
+    }
+  },
+  mounted () {
+    if (this.autofocus) {
+      this.$refs.input.focus()
     }
   }
 }

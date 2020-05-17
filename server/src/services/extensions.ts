@@ -19,9 +19,12 @@ export default class ExtensionsService extends Service {
     return null
   }
 
-  private loadExtension (path: string): boolean {
+  private async loadExtension (path: string): Promise<boolean> {
     try {
-      allExtensions.push(require(path) as CouchBuddyExtension)
+      const Module = (await import(path)).default
+      const extension: CouchBuddyExtension = new Module()
+
+      allExtensions.push(extension)
       return true
     } catch (e) {
       console.log('Error loading extension', e)
@@ -38,8 +41,13 @@ export default class ExtensionsService extends Service {
   async install (packageName: string): Promise<Extension> {
     const extension = await npm.install(packageName)
 
+    const existingExtension = await Extension.findOne({ name: extension.name })
+    if (existingExtension) {
+      extension.id = existingExtension.id
+    }
+
     // Load the package and enable it only if the loading is successful
-    extension.enabled = this.loadExtension(extension.path)
+    extension.enabled = await this.loadExtension(extension.path)
 
     await extension.save()
 
