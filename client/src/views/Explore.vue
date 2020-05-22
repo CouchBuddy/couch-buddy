@@ -8,7 +8,7 @@
     />
 
     <div
-      class="grid gap-4 p-4"
+      class="grid gap-4"
       style="grid-auto-rows: minmax(200px, 1fr); grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));"
     >
       <router-link

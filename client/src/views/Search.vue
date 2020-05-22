@@ -1,15 +1,14 @@
 <template>
   <div>
-    <input
-      ref="input"
+    <x-input
       v-model="query"
       placeholder="Search..."
-      class="bg-gray-800 w-full text-3xl px-4 py-2"
+      autofocus
       @input="search()"
-    >
+    />
 
     <div
-      class="grid gap-4 p-4"
+      class="grid gap-4"
       style="grid-auto-rows: minmax(200px, 1fr); grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));"
     >
       <router-link
@@ -54,9 +53,6 @@ export default {
     query: null,
     results: []
   }),
-  mounted () {
-    this.$refs.input.focus()
-  },
   methods: {
     search: debounce(async function () {
       if (!this.query) { return }
