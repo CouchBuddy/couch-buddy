@@ -14,7 +14,7 @@ export default class Discovery extends Service {
   async init (): Promise<void> {
     this.mdns = Mdns({ loopback: false })
 
-    this.mdns.on('query', this.queryHandler)
+    this.mdns.on('query', (query) => this.queryHandler(query))
   }
 
   async destroy (): Promise<void> {
