@@ -1,9 +1,18 @@
 <template>
   <div class="items-center mb-8">
-    <div class="flex bg-gray-800">
+    <div
+      class="flex pr-4 bg-gray-800 shadow-lg"
+      :class="{ 'pl-4': !prefixIcon }"
+    >
+      <i
+        v-if="prefixIcon"
+        class="py-2 w-12 text-center mdi"
+        :class="prefixIcon"
+      />
+
       <input
         ref="input"
-        class="flex-grow px-4 py-2 bg-transparent border-0"
+        class="flex-grow py-2 bg-transparent border-0"
         v-bind="$attrs"
         :value="value"
         v-on="inputListeners"
@@ -27,6 +36,11 @@ export default {
     errors: {
       type: Array,
       default: () => []
+    },
+    prefixIcon: {
+      type: String,
+      default: null,
+      validator: (val) => val.startsWith('mdi-')
     },
     value: {
       type: [ String, Number ],

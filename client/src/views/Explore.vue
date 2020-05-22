@@ -3,6 +3,7 @@
     <x-input
       v-model="query"
       placeholder="Explore..."
+      prefix-icon="mdi-compass"
       autofocus
       @input="search()"
     />

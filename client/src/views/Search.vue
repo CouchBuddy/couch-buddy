@@ -4,6 +4,7 @@
       v-model="query"
       placeholder="Search..."
       autofocus
+      prefix-icon="mdi-magnify"
       @input="search()"
     />
 
