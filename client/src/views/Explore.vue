@@ -14,7 +14,7 @@
       <router-link
         v-for="item in results"
         :key="item.id"
-        :to="{ name: 'movie', params: { id: item.id } }"
+        :to="{ name: 'movie-from-props', params: { movie: item } }"
         class="flex justify-center items-center cursor-pointer bg-primary"
       >
         <img

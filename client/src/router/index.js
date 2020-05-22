@@ -20,6 +20,12 @@ const getRoutes = () => [
       {
         path: '/movie/:id',
         name: 'movie',
+        component: () => import(/* webpackChunkName: "movie" */ '@/views/MovieFromId.vue')
+      },
+      {
+        path: '/movie',
+        name: 'movie-from-props',
+        props: true,
         component: () => import(/* webpackChunkName: "movie" */ '@/views/Movie.vue')
       },
       {

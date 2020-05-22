@@ -21,6 +21,7 @@
       <div class="w-full md:ml-8 md:w-2/3">
         <div class="flex mt-4 mb-8 text-center">
           <x-btn
+            v-if="movie.id"
             :disabled="movie.type === 'series' && !nextEpisode"
             :icon="isCastConnected ? 'mdi-cast' : 'mdi-play'"
             bordered
@@ -33,8 +34,22 @@
             </span>
           </x-btn>
 
+          <template v-if="movie.downloadOptions">
+            <x-btn
+              v-for="download in movie.downloadOptions"
+              :key="`download-${download.url}`"
+              bordered
+              class="mr-4"
+              @click="downloadMovie(download.url)"
+            >
+              <i class="mdi mdi-download" />
+              {{ download.quality }}
+            </x-btn>
+          </template>
+
           <x-btn
-            :to="{ name: 'movie-edit', params: { id: $route.params.id } }"
+            v-if="movie.id"
+            :to="{ name: 'movie-edit', params: { id: movie.id } }"
             icon="mdi-pencil"
             class="px-4 py-2"
           >
@@ -64,89 +79,64 @@
       </div>
     </div>
 
-    <div
-      v-for="group in episodesBySeason"
-      :key="`season-${group.season}`"
-    >
-      <div class="mt-8 mb-4">
-        SEASON {{ group.season }}
-      </div>
-
-      <x-horizontal-scroller
-        v-slot="item"
-        :items="group.episodes"
-        :centered-item-id="nextEpisode && (nextEpisode.season === group.season) ? nextEpisode.id : null"
+    <template v-if="movie.episodes">
+      <div
+        v-for="group in movie.episodes"
+        :key="`season-${group.season}`"
       >
-        <div
-          class="relative overflow-hidden aspect-ratio-16/9 cursor-pointer"
-          @click="playMovie(item)"
-        >
-          <img
-            :src="`${serverUrl}/api/episodes/${item.id}/thumbnail`"
-            class="absolute w-full h-full object-cover"
-          >
-          <div class="absolute bottom-0 mb-1 ml-2 px-1 text-sm bg-gray-900 opacity-75">
-            E{{ item.episode }}
-          </div>
-
-          <div
-            class="absolute bottom-0 h-1 bg-primary"
-            :style="{ width: `${item.watched || 0}%` }"
-          />
+        <div class="mt-8 mb-4">
+          SEASON {{ group.season }}
         </div>
-      </x-horizontal-scroller>
-    </div>
+
+        <x-horizontal-scroller
+          v-slot="item"
+          :items="group.episodes"
+          :centered-item-id="nextEpisode && (nextEpisode.season === group.season) ? nextEpisode.id : null"
+        >
+          <div
+            class="relative overflow-hidden aspect-ratio-16/9 cursor-pointer"
+            @click="playMovie(item)"
+          >
+            <img
+              :src="`${serverUrl}/api/episodes/${item.id}/thumbnail`"
+              class="absolute w-full h-full object-cover"
+            >
+            <div class="absolute bottom-0 mb-1 ml-2 px-1 text-sm bg-gray-900 opacity-75">
+              E{{ item.episode }}
+            </div>
+
+            <div
+              class="absolute bottom-0 h-1 bg-primary"
+              :style="{ width: `${item.watched || 0}%` }"
+            />
+          </div>
+        </x-horizontal-scroller>
+      </div>
+    </template>
   </div>
 </template>
 
 <script>
 import { mapActions, mapState } from 'vuex'
 
-import client from '@/client'
+import { addTorrent } from '@/client'
 
 export default {
   name: 'Movie',
+  props: {
+    movie: {
+      type: Object,
+      required: true
+    }
+  },
   data: () => ({
-    episodesBySeason: {},
-    movie: {},
-    movieId: null,
     nextEpisode: null
   }),
   computed: {
     ...mapState([ 'isCastConnected', 'serverUrl' ])
   },
-  async mounted () {
-    this.movieId = parseInt(this.$route.params.id)
-
-    const response = await client.get(`/api/library/${this.movieId}`)
-    this.movie = response.data
-
-    if (this.movie.type === 'series') {
-      this.fetchEpisodes(this.movie.id)
-    }
-  },
   methods: {
     ...mapActions([ 'castMovie' ]),
-    async fetchEpisodes (seriesId) {
-      const response = await client.get(`/api/library/${this.movieId}/episodes`)
-
-      this.nextEpisode = response.data.find(e => e.watched < 95)
-
-      // Group episodes by season as object:
-      //   { '1': [ {}, ... ] }
-      const groupedEpisodes = response.data.reduce((r, v, i, a, k = v.season) => { (r[k] || (r[k] = [])).push(v); return r }, {})
-
-      // Convert the object to array and sort both seasons and episodes:
-      //   [ { season: 1, episodes: [ {}, ... ] } ]
-      this.episodesBySeason = []
-      for (const season in groupedEpisodes) {
-        this.episodesBySeason.push({
-          season: parseInt(season),
-          episodes: groupedEpisodes[season].sort((a, b) => a.episode - b.episode)
-        })
-      }
-      this.episodesBySeason.sort((a, b) => a.season - b.season)
-    },
     playMovie (episode) {
       let toPlay
 
@@ -162,6 +152,14 @@ export default {
         this.castMovie(toPlay)
       } else {
         this.$router.push({ name: 'watch', params: { id: this.getWatchId(toPlay) } })
+      }
+    },
+    async downloadMovie (magnetURI) {
+      try {
+        await addTorrent(magnetURI)
+        this.$notify('Added to downloads')
+      } catch (e) {
+        this.$notifyError(e.message)
       }
     },
     getWatchId (movie) {
