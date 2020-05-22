@@ -1,11 +1,12 @@
 import debounce from 'debounce'
-import { Namespace, Server } from 'socket.io'
+import path from 'path'
+import { Namespace } from 'socket.io'
 import { inject, singleton } from 'tsyringe'
 import WebTorrent, { Torrent } from 'webtorrent'
 
 import config from '../config'
 import Download from '../models/Download'
-import { addFileToLibrary, parseFileName } from './library'
+import { addFileToLibrary, parseFileName, scanDirectory } from './library'
 import Service from './Service'
 import SocketIoService from './socket-io'
 
@@ -82,13 +83,21 @@ export default class Downloader extends Service {
   }
 
   async onTorrentDone (torrent: Torrent) {
-    // this = torrent
-    await Download.update({ done: true }, {
-      infoHash: torrent.infoHash
-    })
-
-    for (const file of torrent.files) {
-      addFileToLibrary(file.path)
+    if (torrent.files.length === 1) {
+      addFileToLibrary(torrent.files[0].path)
+    } else {
+      /**
+       * If the torrent contains more files, they are organized into a folder,
+       * so the entire folder must be scanned and added to the library.
+       * The `files` prop is an array of relative paths, i.e.:
+       * `[ 'dir/file.mp4', 'dir/subs.srt' ]`
+       */
+      const torrentDir = torrent.files[0].path.split(path.sep)[0]
+      scanDirectory(path.join(config.mediaDir, torrentDir))
     }
+
+    const download = await Download.findOne({ infoHash: torrent.infoHash })
+    download.done = true
+    await download.save()
   }
 }

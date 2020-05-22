@@ -45,7 +45,7 @@ ptt.addHandler('language', /\.([a-z]{2})\.[a-z]{3,4}$/i)
  * }
  * ```
  *
- * @param dir the directory to read
+ * @param dir the directory to read, it must be an absolute path
  * @param extensions an array of file extensions to fiter the directory content,
  *   i.e.: `[ 'mp4', 'srt' ]`
  */
@@ -249,7 +249,9 @@ export async function addFileToLibrary (_fileName: string, force = false): Promi
         }
 
         const existingMovie = await Movie.findOne({ where })
-        movie.id = existingMovie.id
+        if (existingMovie) {
+          movie.id = existingMovie.id
+        }
       }
 
       const savedMovie = await transaction.save(movie)
@@ -272,6 +274,15 @@ export async function addFileToLibrary (_fileName: string, force = false): Promi
   })
 }
 
+/**
+ * Search video and subtitles files in a directory and in its children
+ * and add them to the library. Internally it calls `addFileToLibrary()`,
+ * but it also takes into account the directory where files are stored,
+ * so it can match videos and subtitles, whereas `addFileToLibrary()`
+ * just add video files to the library.
+ *
+ * @param dir absolute path to a directory
+ */
 export async function scanDirectory (dir: string) {
   const directories = await getDirectoryContent(dir)
 
