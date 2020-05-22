@@ -7,7 +7,9 @@ const client = axios.create({
 
 export default client
 
-export const socket = io(`${location.protocol}//${location.hostname}:3000`)
+export function getSocket (ns = '') {
+  return io(`${location.protocol}//${location.hostname}:3000${ns}`)
+}
 
 export async function addTorrent (magnetURI) {
   const data = new FormData()

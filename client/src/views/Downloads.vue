@@ -83,23 +83,27 @@
 <script>
 import { mapState } from 'vuex'
 
-import client, { socket } from '@/client'
+import client, { getSocket } from '@/client'
 
 export default {
   name: 'Downloads',
   data: () => ({
+    downloadNs: null,
     loading: false,
     magnetURI: null,
-    intervalHandle: null,
     torrents: []
   }),
   computed: {
     ...mapState([ 'isCastConnected' ])
   },
   async mounted () {
-    await this.fetchDownloads()
+    this.socket = getSocket('/downloads')
 
-    socket.on('torrent:download', torrent => {
+    this.socket.on('torrent:all', torrents => {
+      this.torrents = torrents
+    })
+
+    this.socket.on('torrent:download', torrent => {
       const i = this.torrents.findIndex(t => t.infoHash === torrent.infoHash)
 
       if (i >= 0) {
@@ -108,7 +112,7 @@ export default {
     })
   },
   beforeDestroy () {
-    socket.removeAllListeners('torrent:download')
+    this.socket.removeAllListeners('torrent:download')
   },
   methods: {
     async addTorrent () {
@@ -132,9 +136,6 @@ export default {
         this.$refs.upload.value = null
         this.loading = false
       }
-    },
-    async fetchDownloads () {
-      this.torrents = (await client.get('/api/downloads')).data
     }
   }
 }
