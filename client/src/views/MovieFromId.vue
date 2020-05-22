@@ -1,5 +1,8 @@
 <template>
-  <movie-view :movie="movie" />
+  <movie-view
+    v-if="movie"
+    :movie="movie"
+  />
 </template>
 
 <script>
@@ -19,8 +22,8 @@ export default {
     const response = await client.get(`/api/library/${movieId}`)
     const movie = response.data
 
-    if (this.movie.type === 'series') {
-      movie.episodes = await this.fetchEpisodes(this.movie.id)
+    if (movie.type === 'series') {
+      movie.episodes = await this.fetchEpisodes(movie.id)
     }
 
     this.movie = movie
