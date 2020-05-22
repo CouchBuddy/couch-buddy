@@ -83,6 +83,21 @@ export default new Vuex.Store({
         request.activeTrackIds = [ subtitles[0].id ]
       }
 
+      /**
+       * If the movie has not been completely watched,
+       * start from the last watched point
+       */
+      if (movie.watched > 0 && movie.watched < 95) {
+        const metadata = (await client.get(`/api/watch/${watchId}/metadata`)).data
+
+        let duration = metadata.streams.find(s => s.codec_type === 'video').duration
+        if (!duration || duration === 'N/A') {
+          duration = metadata.format.duration
+        }
+
+        request.currentTime = duration * movie.watched / 100
+      }
+
       await castSession.loadMedia(request)
 
       commit('setCastingMovie', movie)

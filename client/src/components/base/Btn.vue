@@ -2,7 +2,7 @@
   <component
     :is="component"
     :to="to"
-    class="btn flex items-center justify-center disabled:text-gray-600 disabled:cursor-not-allowed"
+    class="relative btn flex items-center justify-center disabled:text-gray-600 disabled:cursor-not-allowed"
     :class="[{
       'border-2 border-white disabled:border-gray-600': bordered,
       'rounded-full': icon && !$slots.default && !tile,

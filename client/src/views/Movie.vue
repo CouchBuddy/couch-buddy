@@ -28,10 +28,15 @@
             class="mr-4"
             @click="playMovie()"
           >
-            Watch
+            {{ (movie.watched > 0 && 95 > movie.watched) ? 'Continue watching' : 'Watch' }}
             <span v-if="nextEpisode">
               S{{ nextEpisode.season }}E{{ nextEpisode.episode }}
             </span>
+
+            <div
+              class="absolute bottom-0 left-0 h-1 bg-primary"
+              :style="{ width: `${movie.watched}%` }"
+            />
           </x-btn>
 
           <template v-if="movie.downloadOptions">
