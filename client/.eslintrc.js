@@ -5,17 +5,18 @@ module.exports = {
   },
   extends: [
     'plugin:vue/recommended',
-    '@vue/standard'
+    '@vue/standard',
+    '@vue/typescript'
   ],
   parserOptions: {
-    parser: 'babel-eslint'
+    parser: '@typescript-eslint/parser'
   },
   rules: {
     'no-console': 'error',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'array-bracket-spacing': [ 2, 'always', {
-        objectsInArrays: false,
-        arraysInArrays: false
+      objectsInArrays: false,
+      arraysInArrays: false
     }]
   }
 }
