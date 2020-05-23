@@ -22,7 +22,8 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
 import { mapState } from 'vuex'
 
 import MainNavigation from './MainNavigation'
@@ -30,20 +31,15 @@ import CastControl from '@/components/CastControl'
 import ShortcutHelpDialog from './ShortcutHelpDialog'
 import TheNotification from './TheNotification'
 
-export default {
-  name: 'MainLayout',
+@Component({
   components: {
     CastControl,
     MainNavigation,
     ShortcutHelpDialog,
     TheNotification
   },
-  computed: {
-    ...mapState([ 'systemInfo' ])
-  }
+  computed: mapState([ 'systemInfo' ])
+})
+export default class MainLayout extends Vue {
 }
 </script>
-
-<style>
-
-</style>

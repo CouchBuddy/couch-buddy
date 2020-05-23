@@ -1,11 +1,11 @@
 import Vue from 'vue'
 import EventBus from '@/EventBus'
 
-function notify (message) {
+function notify (message: string) {
   EventBus.$emit('notification', { message })
 }
 
-function notifyError (message) {
+function notifyError (message: string) {
   EventBus.$emit('notification', { message, error: true })
 }
 

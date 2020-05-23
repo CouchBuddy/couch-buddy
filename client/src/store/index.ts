@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-import client from '@/client'
+import client, { setServerUrl } from '@/client'
 import navigation from './navigation'
 
 Vue.use(Vuex)
@@ -25,7 +25,7 @@ export default new Vuex.Store({
 
       if (payload.ipAddresses.length) {
         state.serverUrl = `http://${payload.ipAddresses[0]}:3000`
-        client.baseURL = state.serverUrl
+        setServerUrl(state.serverUrl)
       }
     }
   },
