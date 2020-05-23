@@ -1,3 +1,6 @@
+/// <reference types="chrome"/>
+/// <reference types="chromecast-caf-sender"/>
+
 import Vue from 'vue'
 import Vuex from 'vuex'
 
@@ -33,9 +36,12 @@ export default new Vuex.Store({
     async fetchSystemInfo ({ commit }) {
       commit('setSystemInfo', (await client.get('/api/system')).data)
     },
-    /* global cast, chrome */
     async castMovie ({ commit, state }, movie) {
       const castSession = cast.framework.CastContext.getInstance().getCurrentSession()
+
+      if (!castSession) {
+        throw new Error('Can\'t cast video: CastSession is null')
+      }
 
       const watchId = `${movie.type === 'movie' ? 'm' : 'e'}${movie.id}`
 

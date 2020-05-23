@@ -61,8 +61,7 @@
   </div>
 </template>
 
-<script>
-/* global cast, chrome */
+<script lang="ts">
 import { mapMutations, mapState } from 'vuex'
 
 import client from '@/client'

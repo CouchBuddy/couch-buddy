@@ -3,6 +3,10 @@ module.exports = {
   env: {
     node: true
   },
+  globals: {
+    cast: 'readonly',
+    chrome: 'readonly'
+  },
   extends: [
     'plugin:vue/recommended',
     '@vue/standard',
