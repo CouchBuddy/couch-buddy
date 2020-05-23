@@ -1,7 +1,7 @@
 export default class AppConfig {
   readonly nodeEnv: string;
 
-  get isDevelopment () { return this.nodeEnv === 'production' }
+  get isDevelopment () { return this.nodeEnv === 'development' }
   get isProduction () { return this.nodeEnv === 'production' }
   get isTest () { return this.nodeEnv === 'test' }
 

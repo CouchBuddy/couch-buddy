@@ -9,7 +9,7 @@
     "dev:js": "nodemon dist/src/app.js",
     "dev:ts": "tsc --watch --preserveWatchOutput",
     "lint": "eslint ./src/**/*.{js,ts} --ignore-pattern *.d.ts",
-    "start": "node dist/src/app.js",
+    "start": "NODE_ENV=production node dist/src/app.js",
     "test": "mocha",
     "db:sync": "ts-node src/scripts/sync-db.ts"
   },

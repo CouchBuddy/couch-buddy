@@ -34,13 +34,13 @@ app.use(koaBody({
   urlencoded: true
 }))
 
-app.use(koaStatic('public'))
-
 if (config.isProduction) {
   // In production, Vue SPA client is served by the server,
   // so all URLs but /api and static files are rewritten to / and handled by the SPA
   app.use(spaRewrite('api', '/'))
 }
+
+app.use(koaStatic('public'))
 
 app.use(koaMount('/api', router.routes()))
 app.use(koaMount('/api', router.allowedMethods()))
