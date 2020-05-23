@@ -84,7 +84,7 @@ export default class Downloader extends Service {
 
   async onTorrentDone (torrent: Torrent) {
     if (torrent.files.length === 1) {
-      addFileToLibrary(torrent.files[0].path)
+      await addFileToLibrary(torrent.files[0].path)
     } else {
       /**
        * If the torrent contains more files, they are organized into a folder,
@@ -93,7 +93,7 @@ export default class Downloader extends Service {
        * `[ 'dir/file.mp4', 'dir/subs.srt' ]`
        */
       const torrentDir = torrent.files[0].path.split(path.sep)[0]
-      scanDirectory(path.join(config.mediaDir, torrentDir))
+      await scanDirectory(path.join(config.mediaDir, torrentDir))
     }
 
     const download = await Download.findOne({ infoHash: torrent.infoHash })
