@@ -1,8 +1,9 @@
 import debounce from 'debounce'
+import { promises as fs } from 'fs'
 import path from 'path'
 import { Namespace } from 'socket.io'
 import { inject, singleton } from 'tsyringe'
-import WebTorrent, { Torrent } from 'webtorrent'
+import WebTorrent, { Torrent, TorrentOptions } from 'webtorrent'
 
 import config from '../config'
 import Download from '../models/Download'
@@ -45,10 +46,8 @@ export default class Downloader extends Service {
       where: { done: false }
     })
 
-    const opts = { path: config.mediaDir }
-
     for (const download of downloads) {
-      this.client.add(download.magnetURI, opts)
+      this.addTorrent(download.magnetURI)
     }
 
     // handle torrents completion
@@ -74,6 +73,28 @@ export default class Downloader extends Service {
       this.client.destroy((err) => {
         if (err) { return reject(err) }
         resolve()
+      })
+    })
+  }
+
+  /**
+   * Add a torrent to the download client. If the media directory is not
+   * available, it throws an error.
+   *
+   * @param torrentId A Magnet URI or a path to a torrent file
+   */
+  async addTorrent (torrentId: string): Promise<Torrent> {
+    const stats = await fs.stat(config.mediaDir)
+
+    if (!stats.isDirectory()) {
+      throw new Error('Media directory is not available')
+    }
+
+    const opts: TorrentOptions = { path: config.mediaDir }
+
+    return await new Promise<Torrent>((resolve) => {
+      this.client.add(torrentId, opts, (torrent) => {
+        resolve(torrent)
       })
     })
   }
