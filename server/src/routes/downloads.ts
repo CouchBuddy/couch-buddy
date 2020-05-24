@@ -1,5 +1,6 @@
 import { Context } from 'koa'
 import { container } from 'tsyringe'
+import { Torrent } from 'webtorrent'
 
 import Downloader, { serializeTorrent } from '../services/downloader'
 import Download from '../models/Download'
@@ -34,4 +35,44 @@ export async function addTorrent (ctx: Context) {
 
 export async function listTorrents (ctx: Context) {
   ctx.body = downloader.client.torrents.map(serializeTorrent)
+}
+
+export async function resumeOrPauseTorrent (ctx: Context) {
+  const { infoHash } = ctx.params
+  ctx.assert(infoHash, 400, 'Not a valid info hash')
+
+  const torrent: Torrent = downloader.client.get(infoHash) || null
+  ctx.assert(torrent, 404, 'Torrent not found')
+
+  if (torrent.paused) {
+    torrent.resume()
+  } else {
+    torrent.pause()
+  }
+
+  ctx.status = 204
+}
+
+export async function removeTorrent (ctx: Context) {
+  const { infoHash } = ctx.params
+  ctx.assert(infoHash, 400, 'Not a valid info hash')
+
+  const torrent: Torrent = downloader.client.get(infoHash) || null
+  ctx.assert(torrent, 404, 'Torrent not found')
+
+  try {
+    await new Promise((resolve, reject) => {
+      torrent.destroy((err) => {
+        if (err) { return reject(err) }
+        resolve()
+      })
+    })
+
+    await Download.delete({ infoHash })
+
+    ctx.status = 204
+  } catch (e) {
+    ctx.status = 400
+    ctx.body = e.message
+  }
 }

@@ -39,6 +39,8 @@ router.post('/subtitles/:wid/download', subtitles.downloadSubtitles)
 
 router.post('/downloads', downloads.addTorrent)
 router.get('/downloads', downloads.listTorrents)
+router.post('/downloads/:hash/resumepause', downloads.resumeOrPauseTorrent)
+router.delete('/downloads/:hash', downloads.removeTorrent)
 
 router.get('/explore', explore.searchMovies)
 

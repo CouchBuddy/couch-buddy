@@ -136,6 +136,9 @@ export default {
         this.$refs.upload.value = null
         this.loading = false
       }
+    },
+    async resumeOrPauseTorrent (torrent) {
+      await client.post(`/api/downloads/${torrent.infoHash}/resumepause`)
     }
   }
 }
