@@ -62,120 +62,119 @@
 </template>
 
 <script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
 import { mapMutations, mapState } from 'vuex'
 
 import client from '@/client'
 import config from '@/config'
 
-export default {
-  data: () => ({
-    anyDeviceAvailable: false,
-    isCastLoaded: false,
-    controller: null,
-    latestCurrentTime: 0,
-    mediaStatus: null,
-    player: null
-  }),
-  computed: {
-    ...mapState([ 'castingMovie', 'isCastConnected' ])
-  },
+@Component({
+  computed: mapState([ 'castingMovie', 'isCastConnected' ]),
+  methods: mapMutations([ 'setCastConnected' ])
+})
+export default class CastControl extends Vue {
+  anyDeviceAvailable = false
+  isCastLoaded = false
+  controller: cast.framework.RemotePlayerController = null
+  latestCurrentTime = 0
+  mediaStatus: chrome.cast.media.Media = null
+  player: cast.framework.RemotePlayer = null
+
   created () {
     if (window.cast) {
       this.isCastLoaded = !!cast.framework
     }
 
     window.__onGCastApiAvailable = this.initCast
-  },
+  }
+
   mounted () {
     if (this.isCastLoaded) {
       this.initCast(true)
     }
-  },
-  methods: {
-    ...mapMutations([ 'setCastConnected' ]),
-    initCast (isAvailable) {
-      if (!isAvailable || !chrome || !cast) { return }
+  }
 
-      this.isCastLoaded = true
+  initCast (isAvailable) {
+    if (!isAvailable || !chrome || !cast) { return }
 
-      const context = cast.framework.CastContext.getInstance()
+    this.isCastLoaded = true
 
-      this.anyDeviceAvailable = context.getCastState() !== cast.framework.CastState.NO_DEVICES_AVAILABLE
+    const context = cast.framework.CastContext.getInstance()
 
-      context.setOptions({
-        receiverApplicationId: config.castReceiverAppId || chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-        autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
-        resumeSavedSession: true
-      })
+    this.anyDeviceAvailable = context.getCastState() !== cast.framework.CastState.NO_DEVICES_AVAILABLE
 
-      context.addEventListener(
-        cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
-        this.castConnectionListener
-      )
-      context.addEventListener(
-        cast.framework.CastContextEventType.CAST_STATE_CHANGED,
-        this.castStateListener
-      )
+    context.setOptions({
+      receiverApplicationId: config.castReceiverAppId || chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+      autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+      resumeSavedSession: true
+    })
 
-      this.player = new cast.framework.RemotePlayer()
-      this.controller = new cast.framework.RemotePlayerController(this.player)
+    context.addEventListener(
+      cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+      this.castConnectionListener
+    )
+    context.addEventListener(
+      cast.framework.CastContextEventType.CAST_STATE_CHANGED,
+      this.castStateListener
+    )
 
-      this.controller.addEventListener(
-        cast.framework.RemotePlayerEventType.MEDIA_INFO_CHANGED,
-        this.onRemotePlayerChange
-      )
+    this.player = new cast.framework.RemotePlayer()
+    this.controller = new cast.framework.RemotePlayerController(this.player)
 
-      this.controller.addEventListener(
-        cast.framework.RemotePlayerEventType.CURRENT_TIME_CHANGED,
-        this.onRemotePlayerChange
-      )
-    },
-    castConnectionListener (event) {
-      switch (event.sessionState) {
-        case cast.framework.SessionState.SESSION_STARTED:
-        case cast.framework.SessionState.SESSION_RESUMED:
-          this.setCastConnected(true)
-          break
+    this.controller.addEventListener(
+      cast.framework.RemotePlayerEventType.MEDIA_INFO_CHANGED,
+      this.onRemotePlayerChange
+    )
 
-        case cast.framework.SessionState.SESSION_ENDED:
-          this.setCastConnected(false)
-          break
-      }
-    },
-    castStateListener (event) {
-      this.anyDeviceAvailable = event.castState !== cast.framework.CastState.NO_DEVICES_AVAILABLE
-    },
-    async onRemotePlayerChange (event) {
-      let tmp
+    this.controller.addEventListener(
+      cast.framework.RemotePlayerEventType.CURRENT_TIME_CHANGED,
+      this.onRemotePlayerChange
+    )
+  }
 
-      switch (event.type) {
-        case cast.framework.RemotePlayerEventType.MEDIA_INFO_CHANGED:
-          tmp = cast.framework.CastContext
-            .getInstance()
-            .getCurrentSession()
+  castConnectionListener (event) {
+    switch (event.sessionState) {
+      case cast.framework.SessionState.SESSION_STARTED:
+      case cast.framework.SessionState.SESSION_RESUMED:
+        this.setCastConnected(true)
+        break
 
-          if (tmp) {
-            this.mediaStatus = tmp.getMediaSession()
-          }
-          break
+      case cast.framework.SessionState.SESSION_ENDED:
+        this.setCastConnected(false)
+        break
+    }
+  }
 
-        case cast.framework.RemotePlayerEventType.CURRENT_TIME_CHANGED:
-          if (event.value > this.latestCurrentTime + 10) {
-            this.latestCurrentTime = event.value
+  castStateListener (event: cast.framework.CastStateEventData) {
+    this.anyDeviceAvailable = event.castState !== cast.framework.CastState.NO_DEVICES_AVAILABLE
+  }
 
-            const resourcePath = this.castingMovie.type === 'movie' ? 'library' : 'episodes'
+  async onRemotePlayerChange (event) {
+    let tmp: cast.framework.CastSession
 
-            await client.patch(`/api/${resourcePath}/${this.castingMovie.id}`, {
-              watched: Math.min((this.latestCurrentTime / this.mediaStatus.media.duration) * 100, 100)
-            })
-          }
-          break
-      }
+    switch (event.type) {
+      case cast.framework.RemotePlayerEventType.MEDIA_INFO_CHANGED:
+        tmp = cast.framework.CastContext
+          .getInstance()
+          .getCurrentSession()
+
+        if (tmp) {
+          this.mediaStatus = tmp.getMediaSession()
+        }
+        break
+
+      case cast.framework.RemotePlayerEventType.CURRENT_TIME_CHANGED:
+        if (event.value > this.latestCurrentTime + 10) {
+          this.latestCurrentTime = event.value
+
+          const resourcePath = this.castingMovie.type === 'movie' ? 'library' : 'episodes'
+
+          await client.patch(`/api/${resourcePath}/${this.castingMovie.id}`, {
+            watched: Math.min((this.latestCurrentTime / this.mediaStatus.media.duration) * 100, 100)
+          })
+        }
+        break
     }
   }
 }
 </script>
-
-<style>
-
-</style>
