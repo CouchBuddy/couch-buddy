@@ -4,6 +4,7 @@ import path from 'path'
 import { Namespace } from 'socket.io'
 import { inject, singleton } from 'tsyringe'
 import WebTorrent, { Torrent, TorrentOptions } from 'webtorrent'
+import TorrentParser from 'parse-torrent'
 
 import config from '../config'
 import Download from '../models/Download'
@@ -47,7 +48,11 @@ export default class Downloader extends Service {
     })
 
     for (const download of downloads) {
-      this.addTorrent(download.magnetURI)
+      try {
+        this.addTorrent(download.magnetURI)
+      } catch (e) {
+        console.log('Error while restoring torrent', e)
+      }
     }
 
     // handle torrents completion
@@ -88,6 +93,12 @@ export default class Downloader extends Service {
 
     if (!stats.isDirectory()) {
       throw new Error('Media directory is not available')
+    }
+
+    // Check if the torrent already exists
+    const t = TorrentParser(torrentId)
+    if (this.client.get(t.infoHash)) {
+      throw new Error(`Torrent ${t.infoHash} already exists`)
     }
 
     const opts: TorrentOptions = { path: config.mediaDir }
