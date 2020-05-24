@@ -63,6 +63,10 @@ export default {
     SubtitlesDialog
   },
   props: {
+    movie: {
+      type: Object,
+      required: true
+    },
     // Tell if this control is visible, so we can avoid to update UI if it isn't
     showing: {
       type: Boolean,
@@ -113,6 +117,10 @@ export default {
     this.duration = metadata.streams.find(s => s.codec_type === 'video').duration
     if (!this.duration || this.duration === 'N/A') {
       this.duration = metadata.format.duration
+    }
+
+    if (this.$route.query.continue) {
+      this.video.currentTime = this.duration * this.movie.watched / 100
     }
 
     this.updateRemainingTime()

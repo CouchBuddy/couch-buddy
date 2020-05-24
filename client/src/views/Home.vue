@@ -59,7 +59,7 @@
               v-if="item.type === 'movie' || item.episode"
               :icon="isCastConnected ? 'mdi-cast' : 'mdi-play-circle'"
               x-large
-              @click="playMovie(item)"
+              @click="playMovie(item, collection.continueWatching)"
             />
 
             <x-btn
@@ -93,6 +93,7 @@ export default {
       {
         name: 'Continue Watching',
         url: '/continue-watching',
+        continueWatching: true,
         items: [],
         loading: false
       },
@@ -123,13 +124,17 @@ export default {
   },
   methods: {
     ...mapActions([ 'castMovie' ]),
-    playMovie (movie) {
+    playMovie (movie, continueWatching = false) {
       if (movie.type !== 'movie' && !movie.episode) { return }
 
       if (this.isCastConnected) {
         this.castMovie(movie)
       } else {
-        this.$router.push({ name: 'watch', params: { id: this.getWatchId(movie) } })
+        this.$router.push({
+          name: 'watch',
+          params: { id: this.getWatchId(movie) },
+          query: { continue: continueWatching }
+        })
       }
     },
     getWatchId (movie) {

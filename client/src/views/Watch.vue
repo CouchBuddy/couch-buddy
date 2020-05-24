@@ -72,8 +72,9 @@
     </div>
 
     <video-controls
-      v-if="$refs.video"
+      v-if="$refs.video && movie"
       :video="$refs.video"
+      :movie="movie"
       :watch-id="watchId"
       :showing="showOverlay"
       :subtitles="subtitles"
@@ -98,6 +99,7 @@ export default {
   },
   data: () => ({
     error: null,
+    continueWatching: null,
     loading: false,
     movie: {},
     overlayTimeout: null,
@@ -115,6 +117,7 @@ export default {
   },
   created () {
     this.watchId = this.$route.params.id
+    this.continueWatching = this.$route.query.continueWatching === 'true'
   },
   async mounted () {
     this.resourcePath = this.watchId[0] === 'e' ? 'episodes' : 'library'
