@@ -164,11 +164,13 @@ export default {
           if (event.value > this.latestCurrentTime + 10) {
             this.latestCurrentTime = event.value
 
-            const resourcePath = this.castingMovie.type === 'movie' ? 'library' : 'episodes'
+            if (this.castingMovie) {
+              const resourcePath = this.castingMovie.type === 'movie' ? 'library' : 'episodes'
 
-            await client.patch(`/api/${resourcePath}/${this.castingMovie.id}`, {
-              watched: Math.min((this.latestCurrentTime / this.mediaStatus.media.duration) * 100, 100)
-            })
+              await client.patch(`/api/${resourcePath}/${this.castingMovie.id}`, {
+                watched: Math.min((this.latestCurrentTime / this.mediaStatus.media.duration) * 100, 100)
+              })
+            }
           }
           break
       }
