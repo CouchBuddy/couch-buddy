@@ -18,9 +18,11 @@ export async function continueWatching (ctx: Context) {
 
   if (seriesWatched.length) {
     nextEpisodes = await Episode.createQueryBuilder('episodes')
-      .where(new Brackets(qb => qb
-        .whereInIds(seriesWatched.map(e => e.movie))
-        .andWhere('watched < 95')
+      .where(new Brackets(qb => {
+          qb
+            .where('episodes.id IN (:...ids)', { ids: seriesWatched.map(e => e.movie) })
+            .andWhere('episodes.watched < 95')
+        }
       ))
       .orderBy({ season: 'ASC', episode: 'ASC' })
       .groupBy('movieId')
