@@ -2,7 +2,7 @@ import axios from 'axios'
 import fs from 'fs'
 import { Context } from 'koa'
 import sendFile from 'koa-send'
-import OpenSubtitles from 'opensubtitles-api'
+import OpenSubtitles, { SearchParams } from 'opensubtitles-api'
 import path from 'path'
 import srt2vtt from 'srt-to-vtt'
 
@@ -55,7 +55,7 @@ export async function downloadSubtitles (ctx: Context) {
   if (mediaType === 'movie') {
     media = await Movie.findOne(mediaId)
   } else {
-    media = await Episode.findOne(mediaId)
+    media = await Episode.findOne(mediaId, { relations: [ 'movie' ] })
   }
 
   const mediaFile = await MediaFile.findOne({
@@ -71,17 +71,37 @@ export async function downloadSubtitles (ctx: Context) {
     osClient = new OpenSubtitles(config.openSubtitlesUa)
   }
 
-  // Search subtitles using movie hash
-  let result = await osClient.search({
-    sublanguageid: sublanguageId,
-    path: config.mediaDir + mediaFile.fileName
-  })
+  let result
 
-  // Search again using only IMDB ID
-  if (!result[lang]) {
+  // Search using only IMDB ID
+  if (media.imdbId) {
     result = await osClient.search({
       sublanguageid: sublanguageId,
       imdbid: media.imdbId
+    })
+  }
+
+  if (!result || !result[lang]) {
+    const params: SearchParams = {
+      sublanguageid: sublanguageId
+    }
+
+    if (media instanceof Episode) {
+      params.season = media.season
+      params.episode = media.episode
+      params.query = media.movie.title
+    } else {
+      params.query = media.title
+    }
+
+    result = await osClient.search(params)
+  }
+
+  if (!result || !result[lang]) {
+    // Search subtitles using movie hash
+    result = await osClient.search({
+      sublanguageid: sublanguageId,
+      path: config.mediaDir + mediaFile.fileName
     })
   }
 
