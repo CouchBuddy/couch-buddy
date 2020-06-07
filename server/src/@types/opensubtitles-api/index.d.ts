@@ -12,7 +12,7 @@ declare module 'opensubtitles-api' {
      * Search for subtitles
      * @param params information about the video to be subtitled
      */
-    search (params: SearchParams): SearchResults
+    search (params: SearchParams): Promise<SearchResults>
   }
 
   type Extension = 'srt' | 'sub' | 'smi' | 'txt' | 'ssa' | 'ass' | 'mpl'
