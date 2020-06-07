@@ -9,12 +9,12 @@
         :style="{ transform: `translateX(${currentScroll}px)` }"
       >
         <div
-          v-for="item in items"
+          v-for="(item, index) in items"
           :key="`hs-${item.id}`"
           class="w-1/3 md:1/4 lg:w-1/5 xl:w-1/6 px-1 horizontal-scroller__item"
         >
           <slot
-            v-bind="item"
+            v-bind="{ item, index }"
             @click.stop
           />
         </div>

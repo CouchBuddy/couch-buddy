@@ -10,7 +10,7 @@
       </div>
 
       <x-horizontal-scroller
-        v-slot="item"
+        v-slot="{ item }"
         :items="collection.items"
       >
         <div

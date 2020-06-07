@@ -34,73 +34,90 @@ export default new Vuex.Store({
       commit('setSystemInfo', (await client.get('/api/system')).data)
     },
     /* global cast, chrome */
-    async castMovie ({ commit, state }, movie) {
+    async castMovie ({ commit, state }, { movies, startIndex = 0 }) {
       const castSession = cast.framework.CastContext.getInstance().getCurrentSession()
 
-      const watchId = `${movie.type === 'movie' ? 'm' : 'e'}${movie.id}`
+      const queueItems = []
 
-      const url = `${state.serverUrl}/api/watch/${watchId}`
-      // const mimeType = `video/${movie.container}`
-
-      let metadata
-      if (movie.type === 'movie') {
-        metadata = new chrome.cast.media.MovieMediaMetadata()
-        metadata.title = movie.title
-        metadata.releaseDate = `${movie.year}`
-        metadata.images = [
-          new chrome.cast.Image(movie.poster)
-        ]
-      } else {
-        metadata = new chrome.cast.media.TvShowMediaMetadata()
-        metadata.title = movie.title
-        metadata.season = movie.season
-        metadata.episode = movie.episode
-        metadata.seriesTitle = movie.series ? movie.series.title : null
-        metadata.originalAirdate = `${movie.year}`
-        metadata.images = [
-          new chrome.cast.Image(movie.poster)
-        ]
+      if (!Array.isArray(movies)) {
+        movies = [ movies ]
       }
 
-      const subtitles = (await client.get(`/api/watch/${watchId}/subtitles`)).data
+      for (const movie of movies) {
+        const watchId = `${movie.type === 'movie' ? 'm' : 'e'}${movie.id}`
 
-      const mediaInfo = new chrome.cast.media.MediaInfo(url)
-      mediaInfo.metadata = metadata
-      mediaInfo.tracks = subtitles.map(sub => {
-        const track = new chrome.cast.media.Track(sub.id, chrome.cast.media.TrackType.TEXT)
-        track.trackContentId = `${state.serverUrl}/api/subtitles/${sub.id}`
-        track.trackContentType = 'text/vtt'
-        track.subtype = chrome.cast.media.TextTrackType.SUBTITLES
-        track.name = `${sub.lang} Subtitles`
-        track.language = sub.lang
+        const url = `${state.serverUrl}/api/watch/${watchId}`
+        // const mimeType = `video/${movie.container}`
 
-        return track
-      })
+        let metadata
+        if (movie.type === 'movie') {
+          metadata = new chrome.cast.media.MovieMediaMetadata()
+          metadata.title = movie.title
+          metadata.releaseDate = `${movie.year}`
 
-      const request = new chrome.cast.media.LoadRequest(mediaInfo)
+          if (movie.poster) {
+            metadata.images = [ new chrome.cast.Image(movie.poster) ]
+          }
+        } else {
+          metadata = new chrome.cast.media.TvShowMediaMetadata()
+          metadata.title = movie.title
+          metadata.season = movie.season
+          metadata.episode = movie.episode
+          metadata.seriesTitle = movie.series ? movie.series.title : null
+          metadata.originalAirdate = `${movie.year}`
 
-      if (subtitles.length) {
-        request.activeTrackIds = [ subtitles[0].id ]
-      }
-
-      /**
-       * If the movie has not been completely watched,
-       * start from the last watched point
-       */
-      if (movie.watched > 0 && movie.watched < 95) {
-        const metadata = (await client.get(`/api/watch/${watchId}/metadata`)).data
-
-        let duration = metadata.streams.find(s => s.codec_type === 'video').duration
-        if (!duration || duration === 'N/A') {
-          duration = metadata.format.duration
+          if (movie.poster) {
+            metadata.images = [ new chrome.cast.Image(movie.poster) ]
+          }
         }
 
-        request.currentTime = duration * movie.watched / 100
+        const subtitles = (await client.get(`/api/watch/${watchId}/subtitles`)).data
+
+        const mediaInfo = new chrome.cast.media.MediaInfo(url)
+        mediaInfo.metadata = metadata
+        mediaInfo.tracks = subtitles.map(sub => {
+          const track = new chrome.cast.media.Track(sub.id, chrome.cast.media.TrackType.TEXT)
+          track.trackContentId = `${state.serverUrl}/api/subtitles/${sub.id}`
+          track.trackContentType = 'text/vtt'
+          track.subtype = chrome.cast.media.TextTrackType.SUBTITLES
+          track.name = `${sub.lang} Subtitles`
+          track.language = sub.lang
+
+          return track
+        })
+
+        const queueItem = new chrome.cast.media.QueueItem(mediaInfo)
+
+        if (subtitles.length) {
+          queueItem.activeTrackIds = [ subtitles[0].id ]
+        }
+
+        queueItems.push(queueItem)
+
+        /**
+         * If the movie has not been completely watched,
+         * start from the last watched point
+         */
+        if (movie.watched > 0 && movie.watched < 95) {
+          const metadata = (await client.get(`/api/watch/${watchId}/metadata`)).data
+
+          let duration = metadata.streams.find(s => s.codec_type === 'video').duration
+          if (!duration || duration === 'N/A') {
+            duration = metadata.format.duration
+          }
+
+          queueItem.startTime = duration * movie.watched / 100
+        }
       }
 
-      await castSession.loadMedia(request)
+      const request = new chrome.cast.media.QueueLoadRequest(queueItems)
+      request.startIndex = startIndex
+      // eslint-disable-next-line no-console
+      console.log(request.items)
 
-      commit('setCastingMovie', movie)
+      castSession.getSessionObj().queueLoad(request)
+
+      commit('setCastingMovie', movies[0])
     }
   },
   modules: {

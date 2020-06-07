@@ -94,13 +94,13 @@
         </div>
 
         <x-horizontal-scroller
-          v-slot="item"
+          v-slot="{ item, index }"
           :items="group.episodes"
           :centered-item-id="nextEpisode && (nextEpisode.season === group.season) ? nextEpisode.id : null"
         >
           <div
             class="relative overflow-hidden aspect-ratio-16/9 cursor-pointer"
-            @click="playMovie(item)"
+            @click="playMovie(group.episodes, index)"
           >
             <img
               :src="`${serverUrl}/api/episodes/${item.id}/thumbnail`"
@@ -142,21 +142,21 @@ export default {
   },
   methods: {
     ...mapActions([ 'castMovie' ]),
-    playMovie (episode) {
+    playMovie (episodes, index = 0) {
       let toPlay
 
-      if (episode) {
-        toPlay = episode
+      if (episodes) {
+        toPlay = episodes
       } else {
-        toPlay = this.movie.type === 'series' ? this.nextEpisode : this.movie
+        toPlay = this.movie.type === 'series' ? [ this.nextEpisode ] : [ this.movie ]
       }
 
       if (!toPlay) { return }
 
       if (this.isCastConnected) {
-        this.castMovie(toPlay)
+        this.castMovie({ movies: toPlay, startIndex: index })
       } else {
-        this.$router.push({ name: 'watch', params: { id: this.getWatchId(toPlay) } })
+        this.$router.push({ name: 'watch', params: { id: this.getWatchId(toPlay[0]) } })
       }
     },
     async downloadMovie (magnetURI) {
