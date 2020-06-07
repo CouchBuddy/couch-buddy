@@ -112,8 +112,6 @@ export default new Vuex.Store({
 
       const request = new chrome.cast.media.QueueLoadRequest(queueItems)
       request.startIndex = startIndex
-      // eslint-disable-next-line no-console
-      console.log(request.items)
 
       castSession.getSessionObj().queueLoad(request)
 

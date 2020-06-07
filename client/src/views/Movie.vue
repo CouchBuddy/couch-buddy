@@ -156,7 +156,7 @@ export default {
       if (this.isCastConnected) {
         this.castMovie({ movies: toPlay, startIndex: index })
       } else {
-        this.$router.push({ name: 'watch', params: { id: this.getWatchId(toPlay[0]) } })
+        this.$router.push({ name: 'watch', params: { id: this.getWatchId(toPlay[index]) } })
       }
     },
     async downloadMovie (magnetURI) {
