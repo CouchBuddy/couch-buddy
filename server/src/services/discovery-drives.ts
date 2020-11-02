@@ -65,27 +65,24 @@ export default class Discovery extends Service {
     const baseURL: string = deviceDescription.root.URLBase
 
     const contentDirectory = deviceDescription.root.device.serviceList.service
-    .find((service: any) => service.serviceType === 'urn:schemas-upnp-org:service:ContentDirectory:1')
+      .find((service: any) => service.serviceType === 'urn:schemas-upnp-org:service:ContentDirectory:1')
 
     if (!contentDirectory) { return [] }
 
     const controlURL: string = baseURL + contentDirectory.controlURL
     const service = xml.parse((await axios.get(baseURL + contentDirectory.SCPDURL)).data, XML_PARSER_OPTS)
-    // check if browse action exists
 
-    // Browse root dir
-    const directories = await this.actionBrowseDirectory(controlURL, '0')
+    const hasBrowseAction = service.scpd.actionList.action.find((action: any) => action.name === 'Browse')
+    if (!hasBrowseAction) {
+      console.error('This device doesn\'t have a Browse action')
+      return []
+    }
 
-    // Find a directory that contains videos
-    const videoDir = directories.container.find((dir: any) => dir['dc:title'].toLowerCase().includes('video'))
-    if (!videoDir) { return [] }
-
-    // Browse video dir
-    const videoDirectoryContent = await this.actionBrowseDirectory(controlURL, videoDir['@_id'])
-
-    // Find a directory that contains all videos
-    const videoContainer = videoDirectoryContent.container.find((dir: any) => dir['upnp:class'] === 'object.container.videoContainer')
-    if (!videoContainer) { return [] }
+    const videoContainer = await this.searchVideoContainer(controlURL)
+    if (!videoContainer) {
+      console.error('This device doesn\'t have a video container')
+      return []
+    }
 
     // List all videos
     const allVideoItems = await this.actionBrowseDirectory(controlURL, videoContainer['@_id'])
@@ -106,6 +103,33 @@ export default class Discovery extends Service {
     })
 
     return videos
+  }
+
+  /**
+   * Search an object with `upnp:class` of type `object.container.videoContainer`.
+   * It searches in all subdirectories and may return undefined if none is found
+   *
+   * @param controlURL URL to the SOAP control endpoint
+   * @param objectId The object ID of the directory where to start the scan. If none is
+   *  provided, it starts from root.
+   */
+  async searchVideoContainer (controlURL: string, objectId = '0'): Promise<any | undefined> {
+    const dirContent = await this.actionBrowseDirectory(controlURL, objectId)
+
+    // Find a videoContainer object
+    console.log('found', dirContent.container.map((c: any) => c['dc:title'] + ' - ' + c['upnp:class']))
+    const videoContainer = dirContent.container.find((dir: any) => dir['upnp:class'] === 'object.container.videoContainer')
+
+    if (videoContainer) {
+      return videoContainer
+    } else {
+      // Go deeper in the tree, but search only containers
+      for (const dir of dirContent.container.filter((container: any) => container['upnp:class'] === 'object.container')) {
+        const videoContainer = await this.searchVideoContainer(controlURL, dir['@_id'])
+        if (videoContainer) { return videoContainer }
+      }
+      return undefined
+    }
   }
 
   async actionBrowseDirectory (controlURL: string, objectId: string): Promise<any> {
