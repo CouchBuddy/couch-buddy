@@ -13,7 +13,7 @@ import MediaFile from '../models/MediaFile'
 import Movie from '../models/Movie'
 import SubtitlesFile from '../models/SubtitlesFile'
 import * as movieInfoProvider from './tmdb'
-import { removeFileExtension } from '../utils'
+import { isValidURL, removeFileExtension } from '../utils'
 
 interface ParserResult extends DefaultParserResult {
   part?: number;
@@ -121,7 +121,7 @@ export function parseFileName (fileName: string): ParserResult {
   return basicInfo
 }
 
-export async function searchShowInfo (fileName: string): Promise<Movie | Episode> {
+export async function searchShowInfo (fileName: string): Promise<Movie | Episode | undefined> {
   const basicInfo = parseFileName(fileName)
 
   const isEpisode = basicInfo.season && basicInfo.episode
@@ -137,16 +137,17 @@ export async function searchShowInfo (fileName: string): Promise<Movie | Episode
 
   // If we can't find anything, at least we have basicInfo
   if (!item) {
-    if (isEpisode) {
-      item = new Episode()
-      item.season = basicInfo.season
-      item.episode = basicInfo.episode
-    } else {
-      item = new Movie()
-    }
+    // if (isEpisode) {
+    //   item = new Episode()
+    //   item.season = basicInfo.season
+    //   item.episode = basicInfo.episode
+    // } else {
+    //   item = new Movie()
+    // }
 
-    item.title = basicInfo.title
-    item.year = basicInfo.year
+    // item.title = basicInfo.title
+    // item.year = basicInfo.year
+    return undefined
   }
 
   item.part = basicInfo.part
@@ -160,6 +161,8 @@ export async function searchShowInfo (fileName: string): Promise<Movie | Episode
  * @param _fileName Path to a video file. The path can be absolute or relative,
  *   but in any case it must be included into `config.mediaDir`, if the path is absolute, the
  *   relative path is calculated and stored in the DB.
+ * @param movieTitle If not present, the filename will be used for searching movie info
+ * @param _mimeType If not present, the mimetype will be derived from the filename
  * @param force If true, update the video info even if the file has been already added to
  *   the library.
  *
@@ -168,17 +171,19 @@ export async function searchShowInfo (fileName: string): Promise<Movie | Episode
  *   is invalid or it already exists in the library (and `force` is false) no DB operations are done and
  *   the return value is null.
  */
-export async function addFileToLibrary (_fileName: string, force = false): Promise<[number, string]> {
+export async function addFileToLibrary (_fileName: string, movieTitle?: string, _mimeType?: string, force = false): Promise<[number, string]> {
   if (!_fileName) {
     console.error('fileName is null')
     return null
   }
 
-  const fileName = path.isAbsolute(_fileName)
+  const fileNameIsURL = isValidURL(_fileName)
+
+  const fileName = !fileNameIsURL && path.isAbsolute(_fileName)
     ? path.relative(config.mediaDir, _fileName)
     : _fileName
 
-  const mimeType = mime.lookup(fileName)
+  const mimeType = _mimeType || mime.lookup(fileName)
   if (!mimeType || !mimeType.startsWith('video/')) {
     console.log('Ignoring non-video file', fileName)
     return null
@@ -195,11 +200,14 @@ export async function addFileToLibrary (_fileName: string, force = false): Promi
     }
   }
 
+  const item = await searchShowInfo(movieTitle || fileName)
+  if (!item) {
+    return null
+  }
+
   return await getConnection().transaction(async transaction => {
     // Movie or Episode ID
     let mediaId: number
-
-    const item = await searchShowInfo(fileName)
 
     // Add the ID if the show exists, this is important for DB .save() functions
     // as they create or update a row based on the presence of ID
@@ -230,7 +238,10 @@ export async function addFileToLibrary (_fileName: string, force = false): Promi
       }
 
       episode.movie = series
-      episode.thumbnail = await takeScreenshot(config.mediaDir + fileName)
+
+      if (!fileNameIsURL) {
+        episode.thumbnail = await takeScreenshot(config.mediaDir + fileName)
+      }
 
       const savedEpisode = await transaction.save(episode)
       mediaId = savedEpisode.id

@@ -1,6 +1,6 @@
 import ffmpeg from 'fluent-ffmpeg'
 import fs from 'fs'
-import { Context } from 'koa'
+import { Context, Next } from 'koa'
 import mime from 'mime-types'
 import { PassThrough } from 'stream'
 import { container } from 'tsyringe'
@@ -9,6 +9,7 @@ import { Torrent } from 'webtorrent'
 import config from '../config'
 import MediaFile from '../models/MediaFile'
 import Downloader from '../services/downloader'
+import { isValidURL } from '../utils'
 
 type SupportedCodecs = {
   [ codecType: string ]: string[];
@@ -38,7 +39,7 @@ function ffprobe (path: string): Promise<ffmpeg.FfprobeData> {
   })
 }
 
-export async function watch (ctx: Context) {
+export async function watch (ctx: Context, next: Next) {
   ctx.assert(/^(e|m|t)[a-f0-9]+$/.test(ctx.params.id), 400, 'Invalid ID format')
 
   const isTorrent = ctx.params.id[0] === 't'
@@ -70,6 +71,12 @@ export async function watch (ctx: Context) {
   let stat
 
   if (!isTorrent) {
+    // If the fileName is a URL, then redirect there
+    if (isValidURL(mediaFile.fileName)) {
+      ctx.redirect(mediaFile.fileName)
+      return await next()
+    }
+
     path = config.mediaDir + mediaFile.fileName
     try {
       stat = fs.statSync(path)
