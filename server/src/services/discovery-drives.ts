@@ -3,6 +3,7 @@ import { Packet } from 'dns-packet'
 import xml,{ X2jOptions } from 'fast-xml-parser'
 import he from 'he'
 import Mdns, { MulticastDns } from 'multicast-dns'
+import { URL } from 'url'
 
 import Service from './Service'
 
@@ -24,6 +25,9 @@ const XML_PARSER_OPTS: Partial<X2jOptions> = {
 
 // Definition from http://www.upnp.org/specs/av/UPnP-av-ContentDirectory-v1-Service.pdf section 2.7.6
 const RE_PROTOCOL_INFO = /:\*:(.+):\*$/
+
+const UPNP_CONTAINERS = [ 'object.container', 'object.container.storageFolder', 'object.container.videoContainer']
+const UPNP_VIDEO_ITEMS = [ 'object.item.videoItem', 'object.item.videoItem.movie' ]
 
 export default class Discovery extends Service {
   mdns: MulticastDns;
@@ -62,47 +66,39 @@ export default class Discovery extends Service {
     const response = await axios.get(url)
     const deviceDescription = xml.parse(response.data, XML_PARSER_OPTS)
 
-    const baseURL: string = deviceDescription.root.URLBase
+    const u = new URL(url)
+    const baseURL: string = deviceDescription.root.URLBase || `${u.protocol}//${u.host}`
 
     const contentDirectory = deviceDescription.root.device.serviceList.service
       .find((service: any) => service.serviceType === 'urn:schemas-upnp-org:service:ContentDirectory:1')
 
-    if (!contentDirectory) { return [] }
+    if (!contentDirectory) {
+      console.error('This device doesn\'t have a ContentDirectory')
+      return []
+    }
 
     const controlURL: string = baseURL + contentDirectory.controlURL
-    const service = xml.parse((await axios.get(baseURL + contentDirectory.SCPDURL)).data, XML_PARSER_OPTS)
 
-    const hasBrowseAction = service.scpd.actionList.action.find((action: any) => action.name === 'Browse')
-    if (!hasBrowseAction) {
-      console.error('This device doesn\'t have a Browse action')
-      return []
-    }
+    try {
+      const service = xml.parse((await axios.get(baseURL + contentDirectory.SCPDURL)).data, XML_PARSER_OPTS)
 
-    const videoContainer = await this.searchVideoContainer(controlURL)
-    if (!videoContainer) {
-      console.error('This device doesn\'t have a video container')
-      return []
-    }
-
-    // List all videos
-    const allVideoItems = await this.actionBrowseDirectory(controlURL, videoContainer['@_id'])
-
-    const videos: VideoItem[] = allVideoItems.item.map((item: any) => {
-      const m = item.res['@_protocolInfo'].match(RE_PROTOCOL_INFO)
-      const mimeType = (m && m[1] && m[1] !== '*') ? m[1] : undefined
-
-      return {
-        externalId: item['@_id'],
-        title: '' + item['dc:title'],
-        url: item.res['#text'],
-        size: parseInt(item.res['@_size']),
-        duration: item.res['@_duration'],
-        resolution: item.res['@_resolution'],
-        mimeType
+      const hasBrowseAction = service.scpd.actionList.action.find((action: any) => action.name === 'Browse')
+      if (!hasBrowseAction) {
+        console.error('This device doesn\'t have a Browse action')
+        return []
       }
-    })
+    } catch (e) {
+      console.error('Error listing ContentDirectory services', e)
+      return []
+    }
 
-    return videos
+    const allVideos = await this.searchVideoItems(controlURL)
+    if (!allVideos.length) {
+      console.error('This device doesn\'t contain any video')
+      return []
+    }
+
+    return allVideos
   }
 
   /**
@@ -113,23 +109,34 @@ export default class Discovery extends Service {
    * @param objectId The object ID of the directory where to start the scan. If none is
    *  provided, it starts from root.
    */
-  async searchVideoContainer (controlURL: string, objectId = '0'): Promise<any | undefined> {
+  async searchVideoItems (controlURL: string, objectId = '0'): Promise<VideoItem[]> {
+    let videos: VideoItem[] = []
     const dirContent = await this.actionBrowseDirectory(controlURL, objectId)
 
-    // Find a videoContainer object
-    console.log('found', dirContent.container.map((c: any) => c['dc:title'] + ' - ' + c['upnp:class']))
-    const videoContainer = dirContent.container.find((dir: any) => dir['upnp:class'] === 'object.container.videoContainer')
+    if (dirContent.container) {
+      const containers = Array.isArray(dirContent.container)
+        ? dirContent.container
+        : [ dirContent.container ]
 
-    if (videoContainer) {
-      return videoContainer
-    } else {
       // Go deeper in the tree, but search only containers
-      for (const dir of dirContent.container.filter((container: any) => container['upnp:class'] === 'object.container')) {
-        const videoContainer = await this.searchVideoContainer(controlURL, dir['@_id'])
-        if (videoContainer) { return videoContainer }
+      for (const dir of containers.filter((container: any) => UPNP_CONTAINERS.includes(container['upnp:class']))) {
+        videos = videos.concat(await this.searchVideoItems(controlURL, dir['@_id']))
       }
-      return undefined
     }
+
+    if (dirContent.item) {
+      const items = Array.isArray(dirContent.item)
+        ? dirContent.item
+        : [ dirContent.item ]
+
+      for (const item of items) {
+        if (UPNP_VIDEO_ITEMS.includes(item['upnp:class'])) {
+          videos.push(this.videoItemToObject(item))
+        }
+      }
+    }
+
+    return videos
   }
 
   async actionBrowseDirectory (controlURL: string, objectId: string): Promise<any> {
@@ -143,6 +150,21 @@ export default class Discovery extends Service {
     })
 
     return xml.parse(response.Result, XML_PARSER_OPTS)['DIDL-Lite']
+  }
+
+  videoItemToObject (item: any) {
+    const m = item.res['@_protocolInfo'].match(RE_PROTOCOL_INFO)
+    const mimeType = (m && m[1] && m[1] !== '*') ? m[1] : undefined
+
+    return {
+      externalId: item['@_id'],
+      title: '' + item['dc:title'],
+      url: item.res['#text'],
+      size: parseInt(item.res['@_size']),
+      duration: item.res['@_duration'],
+      resolution: item.res['@_resolution'],
+      mimeType
+    }
   }
 
   async sendSOAPRequest (controlURL: string, type: string, action: string, args: any) {
@@ -159,14 +181,18 @@ export default class Discovery extends Service {
       </s:Body>
     </s:Envelope>`
 
-    const response = await axios.post(controlURL, data, {
-      headers: {
-        'Content-Type': 'text/xml',
-        SOAPACTION: `urn:schemas-upnp-org:service:${type}#${action}`
-      }
-    })
+    try {
+      const response = await axios.post(controlURL, data, {
+        headers: {
+          'Content-Type': 'text/xml',
+          SOAPACTION: `urn:schemas-upnp-org:service:${type}#${action}`
+        }
+      })
 
-    return xml.parse(response.data, XML_PARSER_OPTS)['s:Envelope']['s:Body'][`u:${action}Response`]
+      return xml.parse(response.data, XML_PARSER_OPTS)['s:Envelope']['s:Body'][`u:${action}Response`]
+    } catch (e) {
+      console.error('Error sending SOAP request', e)
+    }
   }
 
   responseHandler (query: Packet) {

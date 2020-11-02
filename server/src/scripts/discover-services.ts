@@ -11,9 +11,12 @@ async function main (bar: SingleBar) {
   // discovery.scan()
 
   const videos = await discovery.parseDevice(process.argv[2])
-  bar.start(10, 0)
 
-  for (const video of videos.slice(0, 10)) {
+  if (!videos || !videos.length) { return }
+
+  bar.start(videos.length, 0)
+
+  for (const video of videos) {
     if (!await addFileToLibrary(video.url, video.title, video.mimeType)) {
       console.warn('Video not added to the lib', video)
     }
@@ -25,5 +28,6 @@ async function main (bar: SingleBar) {
 if (require.main === module) {
   (async function () {
     await main(await boot())
+    process.exit(0)
   })()
 }
