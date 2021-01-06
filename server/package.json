@@ -20,7 +20,7 @@
     "@koa/cors": "^3.0.0",
     "@koa/router": "^8.0.8",
     "argparse": "^1.0.10",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "change-case": "^4.1.1",
     "check-disk-space": "^2.1.0",
     "class-transformer": "^0.2.3",
