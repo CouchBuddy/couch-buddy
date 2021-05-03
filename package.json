@@ -5,14 +5,12 @@
     "client:i": "cd client && npm install",
     "client:dev": "cd client && npm run serve",
     "client:build": "cd client && npm run build",
-
     "server:i": "cd server && npm install",
     "server:dev": "cd server && npm run dev",
     "server:build": "cd server && npm run build",
-
     "build": "npm-run-all --parallel server:build client:build",
     "dev": "npm-run-all --parallel server:dev client:dev",
-    "install" : "npm-run-all --parallel  server:i client:i",
+    "install": "npm-run-all --parallel  server:i client:i",
     "start": "cd server && npm run start"
   },
   "repository": {
