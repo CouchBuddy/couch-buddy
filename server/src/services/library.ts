@@ -65,14 +65,21 @@ export async function getDirectoryContent (dir: string, extensions?: string[]) {
         if (!ext || !extensions.includes(ext)) { continue }
       }
 
-      if ((await fs.promises.lstat(fullPath)).isDirectory()) {
-        await walkDir(fullPath, extensions)
-      } else {
-        if (EXTENSIONS_SUBTITLES.includes(ext)) {
-          subtitles.push(file)
-        } else if (EXTENSIONS_VIDEOS.includes(ext)) {
-          videos.push(file)
+      try {
+        const isDirectory = (await fs.promises.lstat(fullPath)).isDirectory()
+        
+        if (isDirectory) {
+          await walkDir(fullPath, extensions)
+        } else {
+          if (EXTENSIONS_SUBTITLES.includes(ext)) {
+            subtitles.push(file)
+          } else if (EXTENSIONS_VIDEOS.includes(ext)) {
+            videos.push(file)
+          }
         }
+      } catch (err) {
+        console.warn(`Error reading ${fullPath}`, err)
+        continue
       }
     }
 
@@ -88,10 +95,13 @@ export function takeScreenshot (file: string): Promise<string> {
   const folder = path.dirname(file)
   const folderRelative = path.relative(config.mediaDir, folder)
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     ffmpeg(file)
       .on('filenames', (filenames) => {
         resolve(path.join(folderRelative, filenames[0]))
+      })
+      .on('error', err => {
+        reject(err)
       })
       .screenshots({ count: 1, filename: '%b.png', folder })
   })
@@ -240,7 +250,11 @@ export async function addFileToLibrary (_fileName: string, movieTitle?: string, 
       episode.movie = series
 
       if (!fileNameIsURL) {
-        episode.thumbnail = await takeScreenshot(config.mediaDir + fileName)
+        try {
+          episode.thumbnail = await takeScreenshot(config.mediaDir + fileName)
+        } catch (err) {
+          console.warn(`Error taking screenshot for ${fileName}`, err)
+        }
       }
 
       const savedEpisode = await transaction.save(episode)
