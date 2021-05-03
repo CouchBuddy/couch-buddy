@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env npx ts-node
 
 import { ArgumentParser } from 'argparse'
 import assert from 'assert'
@@ -29,7 +29,7 @@ parser.addArgument(
 
 const args = parser.parseArgs()
 
-function main (bar: SingleBar) {
+async function main (bar: SingleBar) {
   switch (args.cmd) {
     case 'add':
       assert(args.file, 'File argument required')
@@ -40,7 +40,7 @@ function main (bar: SingleBar) {
       break
 
     case 'scan':
-      scanDirectory(args.file)
+      await scanDirectory(args.file)
       break
 
     default:
