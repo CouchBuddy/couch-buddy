@@ -1,12 +1,18 @@
-import AppConfig from './AppConfig'
 import dotenv from 'dotenv'
 import fs from 'fs'
 
-// Load default env vars from .env file
-dotenv.config()
+import AppConfig from './AppConfig'
+import { ensureTrailingSlash } from '../utils'
 
-// Load environment-specific config from .env.<environment> file
-const envConfigFile = `.env.${process.env.NODE_ENV}`
+const nodeEnv = process.env.NODE_ENV || 'development'
+console.log(`NODE_ENV=${nodeEnv}`)
+
+// Load default env vars from .env file
+dotenv.config({ path: '.env' })
+
+// Load environment-specific config from .env.<environment> file, if it exists.
+// Env-specific configs have precedence over default ones.
+const envConfigFile = `.env.${nodeEnv}`
 
 if (fs.existsSync(envConfigFile)) {
   const envConfig = dotenv.parse(fs.readFileSync(envConfigFile))
@@ -14,11 +20,11 @@ if (fs.existsSync(envConfigFile)) {
 }
 
 const config = new class Config extends AppConfig {
-  nodeEnv = process.env.NODE_ENV || 'development'
+  nodeEnv = nodeEnv
 
-  dbSqlitePath = process.env.DB_SQLITE_PATH
+  dbSqlitePath = process.env.DB_SQLITE_PATH || 'db.sqlite'
 
-  mediaDir = process.env.MEDIA_DIR
+  mediaDir = ensureTrailingSlash(process.env.MEDIA_DIR)
 
   omdbApiKey = process.env.OMDB_API_KEY
 

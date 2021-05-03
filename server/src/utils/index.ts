@@ -1,3 +1,4 @@
+import path from 'path'
 import { URL } from 'url'
 
 export function removeFileExtension (fileName: string): string {
@@ -15,4 +16,26 @@ export function isValidURL (url: string): boolean {
   } catch {
     return false
   }
+}
+
+/**
+ * Given a relative path, it returns its absolute path starting from
+ * the `server/` folder. If the input path is already absolute, it
+ * returns it.
+ * 
+ * @param relativePath the path
+ * @returns 
+ */
+ export function getAbsolutePath (relativePath: string) {
+  if (path.isAbsolute(relativePath)) {
+    return relativePath
+  } else {
+    return path.resolve(path.join(__dirname, '..', '..', relativePath))
+  }
+}
+
+export function ensureTrailingSlash (path: string) {
+  return path.endsWith('/')
+    ? path
+    : path + '/'
 }
