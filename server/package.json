@@ -28,7 +28,7 @@
     "cli-progress": "^3.6.1",
     "couch-buddy-extensions": "^1.0.2",
     "debounce": "^1.2.0",
-    "dns-packet": "^5.2.1",
+    "dns-packet": "^5.2.2",
     "dotenv": "^8.2.0",
     "fast-xml-parser": "^3.17.4",
     "fluent-ffmpeg": "^2.1.2",
