@@ -120,6 +120,7 @@ export default {
     }
 
     if (this.$route.query.continue) {
+      // eslint-disable-next-line
       this.video.currentTime = this.duration * this.movie.watched / 100
     }
 
@@ -137,6 +138,7 @@ export default {
       this.video.paused ? this.video.play() : this.video.pause()
     },
     toggleMute () {
+      // eslint-disable-next-line
       this.video.muted = !this.video.muted
     },
     updateRemainingTime () {
@@ -144,8 +146,10 @@ export default {
     },
     onSeek () {
       if (Math.abs(this.video.duration - this.duration) < 3) {
+        // eslint-disable-next-line
         this.video.currentTime = this.seekPosition
       } else {
+        // eslint-disable-next-line
         this.video.src = `${this.serverUrl}/api/watch/${this.watchId}?current_time=${this.seekPosition}`
         this.currentTimeOffset = this.seekPosition
       }
