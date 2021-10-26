@@ -1,5 +1,5 @@
 import { Context } from 'koa'
-import { Brackets, LessThan, MoreThan } from 'typeorm'
+import { Brackets, Like, LessThan, MoreThan } from 'typeorm'
 
 import Episode from '../models/Episode'
 import Movie from '../models/Movie'
@@ -80,4 +80,21 @@ export async function recentlyAdded (ctx: Context) {
   ]
 
   ctx.body = recentlyAdded.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+}
+
+function getMoviesByGenre (genre: string) {
+  return Movie.find({
+    where: {
+      genre: Like(`%${genre}%`),
+      watched: LessThan(95)
+    },
+    order: { createdAt: 'DESC' },
+    take: 10
+  })
+}
+
+export async function byGenre (ctx: Context) {
+  const { genre } = ctx.params
+
+  ctx.body = await getMoviesByGenre(genre)
 }

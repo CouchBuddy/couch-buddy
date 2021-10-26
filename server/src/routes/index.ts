@@ -29,6 +29,7 @@ router.get('/search', library.search)
 
 router.get('/collections/continue-watching', collections.continueWatching)
 router.get('/collections/recently-added', collections.recentlyAdded)
+router.get('/collections/by-genre/:genre', collections.byGenre)
 
 router.get('/watch/:id', streaming.watch)
 router.get('/watch/:id/metadata', streaming.getMetadata)
