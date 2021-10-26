@@ -114,6 +114,8 @@ export async function watch (ctx: Context, next: Next) {
 
     videoStream = new PassThrough()
 
+    ctx.assert(!Array.isArray(ctx.request.query.current_time), 400, 'current_time cannot be an array')
+
     ffmpeg(path)
       .withVideoCodec(isSupported.video ? 'copy' : 'libx264')
       .withAudioCodec(isSupported.audio ? 'copy' : 'aac')

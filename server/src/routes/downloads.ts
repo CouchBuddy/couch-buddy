@@ -12,6 +12,7 @@ export async function addTorrent (ctx: Context) {
   const torrentFile = ctx.request.files ? ctx.request.files.torrents : null
 
   ctx.assert(magnetURI || torrentFile, 400, 'You must provide the magnetURI field or upload a file')
+  ctx.assert(!Array.isArray(torrentFile), 400, 'Only 1 torrent file supported at once')
 
   // Torrent file has priority over magnetURI if both are present
   let torrentId: string
@@ -61,7 +62,7 @@ export async function removeTorrent (ctx: Context) {
   ctx.assert(torrent, 404, 'Torrent not found')
 
   try {
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       torrent.destroy((err) => {
         if (err) { return reject(err) }
         resolve()

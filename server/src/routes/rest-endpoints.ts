@@ -37,7 +37,9 @@ export const getResource = <T>(entity: { getRepository(): Repository<T> }): Midd
 export const listResource = <T>(entity: { getRepository(): Repository<T> }): Middleware =>
   async function (ctx: Context) {
     const pageSize = 30
-    const page = ctx.query.page ?? 1
+    const page = ctx.query.page && !Array.isArray(ctx.query.page)
+      ? parseInt(ctx.query.page)
+      : 1
 
     ctx.assert(page >= 1, 400, 'page argument must be >= 1')
 

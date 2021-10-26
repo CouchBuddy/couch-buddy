@@ -49,10 +49,12 @@ export const getLibrary = getResource(Movie)
 export const updateLibrary = updateResource(Movie)
 
 export async function findMovieInfo (ctx: Context) {
-  const title: string = ctx.request.query.title
-  const imdbId: string = ctx.request.query.imdbId
+  const title = ctx.request.query.title
+  const imdbId = ctx.request.query.imdbId
 
   ctx.assert(title || imdbId, 400, 'Param `title` or `imdbId` are required')
+  ctx.assert(!Array.isArray(title), 400, 'Param `title` cannot be an array')
+  ctx.assert(!Array.isArray(imdbId), 400, 'Param `imdbId` cannot be an array')
 
   ctx.status = 200
 
