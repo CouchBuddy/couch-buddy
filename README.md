@@ -133,6 +133,18 @@ npm run serve
 The top-level `package.json` just includes useful NPM scripts
 for running all the lower packages together (thanks to `npm-run-all`).
 
+### TypeORM
+
+Typeorm CLI should be run via the NPM script `typeorm`, to be able to load TS code `npm run typeorm`, see details [here](https://github.com/typeorm/typeorm/blob/master/docs/using-cli.md).
+
+#### Migrations
+
+To generate migrations run:
+
+```bash
+npm run typeorm migration:generate -n MigrationName
+```
+
 ## Test
 
 Run the full test suite:
