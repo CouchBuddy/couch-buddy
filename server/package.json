@@ -77,7 +77,7 @@
     "@types/koa-static": "^4.0.1",
     "@types/mime-types": "^2.1.0",
     "@types/mocha": "^7.0.2",
-    "@types/node": "^13.13.5",
+    "@types/node": "^16.11.6",
     "@types/npm": "^2.0.31",
     "@types/pumpify": "^1.4.1",
     "@types/socket.io": "^2.1.4",
