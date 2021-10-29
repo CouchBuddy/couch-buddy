@@ -67,7 +67,7 @@ export async function getDirectoryContent (dir: string, extensions?: string[]) {
 
       try {
         const isDirectory = (await fs.promises.lstat(fullPath)).isDirectory()
-        
+
         if (isDirectory) {
           await walkDir(fullPath, extensions)
         } else {

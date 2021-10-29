@@ -74,6 +74,8 @@ export default class Downloader extends Service {
   }
 
   destroy (): Promise<void> {
+    this.downloadsNs.removeAllListeners()
+
     return new Promise((resolve, reject) => {
       this.client.destroy((err) => {
         if (err) { return reject(err) }
