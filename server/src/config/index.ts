@@ -1,5 +1,6 @@
 import dotenv from 'dotenv'
 import fs from 'fs'
+import path from 'path'
 
 import AppConfig from './AppConfig'
 
@@ -20,6 +21,8 @@ if (fs.existsSync(envConfigFile)) {
 
 const config = new class Config extends AppConfig {
   nodeEnv = nodeEnv
+
+  uploadsDir = path.resolve(__dirname, '..', '..', 'uploads')
 
   dbSqlitePath = process.env.DB_SQLITE_PATH || 'db.sqlite'
 

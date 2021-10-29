@@ -7,6 +7,7 @@ import { Parser, DefaultParserResult, addDefaults } from 'parse-torrent-title'
 import srt2vtt from 'srt-to-vtt'
 import { container } from 'tsyringe'
 import { FindConditions, getConnection } from 'typeorm'
+import { nanoid } from 'nanoid'
 
 import config from '../config'
 import Episode from '../models/Episode'
@@ -97,19 +98,22 @@ export async function getDirectoryContent (dir: string, extensions?: string[]) {
   return directories
 }
 
-export function takeScreenshot (file: string): Promise<string> {
-  const folder = path.dirname(file)
-  const folderRelative = path.relative(config.mediaDir, folder)
-
+/**
+ * Take 1 frame out of a video file and save it to the disk
+ *
+ * @param videoFilePath the input video
+ * @returns the file path to the saved image
+ */
+function takeScreenshot (videoFilePath: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    ffmpeg(file)
+    ffmpeg(videoFilePath)
       .on('filenames', (filenames) => {
-        resolve(path.join(folderRelative, filenames[0]))
+        resolve(path.join(config.uploadsDir, filenames[0]))
       })
       .on('error', err => {
         reject(err)
       })
-      .screenshots({ count: 1, filename: '%b.png', folder })
+      .screenshots({ count: 1, filename: `${nanoid()}.png`, folder: config.uploadsDir })
   })
 }
 
@@ -174,8 +178,8 @@ export async function searchShowInfo (fileName: string): Promise<Movie | Episode
 /**
  * Add a single video file to the library, the video can be a movie or an episode.
  *
- * @param _fileName Path to a video file. The path can be absolute or relative,
- *   but in any case it must be included into `config.mediaDir`, if the path is absolute, the
+ * @param _fileName File path or URL of a video file. The path can be absolute or relative,
+ *   but in any case it must be included into the library root path. If the path is absolute, the
  *   relative path is calculated and stored in the DB.
  * @param movieTitle If not present, the filename will be used for searching movie info
  * @param _mimeType If not present, the mimetype will be derived from the filename
@@ -187,7 +191,7 @@ export async function searchShowInfo (fileName: string): Promise<Movie | Episode
  *   is invalid or it already exists in the library (and `force` is false) no DB operations are done and
  *   the return value is null.
  */
-export async function addFileToLibrary (_fileName: string, movieTitle?: string, _mimeType?: string, force = false): Promise<[number, string]> {
+export async function addFileToLibrary (libraryRoot: string, _fileName: string, movieTitle?: string, _mimeType?: string, force = false): Promise<[number, string]> {
   if (!_fileName) {
     console.error('fileName is null')
     return null
@@ -196,7 +200,7 @@ export async function addFileToLibrary (_fileName: string, movieTitle?: string, 
   const fileNameIsURL = isValidURL(_fileName)
 
   const fileName = !fileNameIsURL && path.isAbsolute(_fileName)
-    ? path.relative(config.mediaDir, _fileName)
+    ? path.relative(libraryRoot, _fileName)
     : _fileName
 
   const mimeType = _mimeType || mime.lookup(fileName)
@@ -257,7 +261,7 @@ export async function addFileToLibrary (_fileName: string, movieTitle?: string, 
 
       if (!fileNameIsURL) {
         try {
-          episode.thumbnail = await takeScreenshot(config.mediaDir + fileName)
+          episode.thumbnail = await takeScreenshot(path.resolve(libraryRoot, fileName))
         } catch (err) {
           console.warn(`Error taking screenshot for ${fileName}`, err)
         }
@@ -349,7 +353,7 @@ export async function scanDirectory (dir: string) {
         subtitles = []
       }
 
-      const result = await addFileToLibrary(path.join(dir, video.fileName))
+      const result = await addFileToLibrary(dir, video.fileName)
       if (!result) { continue }
 
       for (const subsFile of matchingSubtitles) {
@@ -400,16 +404,14 @@ export async function scanDirectory (dir: string) {
   console.log('matched', coupledSubs, allSubs)
 }
 
-export async function searchVideoFiles (libraryId: number): Promise<VideoItem[]> {
-  const library = await Library.findOne(libraryId)
-
-  if (library.path.startsWith('http')) {
-    const deviceInfo = await ssdpService.getDeviceInfo(library.path)
+export async function searchVideoFiles (libraryRoot: string): Promise<VideoItem[]> {
+  if (libraryRoot.startsWith('http')) {
+    const deviceInfo = await ssdpService.getDeviceInfo(libraryRoot)
     return await ssdpService.getDeviceVideoItems(deviceInfo)
   } else {
     const videoFilePaths = await new Promise<string[]>((resolve, reject) => {
       const options = {
-        cwd: library.path,
+        cwd: libraryRoot,
         matchBase: true,
         nocase: true,
         nodir: true

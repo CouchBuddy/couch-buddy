@@ -118,7 +118,7 @@ export default class Downloader extends Service {
 
   async onTorrentDone (torrent: Torrent) {
     if (torrent.files.length === 1) {
-      await addFileToLibrary(torrent.files[0].path)
+      await addFileToLibrary(config.mediaDir, torrent.files[0].path)
     } else {
       /**
        * If the torrent contains more files, they are organized into a folder,

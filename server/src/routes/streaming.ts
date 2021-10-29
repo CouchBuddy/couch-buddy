@@ -61,7 +61,10 @@ export async function watch (ctx: Context, next: Next) {
       where: {
         mediaId,
         mediaType
-      }
+      },
+      relations: [
+        'library'
+      ]
     })
   }
 
@@ -77,7 +80,7 @@ export async function watch (ctx: Context, next: Next) {
       return await next()
     }
 
-    path = config.mediaDir + mediaFile.fileName
+    path = mediaFile.getAbsolutePath()
     try {
       stat = fs.statSync(path)
     } catch (e) {
@@ -198,12 +201,12 @@ async function getVideoFilePath (ctx: Context): Promise<string> {
     })
     ctx.assert(mediaFile, 404, 'Media not found')
 
-    return mediaFile.fileName
+    return mediaFile.getAbsolutePath()
   }
 }
 
 export async function getMetadata (ctx: Context) {
   const filePath = await getVideoFilePath(ctx)
 
-  ctx.body = await ffprobe(config.mediaDir + filePath)
+  ctx.body = await ffprobe(filePath)
 }

@@ -10,6 +10,7 @@ export default class AppConfig {
   /**
    * Directory where media files are stored, the path is absolute
    */
+  readonly uploadsDir: string;
   readonly mediaDir: string;
   readonly omdbApiKey?: string;
   readonly openSubtitlesUa?: string;
