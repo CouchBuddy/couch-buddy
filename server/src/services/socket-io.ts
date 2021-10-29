@@ -1,4 +1,4 @@
-import socketIo from 'socket.io'
+import SocketIO from 'socket.io'
 import { singleton } from 'tsyringe'
 
 import server from './server'
@@ -10,16 +10,14 @@ export default class SocketIo extends Service {
 
   constructor () {
     super()
-    this.io = socketIo()
+    this.io = new SocketIO.Server({
+      serveClient: false,
+      transports: [ 'websocket' ]
+    })
   }
 
   async init (): Promise<void> {
     this.io.attach(server)
-
-    this.io.on('connection', client => {
-      client.on('event', () => { /* … */ })
-      client.on('disconnect', () => { /* … */ })
-    })
   }
 
   async destroy (): Promise<void> {

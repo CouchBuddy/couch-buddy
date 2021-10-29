@@ -1,11 +1,16 @@
 import axios from 'axios'
-import { Packet } from 'dns-packet'
+import { Buffer } from 'buffer'
+import dgram from 'dgram'
 import xml,{ X2jOptions } from 'fast-xml-parser'
 import he from 'he'
-import Mdns, { MulticastDns } from 'multicast-dns'
+import { Namespace } from 'socket.io'
+import { inject, singleton } from 'tsyringe'
 import { URL } from 'url'
 
-import Service from './Service'
+import SSDPResponse from './SsdpResponse'
+import Service from '../Service'
+import SocketIoService from '../socket-io'
+import { ensureTrailingSlash } from '../../utils'
 
 interface VideoItem {
   externalId: string | number
@@ -15,6 +20,13 @@ interface VideoItem {
   duration?: string
   resolution?: string
   mimeType?: string
+}
+
+interface DeviceInfo {
+  id: string
+  name: string
+  baseURL: string
+  contentDirectory: any
 }
 
 const XML_PARSER_OPTS: Partial<X2jOptions> = {
@@ -29,58 +41,97 @@ const RE_PROTOCOL_INFO = /:\*:(.+):\*$/
 const UPNP_CONTAINERS = [ 'object.container', 'object.container.storageFolder', 'object.container.videoContainer']
 const UPNP_VIDEO_ITEMS = [ 'object.item.videoItem', 'object.item.videoItem.movie' ]
 
+@singleton()
 export default class Discovery extends Service {
-  mdns: MulticastDns;
+  devices: { [usn: string]: DeviceInfo } = {}
+
+  private client: dgram.Socket
+  private socketIo: Namespace
+
+  constructor (@inject(SocketIoService) socketIoService: SocketIoService) {
+    super()
+    this.socketIo = socketIoService.io.of('/ssdp')
+  }
 
   async init (): Promise<void> {
-    this.mdns = Mdns({ loopback: false })
+    this.socketIo.on('connection', (socket) => {
+      socket.emit('devices:all', this.devices)
+    })
 
-    this.mdns.on('response', this.responseHandler)
+    this.scan()
   }
 
   async destroy (): Promise<void> {
-    return new Promise((resolve, reject) =>
-      this.mdns.destroy((err) => {
-        if (err) { return reject(err) }
-        resolve()
+    this.socketIo.removeAllListeners()
+
+    if (this.client) {
+      return new Promise((resolve) => {
+        this.client.close(resolve)
       })
-    )
+    }
   }
 
   scan () {
-    console.log('Scan started')
+    this.client = dgram.createSocket('udp4')
 
-    this.mdns.query({
-      questions:[{
-        name: '_services._dns-sd._udp',
-        type: 'PTR'
-      }]
-    }, (e) => {
-      if (e) {
-        console.log('Error sending query', e)
-      }
+    const messageLines = [
+      'M-SEARCH * HTTP/1.1',
+      'HOST:239.255.255.250:1900',
+      'ST:upnp:rootdevice',
+      'MX:2',
+      'MAN:"ssdp:discover"'
+    ]
+    const message = Buffer.from(messageLines.join('\r\n') + '\r\n')
+
+    this.client.send(message, 1900, '239.255.255.250')
+
+    this.client.on('message', async (msg) => {
+      const response = new SSDPResponse(msg.toString())
+
+      try {
+        const deviceInfo = await this.getDeviceInfo(response.getHeader('Location'))
+
+        if (deviceInfo.contentDirectory) {
+          this.socketIo.emit('devices:new', deviceInfo)
+          this.devices[response.getHeader('USN')] = deviceInfo
+        }
+      } catch {}
     })
   }
 
-  async parseDevice (url: string): Promise<VideoItem[]> {
+  private async getDeviceInfo (url: string): Promise<DeviceInfo> {
     const response = await axios.get(url)
     const deviceDescription = xml.parse(response.data, XML_PARSER_OPTS)
 
     const u = new URL(url)
-    const baseURL: string = deviceDescription.root.URLBase || `${u.protocol}//${u.host}`
+    /**
+     * Service base URL, it's always with a trailing slash
+     */
+    const baseURL: string = ensureTrailingSlash(deviceDescription.root.URLBase || `${u.protocol}//${u.host}`)
 
     const contentDirectory = deviceDescription.root.device.serviceList.service
       .find((service: any) => service.serviceType === 'urn:schemas-upnp-org:service:ContentDirectory:1')
 
-    if (!contentDirectory) {
-      console.error('This device doesn\'t have a ContentDirectory')
-      return []
+    return {
+      id: deviceDescription.root.device.UDN,
+      name: deviceDescription.root.device.friendlyName,
+      baseURL,
+      contentDirectory
     }
+  }
 
-    const controlURL: string = baseURL + contentDirectory.controlURL
+  async getDeviceVideoItems (device: DeviceInfo): Promise<VideoItem[]> {
+    const controlURL = device.baseURL + device.contentDirectory.controlURL
+    const scpdURL = device.baseURL + device.contentDirectory.SCPDURL
 
     try {
-      const service = xml.parse((await axios.get(baseURL + contentDirectory.SCPDURL)).data, XML_PARSER_OPTS)
+      console.log('GET', scpdURL)
+      const service = xml.parse((await axios.get(scpdURL)).data, XML_PARSER_OPTS)
+
+      if (!service.scpd) {
+        console.error('This device doesnt have an scpd', service)
+        return []
+      }
 
       const hasBrowseAction = service.scpd.actionList.action.find((action: any) => action.name === 'Browse')
       if (!hasBrowseAction) {
@@ -109,7 +160,7 @@ export default class Discovery extends Service {
    * @param objectId The object ID of the directory where to start the scan. If none is
    *  provided, it starts from root.
    */
-  async searchVideoItems (controlURL: string, objectId = '0'): Promise<VideoItem[]> {
+  private async searchVideoItems (controlURL: string, objectId = '0'): Promise<VideoItem[]> {
     let videos: VideoItem[] = []
     const dirContent = await this.actionBrowseDirectory(controlURL, objectId)
 
@@ -139,7 +190,7 @@ export default class Discovery extends Service {
     return videos
   }
 
-  async actionBrowseDirectory (controlURL: string, objectId: string): Promise<any> {
+  private async actionBrowseDirectory (controlURL: string, objectId: string): Promise<any> {
     const response = await this.sendSOAPRequest(controlURL, 'ContentDirectory:1', 'Browse', {
       ObjectID: objectId,
       BrowseFlag: 'BrowseDirectChildren',
@@ -152,7 +203,7 @@ export default class Discovery extends Service {
     return xml.parse(response.Result, XML_PARSER_OPTS)['DIDL-Lite']
   }
 
-  videoItemToObject (item: any) {
+  private videoItemToObject (item: any) {
     const m = item.res['@_protocolInfo'].match(RE_PROTOCOL_INFO)
     const mimeType = (m && m[1] && m[1] !== '*') ? m[1] : undefined
 
@@ -167,7 +218,7 @@ export default class Discovery extends Service {
     }
   }
 
-  async sendSOAPRequest (controlURL: string, type: string, action: string, args: any) {
+  private async sendSOAPRequest (controlURL: string, type: string, action: string, args: any) {
     const argsXml = Object.entries(args).map(([ k, v ]) => `<${k}>${v}</${k}>`)
 
     const data = `<s:Envelope
@@ -192,12 +243,6 @@ export default class Discovery extends Service {
       return xml.parse(response.data, XML_PARSER_OPTS)['s:Envelope']['s:Body'][`u:${action}Response`]
     } catch (e) {
       console.error('Error sending SOAP request', e)
-    }
-  }
-
-  responseHandler (query: Packet) {
-    for (const answer of query.answers) {
-      console.log('<A>', answer)
     }
   }
 }

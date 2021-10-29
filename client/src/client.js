@@ -1,5 +1,5 @@
 import axios from 'axios'
-import io from '../../server/node_modules/socket.io-client'
+import { io } from 'socket.io-client'
 
 const client = axios.create({
   baseURL: `${location.protocol}//${location.hostname}:3000`
@@ -8,7 +8,7 @@ const client = axios.create({
 export default client
 
 export function getSocket (ns = '') {
-  return io(`${location.protocol}//${location.hostname}:3000${ns}`)
+  return io(`${location.protocol}//${location.hostname}:3000${ns}`, { transports: [ 'websocket' ] })
 }
 
 export async function addTorrent (magnetURI) {
