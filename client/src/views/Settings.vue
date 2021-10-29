@@ -32,16 +32,34 @@
 
     <div class="mb-8">
       <h2 class="text-2xl mb-4">
-        Library
+        Libraries
       </h2>
 
-      <x-btn
-        bordered
-        :disabled="scanningLibrary"
-        @click="scanLibrary()"
+      <div
+        v-for="lib in libraries"
+        :key="lib.id"
       >
-        {{ scanningLibrary ? 'Scanning...' : 'Scan Library' }}
-      </x-btn>
+        <div class="flex">
+          <div class="flex-grow">
+            <div>{{ lib.name }}</div>
+            <div>{{ lib.path }}</div>
+          </div>
+
+          <div>
+            <x-btn
+              bordered
+              :disabled="scanningLibrary"
+              @click="scanLibrary(lib.id)"
+            >
+              {{ scanningLibrary ? 'Scanning...' : 'Scan' }}
+            </x-btn>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <edit-library-dialog />
+      </div>
     </div>
 
     <div class="mb-8">
@@ -71,13 +89,18 @@
 import { mapState } from 'vuex'
 
 import client from '@/client'
+import EditLibraryDialog from '@/components/EditLibraryDialog'
 
 export default {
+  components: {
+    EditLibraryDialog
+  },
   data: () => ({
     extensionError: null,
     extensionInstalling: false,
     extensionName: null,
     extensions: [],
+    libraries: [],
     scanningLibrary: false
   }),
   computed: {
@@ -85,12 +108,13 @@ export default {
   },
   async mounted () {
     this.extensions = (await client.get('/api/extensions')).data
+    this.libraries = (await client.get('/api/libraries')).data
   },
   methods: {
-    async scanLibrary () {
+    async scanLibrary (libraryId) {
       try {
         this.scanningLibrary = true
-        await client.post('/api/library/scan')
+        await client.post(`/api/library/scan/${libraryId}`)
       } finally {
         this.scanningLibrary = false
       }

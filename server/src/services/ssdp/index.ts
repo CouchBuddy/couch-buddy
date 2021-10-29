@@ -11,20 +11,12 @@ import SSDPResponse from './SsdpResponse'
 import Service from '../Service'
 import SocketIoService from '../socket-io'
 import { ensureTrailingSlash } from '../../utils'
-
-interface VideoItem {
-  externalId: string | number
-  title: string
-  url: string
-  size?: number
-  duration?: string
-  resolution?: string
-  mimeType?: string
-}
+import { VideoItem } from '../../types'
 
 interface DeviceInfo {
   id: string
   name: string
+  location: string
   baseURL: string
   contentDirectory: any
 }
@@ -87,19 +79,20 @@ export default class Discovery extends Service {
 
     this.client.on('message', async (msg) => {
       const response = new SSDPResponse(msg.toString())
+      console.log('Device found', response.headers)
 
       try {
         const deviceInfo = await this.getDeviceInfo(response.getHeader('Location'))
 
         if (deviceInfo.contentDirectory) {
           this.socketIo.emit('devices:new', deviceInfo)
-          this.devices[response.getHeader('USN')] = deviceInfo
+          this.devices[deviceInfo.id] = deviceInfo
         }
       } catch {}
     })
   }
 
-  private async getDeviceInfo (url: string): Promise<DeviceInfo> {
+  async getDeviceInfo (url: string): Promise<DeviceInfo> {
     const response = await axios.get(url)
     const deviceDescription = xml.parse(response.data, XML_PARSER_OPTS)
 
@@ -115,6 +108,7 @@ export default class Discovery extends Service {
     return {
       id: deviceDescription.root.device.UDN,
       name: deviceDescription.root.device.friendlyName,
+      location: url,
       baseURL,
       contentDirectory
     }

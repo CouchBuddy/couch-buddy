@@ -2,7 +2,6 @@ import dotenv from 'dotenv'
 import fs from 'fs'
 
 import AppConfig from './AppConfig'
-import { ensureTrailingSlash } from '../utils'
 
 const nodeEnv = process.env.NODE_ENV || 'development'
 console.log(`NODE_ENV=${nodeEnv}`)
@@ -23,8 +22,6 @@ const config = new class Config extends AppConfig {
   nodeEnv = nodeEnv
 
   dbSqlitePath = process.env.DB_SQLITE_PATH || 'db.sqlite'
-
-  mediaDir = ensureTrailingSlash(process.env.MEDIA_DIR)
 
   omdbApiKey = process.env.OMDB_API_KEY
 

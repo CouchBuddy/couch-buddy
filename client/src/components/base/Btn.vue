@@ -6,7 +6,9 @@
     :class="[{
       'border-2 border-white disabled:border-gray-600': bordered,
       'rounded-full': icon && !$slots.default && !tile,
-      'px-4 py-2': $slots.default
+      'px-4 py-2': $slots.default,
+      [`bg-${color}`]: color && !bordered,
+      [`border-${color} text-${color}`]: color && bordered
     }, size]"
     v-on="$listeners"
   >
@@ -32,6 +34,11 @@ export default {
     bordered: {
       type: Boolean,
       default: false
+    },
+    color: {
+      type: String,
+      required: false,
+      default: null
     },
     icon: {
       type: String,

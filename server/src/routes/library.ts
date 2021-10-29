@@ -9,15 +9,17 @@ import { addFileToLibrary, searchVideoFiles } from '../services/library'
 import { getMovieById, searchMovie } from '../services/tmdb'
 
 export async function scanLibrary (ctx: Context) {
+  const libraryId = parseInt(ctx.params.id)
+
   // Scan directory to search video files
-  const videos = await searchVideoFiles(config.mediaDir)
-  console.log(`Found ${videos.length} video files in ${config.mediaDir}`)
+  const videos = await searchVideoFiles(libraryId)
+  console.log(`Found ${videos.length} video files`)
 
   const added: string[] = []
 
-  for (const fileName of videos) {
-    if (await addFileToLibrary(fileName)) {
-      added.push(fileName)
+  for (const video of videos) {
+    if (await addFileToLibrary(video.url, video.title, video.mimeType)) {
+      added.push(video.title)
     }
   }
 

@@ -5,15 +5,19 @@ import mime from 'mime-types'
 import path from 'path'
 import { Parser, DefaultParserResult, addDefaults } from 'parse-torrent-title'
 import srt2vtt from 'srt-to-vtt'
+import { container } from 'tsyringe'
 import { FindConditions, getConnection } from 'typeorm'
 
 import config from '../config'
 import Episode from '../models/Episode'
+import Library from '../models/Library'
 import MediaFile from '../models/MediaFile'
 import Movie from '../models/Movie'
 import SubtitlesFile from '../models/SubtitlesFile'
 import * as movieInfoProvider from './tmdb'
 import { isValidURL, removeFileExtension } from '../utils'
+import SSDP from '../services/ssdp'
+import { VideoItem } from '../types'
 
 interface ParserResult extends DefaultParserResult {
   part?: number;
@@ -27,6 +31,8 @@ interface DirectoryContent {
 // Define files extensions by content type
 const EXTENSIONS_SUBTITLES = [ 'srt', 'vtt' ]
 const EXTENSIONS_VIDEOS = [ 'mp4', 'mkv', 'avi' ]
+
+const ssdpService = container.resolve(SSDP)
 
 const ptt = new Parser<ParserResult>()
 addDefaults(ptt)
@@ -394,21 +400,32 @@ export async function scanDirectory (dir: string) {
   console.log('matched', coupledSubs, allSubs)
 }
 
-export function searchVideoFiles (dir: string): Promise<string[]> {
-  return new Promise((resolve, reject) => {
-    const options = {
-      cwd: dir,
-      matchBase: true,
-      nocase: true,
-      nodir: true
-    }
+export async function searchVideoFiles (libraryId: number): Promise<VideoItem[]> {
+  const library = await Library.findOne(libraryId)
 
-    glob('**/*.{mp4,mkv,avi}', options, (err, files) => {
-      if (err) {
-        reject(err)
+  if (library.path.startsWith('http')) {
+    const deviceInfo = await ssdpService.getDeviceInfo(library.path)
+    return await ssdpService.getDeviceVideoItems(deviceInfo)
+  } else {
+    const videoFilePaths = await new Promise<string[]>((resolve, reject) => {
+      const options = {
+        cwd: library.path,
+        matchBase: true,
+        nocase: true,
+        nodir: true
       }
 
-      resolve(files)
+      glob('**/*.{mp4,mkv,avi}', options, (err, files) => {
+        if (err) {
+          reject(err)
+        }
+
+        resolve(files)
+      })
     })
-  })
+
+    return videoFilePaths.map(path => ({
+      url: path
+    }))
+  }
 }
