@@ -50,6 +50,25 @@ export const listResource = <T>(entity: { getRepository(): Repository<T> }): Mid
   }
 
 /**
+ * Create a resource
+ *
+ * @param repository Get the entity repository calling `.getRepository()` on the class
+ */
+ export const createResource = <T>(entity: { getRepository(): Repository<T> }): Middleware =>
+ async function (ctx: Context) {
+   try {
+     const result = await entity.getRepository().insert(ctx.request.body)
+     const insertedId = result.identifiers[0]
+
+     ctx.status = 201
+     ctx.body = { ...ctx.request.body, id: insertedId }
+   } catch (e) {
+     ctx.status = 400
+     ctx.body = e.message
+   }
+ }
+
+/**
  * Update a resource by its ID
  *
  * @param repository Get the entity repository calling `.getRepository()` on the class

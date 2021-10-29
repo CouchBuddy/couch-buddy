@@ -3,6 +3,7 @@ import KoaRouter from '@koa/router'
 import * as downloads from './downloads'
 import * as explore from './explore'
 import * as extensions from './extensions'
+import * as libraries from './libraries'
 import * as library from './library'
 import * as collections from './media-collections'
 import * as streaming from './streaming'
@@ -15,6 +16,11 @@ router.get('/system', system.getSystemInfo)
 
 router.get('/extensions', extensions.listExtensions)
 router.post('/extensions', extensions.install)
+
+router.get('/libraries/:id', libraries.getLibrary)
+router.get('/libraries', libraries.listLibraries)
+router.post('/libraries', libraries.createLibraries)
+router.patch('/libraries/:id', libraries.updateLibrary)
 
 router.get('/library/find-info', library.findMovieInfo)
 router.get('/library', library.listLibrary)

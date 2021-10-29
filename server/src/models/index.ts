@@ -4,6 +4,7 @@ import config from '../config'
 import Download from './Download'
 import Episode from './Episode'
 import Extention from './Extension'
+import Library from './Library'
 import MediaFile from './MediaFile'
 import Movie from './Movie'
 import Subtitles from './SubtitlesFile'
@@ -17,6 +18,7 @@ export async function init () {
       Download,
       Episode,
       Extention,
+      Library,
       MediaFile,
       Movie,
       Subtitles
