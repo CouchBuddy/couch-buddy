@@ -33,13 +33,6 @@ export async function scanLibrary (ctx: Context) {
 export async function search (ctx: Context) {
   ctx.assert(ctx.request.query.search, 400, 'search cannot be empty')
 
-  // Search movies with SQLite FTS5 MATCH operator
-  // const query = `SELECT movies.* FROM movies_fts
-  // INNER JOIN movies ON movies_fts.ID = movies.ID
-  // WHERE movies_fts
-  // MATCH '-ID:${ctx.request.query.search}'
-  // ORDER BY rank`
-
   const results: Movie[] = await Movie.getRepository()
     .createQueryBuilder('movies')
     .innerJoin('movies_fts', 'movies_fts', 'movies_fts.ID = movies.ID')
