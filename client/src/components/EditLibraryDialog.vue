@@ -83,6 +83,7 @@ export default {
     async save () {
       await client.post('/api/libraries', { name: this.name, path: this.path })
       this.dialogOpen = false
+      this.$emit('update')
     },
     getURLHostname (url) {
       return new URL(url).hostname

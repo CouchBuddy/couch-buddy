@@ -44,7 +44,7 @@
       </div>
 
       <div>
-        <edit-library-dialog />
+        <edit-library-dialog @update="fetchLibraries" />
       </div>
     </div>
 
@@ -94,9 +94,12 @@ export default {
   },
   async mounted () {
     this.extensions = (await client.get('/api/extensions')).data
-    this.libraries = (await client.get('/api/libraries')).data
+    this.fetchLibraries()
   },
   methods: {
+    async fetchLibraries () {
+      this.libraries = (await client.get('/api/libraries')).data
+    },
     async scanLibrary (libraryId) {
       try {
         this.scanningLibrary = true
