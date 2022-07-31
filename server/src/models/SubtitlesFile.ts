@@ -5,12 +5,20 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
 
+import Library from './Library';
+
 @Entity('subtitles_files')
 export default class SubtitlesFile extends BaseEntity {
+  @Column({
+    default: false
+  })
+  downloaded: boolean;
+
   @Column({
     nullable: false
   })
@@ -25,6 +33,9 @@ export default class SubtitlesFile extends BaseEntity {
   get langName () {
     return ISO6391.getName(this.lang)
   }
+
+  @ManyToOne(() => Library)
+  library: Library;
 
   @Column({
     nullable: false

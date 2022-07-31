@@ -35,11 +35,19 @@ export async function getSubtitles (ctx: Context) {
   const id = parseInt(ctx.params.id)
   ctx.assert(id >= 1, 400, 'Invalid ID')
 
-  const subtitles = await SubtitlesFile.findOne(id)
+  const subtitles = await SubtitlesFile.findOne(id, {
+    relations: [
+      'library'
+    ]
+  })
 
   ctx.assert(subtitles, 404)
 
-  await sendFile(ctx, subtitles.fileName, { root: config.mediaDir })
+  const fileBaseDir = subtitles.downloaded
+    ? config.uploadsDir
+    : subtitles.library.path
+
+  await sendFile(ctx, subtitles.fileName, { root: fileBaseDir })
 }
 
 export async function downloadSubtitles (ctx: Context) {
@@ -62,7 +70,10 @@ export async function downloadSubtitles (ctx: Context) {
     where: {
       mediaId,
       mediaType
-    }
+    },
+    relations: [
+      'library'
+    ]
   })
 
   ctx.assert(mediaFile, 404, 'Media not found')
@@ -101,7 +112,7 @@ export async function downloadSubtitles (ctx: Context) {
     // Search subtitles using movie hash
     result = await osClient.search({
       sublanguageid: sublanguageId,
-      path: config.mediaDir + mediaFile.fileName
+      path: mediaFile.getAbsolutePath(),
     })
   }
 
@@ -125,11 +136,13 @@ export async function downloadSubtitles (ctx: Context) {
     return
   }
 
-  // Find subtitles filename with several strategies
-  // 1. name of the downloaded file as in HTTP headers
-  // 2. from the OS API
-  // 3. use name of the video file
-  let fileName
+  /**
+   * Subtitles filename obtained via several strategies:
+   * 1. name of the downloaded file as in HTTP headers
+   * 2. from the OS API
+   * 3. use name of the video file
+   */
+  let fileName: string
 
   if (response.headers['Content-Disposition']) {
     const m = response.headers['Content-Disposition'].match(/filename="(.*)"/)
@@ -150,19 +163,18 @@ export async function downloadSubtitles (ctx: Context) {
     stream = stream.pipe(srt2vtt())
   }
 
-  const mediaFileDir = path.dirname(mediaFile.fileName)
-
   await stream.pipe(
     fs.createWriteStream(
       // Save subtitles in video file directory
-      path.join(config.mediaDir, mediaFileDir, fileName)
+      path.join(config.uploadsDir, fileName)
     )
   )
 
   ctx.body = await SubtitlesFile.create({
-    fileName: path.join(mediaFileDir, fileName),
+    fileName,
     lang,
     mediaId,
-    mediaType
+    mediaType,
+    downloaded: true,
   }).save()
 }

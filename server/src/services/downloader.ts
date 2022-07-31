@@ -6,9 +6,9 @@ import { inject, singleton } from 'tsyringe'
 import WebTorrent, { Torrent, TorrentOptions } from 'webtorrent'
 import TorrentParser from 'parse-torrent'
 
-import config from '../config'
 import Download from '../models/Download'
-import { addFileToLibrary, parseFileName, scanDirectory } from './library'
+import Library from '../models/Library'
+import { addFileToLibrary, parseFileName, scanLibraryWithSubtitles } from './library'
 import Service from './Service'
 import SocketIoService from './socket-io'
 
@@ -33,6 +33,7 @@ export function serializeTorrent (t: Torrent) {
 export default class Downloader extends Service {
   client: WebTorrent.Instance;
   downloadsNs: Namespace;
+  library: Library;
   socketIo: SocketIoService;
 
   constructor (@inject(SocketIoService) socketIoService: SocketIoService) {
@@ -42,6 +43,8 @@ export default class Downloader extends Service {
 
   async init () {
     this.client = new WebTorrent()
+
+    this.library = await Library.findOne()
 
     const downloads = await Download.find({
       where: { done: false }
@@ -91,7 +94,7 @@ export default class Downloader extends Service {
    * @param torrentId A Magnet URI or a path to a torrent file
    */
   async addTorrent (torrentId: string): Promise<Torrent> {
-    const stats = await fs.stat(config.mediaDir)
+    const stats = await fs.stat(this.library.path)
 
     if (!stats.isDirectory()) {
       throw new Error('Media directory is not available')
@@ -103,7 +106,7 @@ export default class Downloader extends Service {
       throw new Error(`Torrent ${t.infoHash} already exists`)
     }
 
-    const opts: TorrentOptions = { path: config.mediaDir }
+    const opts: TorrentOptions = { path: this.library.path }
 
     return await new Promise<Torrent>((resolve) => {
       this.client.add(torrentId, opts, (torrent) => {
@@ -118,7 +121,7 @@ export default class Downloader extends Service {
 
   async onTorrentDone (torrent: Torrent) {
     if (torrent.files.length === 1) {
-      await addFileToLibrary(config.mediaDir, torrent.files[0].path)
+      await addFileToLibrary(this.library, torrent.files[0].path)
     } else {
       /**
        * If the torrent contains more files, they are organized into a folder,
@@ -127,7 +130,7 @@ export default class Downloader extends Service {
        * `[ 'dir/file.mp4', 'dir/subs.srt' ]`
        */
       const torrentDir = torrent.files[0].path.split(path.sep)[0]
-      await scanDirectory(path.join(config.mediaDir, torrentDir))
+      await scanLibraryWithSubtitles(this.library)
     }
 
     const download = await Download.findOne({ infoHash: torrent.infoHash })

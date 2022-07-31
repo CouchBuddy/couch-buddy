@@ -108,7 +108,7 @@ function takeScreenshot (videoFilePath: string): Promise<string> {
   return new Promise((resolve, reject) => {
     ffmpeg(videoFilePath)
       .on('filenames', (filenames) => {
-        resolve(path.join(config.uploadsDir, filenames[0]))
+        resolve(filenames[0])
       })
       .on('error', err => {
         reject(err)
@@ -317,10 +317,10 @@ export async function addFileToLibrary (library: Library, _fileName: string, mov
  * so it can match videos and subtitles, whereas `addFileToLibrary()`
  * just add video files to the library.
  *
- * @param dir absolute path to a directory
+ * @param library the library object to scan
  */
-export async function scanDirectory (dir: string) {
-  const directories = await getDirectoryContent(dir)
+export async function scanLibraryWithSubtitles (library: Library) {
+  const directories = await getDirectoryContent(library.path)
 
   let allSubs = 0
   let coupledSubs = 0
@@ -354,7 +354,7 @@ export async function scanDirectory (dir: string) {
         subtitles = []
       }
 
-      const result = await addFileToLibrary(dir, video.fileName)
+      const result = await addFileToLibrary(library, video.fileName)
       if (!result) { continue }
 
       for (const subsFile of matchingSubtitles) {
@@ -386,7 +386,7 @@ export async function scanDirectory (dir: string) {
         }
 
         const subs = new SubtitlesFile()
-        subs.fileName = path.relative(config.mediaDir, subsFile.fileName)
+        subs.fileName = path.relative(library.path, subsFile.fileName)
         subs.mediaId = id
         subs.mediaType = type
         subs.lang = lang
