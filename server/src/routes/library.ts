@@ -7,27 +7,18 @@ import config from '../config'
 import Episode from '../models/Episode'
 import Movie from '../models/Movie'
 import { getResource, listResource, updateResource } from './rest-endpoints'
-import { addFileToLibrary, searchVideoFiles } from '../services/library'
+import { scanLibraryWithSubtitles } from '../services/library'
 import { getMovieById, searchMovie } from '../services/tmdb'
 import Library from '../models/Library'
 
 export async function scanLibrary (ctx: Context) {
   const libraryId = parseInt(ctx.params.id)
   const library = await Library.findOne(libraryId)
+  ctx.assert(library, 404, `Library with ID ${libraryId} not found`)
 
-  // Scan directory to search video files
-  const videos = await searchVideoFiles(library.path)
-  console.log(`Found ${videos.length} video files`)
+  await scanLibraryWithSubtitles(library)
 
-  const added: string[] = []
-
-  for (const video of videos) {
-    if (await addFileToLibrary(library, video.url, video.title, video.mimeType)) {
-      added.push(video.title)
-    }
-  }
-
-  ctx.body = added
+  ctx.status = 204
 }
 
 export async function search (ctx: Context) {

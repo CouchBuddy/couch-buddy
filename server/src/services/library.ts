@@ -56,7 +56,7 @@ ptt.addHandler('language', /\.([a-z]{2})\.[a-z]{3,4}$/i)
  * @param extensions an array of file extensions to fiter the directory content,
  *   i.e.: `[ 'mp4', 'srt' ]`
  */
-export async function getDirectoryContent (dir: string, extensions?: string[]) {
+async function getDirectoryContent (dir: string, extensions?: string[]) {
   const directories: { [dir: string]: DirectoryContent } = {}
 
   const walkDir = async function (dir: string, extensions?: string[]) {
@@ -403,32 +403,4 @@ export async function scanLibraryWithSubtitles (library: Library) {
   }
 
   console.log('matched', coupledSubs, allSubs)
-}
-
-export async function searchVideoFiles (libraryRoot: string): Promise<VideoItem[]> {
-  if (libraryRoot.startsWith('http')) {
-    const deviceInfo = await ssdpService.getDeviceInfo(libraryRoot)
-    return await ssdpService.getDeviceVideoItems(deviceInfo)
-  } else {
-    const videoFilePaths = await new Promise<string[]>((resolve, reject) => {
-      const options = {
-        cwd: libraryRoot,
-        matchBase: true,
-        nocase: true,
-        nodir: true
-      }
-
-      glob('**/*.{mp4,mkv,avi}', options, (err, files) => {
-        if (err) {
-          reject(err)
-        }
-
-        resolve(files)
-      })
-    })
-
-    return videoFilePaths.map(path => ({
-      url: path
-    }))
-  }
 }
