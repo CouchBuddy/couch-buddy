@@ -57,27 +57,15 @@ export async function recentlyAdded (ctx: Context) {
   const oneWeekAgo = new Date()
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
 
-  const recentlyAdded: (Movie | Episode)[] = [
-    ...await Movie.find({
-      where: {
-        type: 'movie',
-        createdAt: MoreThan(oneWeekAgo),
-        watched: LessThan(95)
-      },
-      order: { createdAt: 'DESC' },
-      take: 10
-    }),
-
-    ...await Episode.find({
-      where: {
-        createdAt: MoreThan(oneWeekAgo),
-        watched: LessThan(95)
-      },
-      order: { createdAt: 'DESC' },
-      take: 10,
-      relations: [ 'movie' ]
-    })
-  ]
+  const recentlyAdded = await Movie.find({
+    where: {
+      type: 'movie',
+      createdAt: MoreThan(oneWeekAgo),
+      watched: LessThan(95)
+    },
+    order: { createdAt: 'DESC' },
+    take: 10
+  })
 
   ctx.body = recentlyAdded.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
 }
