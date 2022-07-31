@@ -197,7 +197,10 @@ async function getVideoFilePath (ctx: Context): Promise<string> {
       where: {
         mediaId,
         mediaType
-      }
+      },
+      relations: [
+        'library'
+      ]
     })
     ctx.assert(mediaFile, 404, 'Media not found')
 
