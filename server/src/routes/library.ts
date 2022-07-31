@@ -1,3 +1,5 @@
+import path from 'path'
+
 import { Context } from 'koa'
 import sendFile from 'koa-send'
 
@@ -90,5 +92,5 @@ export async function getEpisodeThumbnail (ctx: Context) {
 
   ctx.assert(episode, 404)
 
-  await sendFile(ctx, episode.thumbnail, { root: config.uploadsDir })
+  await sendFile(ctx, path.relative(config.uploadsDir, episode.thumbnail), { root: config.uploadsDir })
 }
