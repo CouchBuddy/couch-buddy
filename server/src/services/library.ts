@@ -191,7 +191,7 @@ export async function searchShowInfo (fileName: string): Promise<Movie | Episode
  *   is invalid or it already exists in the library (and `force` is false) no DB operations are done and
  *   the return value is null.
  */
-export async function addFileToLibrary (libraryRoot: string, _fileName: string, movieTitle?: string, _mimeType?: string, force = false): Promise<[number, string]> {
+export async function addFileToLibrary (library: Library, _fileName: string, movieTitle?: string, _mimeType?: string, force = false): Promise<[number, string]> {
   if (!_fileName) {
     console.error('fileName is null')
     return null
@@ -200,7 +200,7 @@ export async function addFileToLibrary (libraryRoot: string, _fileName: string, 
   const fileNameIsURL = isValidURL(_fileName)
 
   const fileName = !fileNameIsURL && path.isAbsolute(_fileName)
-    ? path.relative(libraryRoot, _fileName)
+    ? path.relative(library.path, _fileName)
     : _fileName
 
   const mimeType = _mimeType || mime.lookup(fileName)
@@ -261,7 +261,7 @@ export async function addFileToLibrary (libraryRoot: string, _fileName: string, 
 
       if (!fileNameIsURL) {
         try {
-          episode.thumbnail = await takeScreenshot(path.resolve(libraryRoot, fileName))
+          episode.thumbnail = await takeScreenshot(path.resolve(library.path, fileName))
         } catch (err) {
           console.warn(`Error taking screenshot for ${fileName}`, err)
         }
@@ -295,6 +295,7 @@ export async function addFileToLibrary (libraryRoot: string, _fileName: string, 
 
     if (!existingFile) {
       await transaction.save(MediaFile.create({
+        library,
         fileName,
         mediaId,
         mediaType: isEpisode ? 'episode' : 'movie',

@@ -1,12 +1,15 @@
 import { IsMimeType, IsIn, Min } from 'class-validator'
+import path from 'path';
 import {
   BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
+import Library from './Library'
 
 @Entity('media_files')
 export default class MediaFile extends BaseEntity {
@@ -14,6 +17,9 @@ export default class MediaFile extends BaseEntity {
     nullable: false
   })
   fileName: string;
+
+  @ManyToOne(() => Library)
+  library: Library;
 
   @Column({
     nullable: false
@@ -46,4 +52,12 @@ export default class MediaFile extends BaseEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  getAbsolutePath () {
+    if (this.fileName.startsWith('http')) {
+      return this.fileName
+    } else {
+      return path.join(this.library.path, this.fileName)
+    }
+  }
 }

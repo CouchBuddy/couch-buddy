@@ -7,18 +7,20 @@ import Movie from '../models/Movie'
 import { getResource, listResource, updateResource } from './rest-endpoints'
 import { addFileToLibrary, searchVideoFiles } from '../services/library'
 import { getMovieById, searchMovie } from '../services/tmdb'
+import Library from '../models/Library'
 
 export async function scanLibrary (ctx: Context) {
   const libraryId = parseInt(ctx.params.id)
+  const library = await Library.findOne(libraryId)
 
   // Scan directory to search video files
-  const videos = await searchVideoFiles(libraryId)
+  const videos = await searchVideoFiles(library.path)
   console.log(`Found ${videos.length} video files`)
 
   const added: string[] = []
 
   for (const video of videos) {
-    if (await addFileToLibrary(video.url, video.title, video.mimeType)) {
+    if (await addFileToLibrary(library, video.url, video.title, video.mimeType)) {
       added.push(video.title)
     }
   }
@@ -88,5 +90,5 @@ export async function getEpisodeThumbnail (ctx: Context) {
 
   ctx.assert(episode, 404)
 
-  await sendFile(ctx, episode.thumbnail, { root: config.mediaDir })
+  await sendFile(ctx, episode.thumbnail, { root: config.uploadsDir })
 }

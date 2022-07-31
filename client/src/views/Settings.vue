@@ -114,7 +114,7 @@ export default {
     async scanLibrary (libraryId) {
       try {
         this.scanningLibrary = true
-        await client.post(`/api/library/scan/${libraryId}`)
+        await client.post(`/api/libraries/${libraryId}/scan`)
       } finally {
         this.scanningLibrary = false
       }
