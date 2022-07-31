@@ -1,11 +1,11 @@
 <template>
   <div
     tabindex="0"
-    @keydown.esc="isOpen = false"
+    @keydown.esc="$emit('input', false)"
   >
     <slot
       name="activator"
-      v-bind="{ on: { click: () => isOpen = !isOpen } }"
+      v-bind="{ on: { click: () => $emit('input', !value) } }"
     />
 
     <!-- overlay -->
@@ -14,7 +14,7 @@
       leave-active-class="animated fadeOut faster"
     >
       <div
-        v-if="isOpen"
+        v-if="value"
         class="fixed z-30 flex inset-0 modal-overlay"
       />
     </transition>
@@ -25,16 +25,19 @@
       leave-active-class="animated fadeOutDown faster"
     >
       <div
-        v-if="isOpen"
+        v-if="value"
         class="fixed z-30 flex inset-0 justify-center items-center"
-        @click="isOpen = false"
+        @click="$emit('input', false)"
       >
         <div
           class="max-w-full max-h-full mx-12"
           :style="{ width }"
           @click.stop
         >
-          <slot />
+          <slot v-bind="{
+            close: () => $emit('input', false),
+            open: () => $emit('input', true),
+          }" />
         </div>
       </div>
     </transition>
@@ -44,6 +47,10 @@
 <script>
 export default {
   props: {
+    value: {
+      type: Boolean,
+      default: false
+    },
     width: {
       type: String,
       default: '500px'
@@ -51,7 +58,15 @@ export default {
   },
   data () {
     return {
-      isOpen: false
+      // value: false
+    }
+  },
+  methods: {
+    close () {
+      this.$emit('input', false)
+    },
+    open () {
+      this.$emit('input', true)
     }
   }
 }

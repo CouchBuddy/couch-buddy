@@ -1,6 +1,6 @@
 <template>
   <div>
-    <x-modal>
+    <x-modal v-model="dialogOpen">
       <template #activator="{ on }">
         <x-btn
           icon="mdi-plus"
@@ -59,6 +59,7 @@ import client, { getSocket } from '@/client'
 
 export default {
   data: () => ({
+    dialogOpen: false,
     name: '',
     path: '',
     networkDevices: {}
@@ -75,11 +76,13 @@ export default {
     })
   },
   beforeDestroy () {
-    this.socket.removeAllListeners('torrent:download')
+    this.socket.removeAllListeners('devices:new')
+    this.socket.removeAllListeners('devices:all')
   },
   methods: {
     async save () {
       await client.post('/api/libraries', { name: this.name, path: this.path })
+      this.dialogOpen = false
     },
     getURLHostname (url) {
       return new URL(url).hostname
