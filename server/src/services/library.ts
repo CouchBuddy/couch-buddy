@@ -1,6 +1,5 @@
 import ffmpeg from 'fluent-ffmpeg'
 import fs from 'fs'
-import glob from 'glob'
 import mime from 'mime-types'
 import path from 'path'
 import { Parser, DefaultParserResult, addDefaults } from 'parse-torrent-title'
@@ -90,7 +89,9 @@ async function getDirectoryContent (dir: string, extensions?: string[]) {
       }
     }
 
-    directories[dir] = { subtitles, videos }
+    if (subtitles.length || videos.length) {
+      directories[dir] = { subtitles, videos }
+    }
   }
 
   await walkDir(dir, extensions)
@@ -326,8 +327,16 @@ export async function scanLibraryWithSubtitles (library: Library) {
   let coupledSubs = 0
 
   for (const dir in directories) {
-    const videos = directories[dir].videos.map(fileName => ({ fileName, info: parseFileName(fileName) }))
-    let subtitles = directories[dir].subtitles.map(fileName => ({ fileName, info: parseFileName(fileName) }))
+    const videos = directories[dir].videos.map(fileName => ({
+      fileName,
+      absolutePath: path.join(dir, fileName),
+      info: parseFileName(fileName),
+    }))
+    let subtitles = directories[dir].subtitles.map(fileName => ({
+      fileName,
+      absolutePath: path.join(dir, fileName),
+      info: parseFileName(fileName)
+    }))
 
     allSubs += subtitles.length
 
@@ -354,7 +363,7 @@ export async function scanLibraryWithSubtitles (library: Library) {
         subtitles = []
       }
 
-      const result = await addFileToLibrary(library, video.fileName)
+      const result = await addFileToLibrary(library, video.absolutePath)
       if (!result) { continue }
 
       for (const subsFile of matchingSubtitles) {
@@ -363,30 +372,27 @@ export async function scanLibraryWithSubtitles (library: Library) {
         const lang = (subsFile.info.language || 'en').toLowerCase()
         const subsFileType = mime.lookup(subsFile.fileName)
 
-        // Make subs filename an absolute path
-        subsFile.fileName = path.join(dir, subsFile.fileName)
-
         if (subsFileType === 'application/x-subrip') {
-          const vttFileName = removeFileExtension(subsFile.fileName) + '.vtt'
+          const vttFileName = removeFileExtension(subsFile.absolutePath) + '.vtt'
 
           // The .srt is going to be converted into .vtt, but the output
           // filename already exists, most likely the .srt has been already
           // converted to .vtt, so just skip this file
           if (matchingSubtitles.find(subs => subs.fileName === vttFileName)) { continue }
 
-          fs.createReadStream(subsFile.fileName)
+          fs.createReadStream(subsFile.absolutePath)
             .pipe(srt2vtt())
             .pipe(fs.createWriteStream(vttFileName))
 
           // The .vtt file path is the one to be saved on the DB
-          subsFile.fileName = vttFileName
+          subsFile.absolutePath = vttFileName
         } else if (subsFileType !== 'text/vtt') {
-          console.warn('Unsupported subtitles file type', subsFile.fileName)
+          console.warn('Unsupported subtitles file type', subsFile.absolutePath)
           continue
         }
 
         const subs = new SubtitlesFile()
-        subs.fileName = path.relative(library.path, subsFile.fileName)
+        subs.fileName = path.relative(library.path, subsFile.absolutePath)
         subs.mediaId = id
         subs.mediaType = type
         subs.lang = lang
