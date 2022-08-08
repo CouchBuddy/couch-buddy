@@ -79,7 +79,6 @@ export default class Discovery extends Service {
 
     this.client.on('message', async (msg) => {
       const response = new SSDPResponse(msg.toString())
-      console.log('Device found', response.headers)
 
       try {
         const deviceInfo = await this.getDeviceInfo(response.getHeader('Location'))
