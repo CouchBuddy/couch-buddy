@@ -20,8 +20,13 @@ export const getResource = <T>(entity: { getRepository(): Repository<T> }): Midd
         .limit(1)
         .getOne()
     } else {
-      resource = await entity.getRepository()
-        .findOne(id)
+      const relations = ctx.query.__relations
+        ? Array.isArray(ctx.query.__relations) ? ctx.query.__relations : [ctx.query.__relations]
+        : []
+
+      resource = await entity.getRepository().findOne(id, {
+        relations
+      })
     }
 
     ctx.assert(resource, 404)
