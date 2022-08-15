@@ -1,6 +1,9 @@
 import { IsEnum, Min, Max } from 'class-validator'
 import { Exclude, Expose, classToPlain } from 'class-transformer'
 import {
+  AfterInsert,
+  AfterLoad,
+  AfterUpdate,
   BaseEntity,
   Column,
   CreateDateColumn,
@@ -12,6 +15,8 @@ import {
 
 import Episode from './Episode'
 import { getTmdbImageUrl } from '../utils'
+import { getIpAddresses } from '../services/system'
+import config from '../config'
 
 export enum MovieType {
   Movie = 'movie',
@@ -20,6 +25,8 @@ export enum MovieType {
 
 @Entity('movies')
 export default class Movie extends BaseEntity {
+  videoUri: String
+
   @Exclude()
   private _backdrop?: string;
 
@@ -154,6 +161,13 @@ export default class Movie extends BaseEntity {
 
   @UpdateDateColumn()
   updatedAt?: Date;
+
+  @AfterLoad()
+  @AfterInsert()
+  @AfterUpdate()
+  generateVideoUri(): void {
+    this.videoUri = `http://${getIpAddresses()[0]}:${config.port}/api/watch/m${this.id}`
+  }
 
   toJSON () {
     return classToPlain(this)

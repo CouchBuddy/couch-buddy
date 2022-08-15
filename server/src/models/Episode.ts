@@ -1,6 +1,9 @@
 import { Min, Max } from 'class-validator'
 import { Exclude, Expose, classToPlain } from 'class-transformer'
 import {
+  AfterInsert,
+  AfterLoad,
+  AfterUpdate,
   BaseEntity,
   Column,
   CreateDateColumn,
@@ -12,9 +15,13 @@ import {
 
 import Movie from './Movie'
 import { getTmdbImageUrl } from '../utils'
+import { getIpAddresses } from '../services/system'
+import config from '../config'
 
 @Entity('episodes')
 export default class Episode extends BaseEntity {
+  videoUri: string;
+
   @Exclude()
   private _backdrop?: string;
 
@@ -145,6 +152,13 @@ export default class Episode extends BaseEntity {
 
   @UpdateDateColumn()
   updatedAt?: Date;
+
+  @AfterLoad()
+  @AfterInsert()
+  @AfterUpdate()
+  generateVideoUri(): void {
+    this.videoUri = `http://${getIpAddresses()[0]}:${config.port}/api/watch/e${this.id}`
+  }
 
   toJSON () {
     return classToPlain(this)

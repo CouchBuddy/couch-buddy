@@ -1,8 +1,13 @@
 import { networkInterfaces } from 'os'
 
+let ipAddressesCache: string[] = []
+
 export function getIpAddresses (): string[] {
+  if (ipAddressesCache.length) {
+    return ipAddressesCache
+  }
+
   const ifaces = networkInterfaces()
-  const ips: string[] = []
 
   Object.keys(ifaces).forEach(function (ifname) {
     let alias = 0
@@ -20,9 +25,9 @@ export function getIpAddresses (): string[] {
       }
       ++alias
 
-      ips.push(iface.address)
+      ipAddressesCache.push(iface.address)
     })
   })
 
-  return ips
+  return ipAddressesCache
 }
