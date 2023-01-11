@@ -25,7 +25,7 @@
     "change-case": "^4.1.1",
     "check-disk-space": "^2.1.0",
     "class-transformer": "^0.2.3",
-    "class-validator": "^0.12.2",
+    "class-validator": "^0.14.0",
     "cli-progress": "^3.6.1",
     "couch-buddy-extensions": "^1.0.2",
     "debounce": "^1.2.0",
